@@ -1,0 +1,40 @@
+﻿星期   月份  日   时间   时区
+Wednesday  Oct（October） 16  
+
+1、springboot权限框架：springboot security（完成） 和 shiro
+2、springboot任务框架（完成）
+3、springboot整合消息中间件：activeMQ
+4、springboot整合分布式（dubbo+zookeeper） 完成
+5、springCould
+6、数据库主从复制，配合springboot整合多数据源动态切换，实现读写分离  
+7、springboot检索：ElasticSearch 搜索引擎框架
+8、学习Apache commons包、jackson库、logback库、lombok插件   完成
+9、quartz 分布式集群任务框架
+10、Hibernate Validator  接口参数校验框架
+11、swagger2  接口文档生成框架
+
+mybatis深入理解
+
+spring 配置理解，和AOP/容器技术原理
+
+springMVC的底层原理和框架功能
+
+整理springboot常用注解和配置
+
+学习zookeeper
+学习netty
+分布式锁：多个客户端对同一资源进行访问，在实现并发执行安全性（一个数数据，同一时间只能被一台机器中的一个线程访问）的同时，还要避免死锁、高可用和高效的获取释放锁、并保证数据的最终一致性
+
+分布式事务：
+
+扩展：thymeleaf模板引擎、Nginx（Http服务器）
+
+1、创建一个常用的原生项目（操作数据库）
+2、创建一个常用的springboot项目（web服务）
+3、创建一个分布式项目集群（dubbo+zookeeper）
+4、创建一个常用的ssm框架项目
+5、搭建FTP服务器
+
+
+工作问题：
+

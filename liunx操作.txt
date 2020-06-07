@@ -1,0 +1,13 @@
+mkdir  /mnt/usb      创建挂载目录
+fdisk -|   查看系统目前所有硬盘
+mount    /dev/sdb1  /mnt/usb        将指定硬盘挂载到  /mnt/usb目录中
+
+cd  /mnt/usb             进入挂载U盘的目录
+ls         查看U盘中的文件
+ls -lht   查询文件，以及大小
+du -sh  查询文件夹总大小
+df -hl  显示系统磁盘分区大小
+
+卸载U盘   umount U盘别名  dev/sda1
+
+cp -r /文件夹   /mnt/           将挂载目录中的文件移动到本地    
