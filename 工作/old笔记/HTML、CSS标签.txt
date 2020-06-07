@@ -1,0 +1,660 @@
+HTML标签整理：
+基本结构
+	<html>
+		<head><!-- 页面的头部 -->
+			<title>网页标题</title>
+		</head>
+		<body><!-- 页面的身体 -->
+			网页主体
+		</body>
+	</html>
+	1.不区分大小写
+	2.不同标记 属性可能相同,也可能不同
+	3.标记对数成对存在(如:<html></html>),少数单独存在(如:<img>)
+	4.可以嵌套使用,但是不可以交叉嵌套使用
+
+1.<img /> 是插入图片标签
+
+	属性 
+             src   引入外部文件
+
+             width  设置宽 
+       
+             height  设置高 
+    
+             title 图片标题  具有提示作用
+
+             alt   当图片失效时显示的内容
+
+             align  图片与文本对其方式     middle  中    top  上    bottom 下   left 左  center 在中间  right 右（效果配合文字可以看出来）
+
+2.<a></a> 是超链接标签  	
+
+	属性
+            href放入的是要跳转到的网址 
+                      1 外部链接  如:<a href="http://www.baidu.com">百度</a>
+	              2.内部链接 如:<a href="自己网页URL">百度</a>
+	              3 多媒体链接  如:<a href="图片/音乐/视频URL">百度</a>
+	              4.自定义链接  (1) 设置一个书签 如:<a name="top"></a>            name  设置链接名字  ，可以直接跳到相应的地方
+			            (2)	链接书签name值 如:<a href="#top">回顶部</a>
+
+           target 	
+                     _blank      在新窗口中打开
+                     _parent     在父窗口中打开
+                     _self       在本窗口中打开
+                     _top        显示在整个浏览器窗口
+                     now         在新窗口中打开
+                     framename
+规定在何处打开链接文档。
+
+3.<input/>  输入框 
+       属性
+           size  最大显示内容
+
+           maxlength   最大输入内容
+
+4.<button>内容</button>  按钮。
+
+5. <p></p> 是段落标签    具有分段效果
+
+	属性  align 是对齐方式    有三个值  分别是 left（左）/center(中)/right(右)
+
+6.<center></center>  是居中标签 
+
+7，<br /> 换行
+
+8.&nbsp；    英文字符的空格 
+
+9.&copy;     是版权符号
+
+
+10.<hx></hx> （x=1，2，3，4，5，6） 标题标签  由大到小    
+
+	属性
+            align 对齐方式   有三个值 left（左）/center(中)/right(右)	
+
+11.<pre></pre>:预编译标签。
+
+12.<b></b>:粗体。
+
+13.<i></i>:斜体。
+
+14.<u></u> 下划线
+
+15<s></s>  删除线
+
+16. <sub></sub> 下标
+
+17. <sup></sup>  上标
+
+18.<font></font>  文本修饰标签   
+
+	属性  color（颜色） 
+              
+               size(大小)
+   
+                face(字体)
+
+19.<hr/>  是水平分割线 
+
+	属性 
+             size（大小）  
+ 
+             color （颜色）
+
+             width   宽
+     
+            noshade  有无阴影
+
+
+
+20.<table></table>  是表格 
+ 
+	属性  border 是表格边框
+    
+              frame 属性规定外侧边框的哪个部分是可见的。     
+                           void	        不显示外侧边框。
+                           above	显示上部的外侧边框。
+                           below	显示下部的外侧边框。
+                           hsides	显示上部和下部的外侧边框。
+                           vsides	显示左边和右边的外侧边框。
+                           lhs	        显示左边的外侧边框。
+                           rhs	        显示右边的外侧边框。
+                           box	        在所有四个边上显示外侧边框。
+                           border	在所有四个边上显示外侧边框。
+
+               rules  属性规定内侧边框的哪个部分是可见的。
+                         none	没有线条。
+                         rows	位于行之间的线条。
+                         cols	位于列之间的线条。
+                         all	位于行和列之间的线条。
+                         groups	位于行组和列组之间的线条。
+                        
+              cellpadding（内间距  内容与边框之间）
+
+	      cellspacing（外边距   单元格与单元格之间）
+
+              bgcolor    背景颜色
+
+              background  背景图片
+
+              align    水平对其方式    left 左  center 中  right  右
+
+              valign   纵向对其方式    top 上  bottom 下   middle  中
+ 
+        <caption></caption>   表格标题
+	
+	<tr></tr>表示一行 
+
+	<th></th>表示表头    具有字体加粗和居中的效果
+
+	<td></td>表示单元格   
+		
+		属性
+                   rowspan 是跨行
+
+                   colspan  是跨列
+
+21.<form></form>  是表单  
+
+	  属性action 放入要提交到的网址
+    
+              method  转跳的方式   get     post   
+
+            
+
+    <input />  是form的子标签   是输入框   
+
+             placeholder  输入框提示内容 （填入内容时消失）
+  
+             readonly     只读（不能对其改变）
+
+             disabled      禁用
+
+              value       改变默认值
+
+              name        给输入框取名字   现在不常用，后台时常用
+  
+	  属性type是类型  包括
+
+		 text     （文本框） 属性 maxlength（最大长度）  size（框的尺寸） value（默认值）
+		
+		 password （密码框）
+				   
+	         radio    （单选框 ） name 用来确认单选关系  checked 默认选项
+		  
+	         checkbox （多选框）    checked  默认选项
+		  
+	         number   （数字框）
+				  
+                 email    （邮箱框）
+
+                 image      图片框
+
+                 file       文件
+		
+	         reset    (重置按钮)
+
+	         submit   (提交按钮)
+
+                 hidden    隐藏
+
+                
+				     
+22.<select></select>  是下拉列表
+		   
+23.<option></option>  是下拉列表的其中一个选项     selected  默认选择
+	
+24.<textarea></texteara> 是多行文本
+	
+	  属性 cols（设置宽） rows（设置行数）  readonly  只读属性
+
+
+
+
+25.<video src=""></video>:视频插入。
+   <audio src=""></audio>  音乐插入
+     属性
+        autoplay  自动播放
+        controls  播放控件
+        loop      循环
+
+26。<embed src=""></embed>:插入音乐，视频。
+       
+
+27.<ul></ul> 无序列表 
+   <ol></ol> 有序列表
+	
+	<li></li>是列表的其中一个选项
+
+   1.type:符号类型(1/A/a/I/i) 默认数字1
+    
+   2.start:开始值(取值为整数)
+
+28.<marquee></marquee>是跑马灯效果  
+	
+	 属性 behavior（行为）="slide"（滑动）/alternate(来回卷动)/scroll"(默认效果预设卷动)
+		     	  
+	      scrollamount="10" （设置卷动时间）
+		     	
+	      direction（设置卷动方向）="down" （下）/up(上)/left(左)/right(右)
+		     	 
+	      scrolldelay="500"（设置卷动延迟）	   在ie浏览器中可以
+
+              onmouseover 属性在鼠标指针移动到元素上时触发。      this.stop()   停止
+                                             
+              onmouseout  属性在鼠标指针离开元素上时触发。     this.start()   开始
+
+             注释：onmouseover 属性不适用以下元素：<base>、<bdo>、<br>、<head>、<html>、<iframe>、<meta>、<param>、<script>、<style> 或 <title>。
+     
+             loop     循环  等于本身是无限循环
+
+             hspace   水平位置的外边距
+
+             vspace   垂直位置的外边距
+
+  
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+CSS标签整理
+
+1.样式表
+
+（1）内部样式表
+	
+	在<head></head>里面写入<style type="text/css"> css内容  </style>		
+
+（2）行内样式表
+
+	在开始标签里面 写入 style=“属性：值；属性：值”
+
+（3）外部样式表
+	
+	在css文件夹中 新建 .css文件  
+	
+	在<head></head>里面写入<link  />标签引入<link rel="stylesheet" type="text/css" href="外部css的url">
+
+2.标签选择器如: p{
+				color:red;
+	                }
+	2.id选择器(相同标签,不同样式)如: #id{
+	
+						color:red;
+					}
+	3.类选择器(不同标签,相同样式)如: .class{
+						color:red
+					}
+	4.派生选择器:  #used p{
+				color:red;
+				}
+			.used p{
+				color:red;
+				}
+	
+3文本属性
+
+（1）font-size		字体大小
+
+（2）font-family	字体类型
+
+（3）font-style		字体样式
+	
+	值：italic（斜体）
+		
+	    normal（正常）
+
+（4）font-weight       文字粗细  取值100-900
+
+（5）color		设置或检索文本的颜色          transparent  透明
+
+（6）text-align		文本对齐
+	
+	值：left  （左）
+		
+	    center（中）
+	
+	    right （右）
+ 
+（7）text-decoration    文本修饰    underline  下划线   
+
+（8）text- transform    控制元素中的字母    capitalize	以大写字母开头     uppercase	全部大写   lowercase	全部小写      inherit     规定应该从父元素继承 
+
+ (9) text-indent      首行缩进多少像素
+
+（10）letter-spacing   字符间距
+
+4.背景属性
+
+（1）background-color 		  背景颜色
+
+（2）background-image：url（）；  背景图片
+
+（3）background-repeat		  背景平铺
+		
+	值：repeat  （默认）
+			
+	    repeat-x（在X轴平铺）
+				
+	    repeat-y（在Y轴平铺）
+			
+	    no-repeat（不平铺）
+					
+
+（4）background-size              背景图片尺寸    cover 填充整个页面
+
+ (5) background-position          背景图片移动       第一个像素为正背景图片整体向右移动 第二个像素为正是背景图片整体向下移动
+
+（6）background-attachment       背景是否跟随滚动条滚动    fixed   固定  scroll  滚动  
+
+（7）background          颜色   图片  是否重复  移位 / 大小  固定
+
+     background：red  url() no-repeat 100px 30px/ cover  fixed ；
+
+（8）box-sizing：border-box； 一般情况下设置边框后，边框宽会占用外部位置，使用这种属性后，边框线会占用内部位置。
+
+ (9) background:rgba(20,20,20,0.4);     背景颜色透明度
+
+（10）background：  linear-gradient（to right，   red        12%,     blue         100% ）  ；     颜色过渡 
+                        线性渐变        方向   开始颜色  结束位置  结束颜色   开始位置
+ (11) background:  radial-gradient(circle, red, yellow, green);      径向线性渐变（由外部向中心）  
+
+（12）background-clip     背景剪切（如果没效果在前面加-webkit-）    text 按文本剪切
+
+（13 box-shadow:5px       2px             6px           10px        #000                  inset  
+              x轴移动    y轴移动     阴影虚化程度     阴影扩大    阴影颜色         内虚化（默认是向外）
+                                    (数字越大虚化程度越大)           （默认为黑色） 
+
+5.伪类
+
+（1）a:link {}    未被访问过的链接
+
+（2）a:visited{}  已经访问过的链接
+
+（3）a:hover{}   当鼠标放在上面的时候发生变化
+
+（4）a:active{}   当鼠标点击的那一刻发生的变化
+
+ (5) li:nth-child()  匹配到父元素的任一子元素
+
+（6）div：before{}  选择器在被选元素的内容前面插入内容。请使用 content 属性来指定要插入的内容。
+     div：before{
+           content：""；   指内容为空
+
+          }   
+  例子  <html>
+         <head>
+           <style>
+            p:before
+             {
+                content:"台词：";
+                background-color:yellow;
+                color:red;
+                font-weight:bold;
+               }
+           </style>
+         </head>
+
+         <body>
+
+           <p>我是唐老鸭。</p>
+           <p>我住在 Duckburg。</p>
+
+           <p><b>注释：</b>对于在 IE8 中工作的 :before，必须声明 DOCTYPE。</p>
+
+         </body>
+      </html>
+
+（7）div：after{} 选择器在被选元素的内容后面插入内容  请使用 content 属性来指定要插入的内容。
+      div：after{
+           content：""；   指内容为空
+
+          }   
+
+
+
+6. div布局 
+  
+（1）<div></div>   是块级元素  （快元素：   独占一行   可以改变大小  自上而下排列）
+			
+（2）<span></span> 是行内元素   （行内元素：不独占一行 不可以改变大小  自左至右排列 ）
+
+（3）使块级元素横向排列 
+	
+	float 浮动  left 左浮动  left 右浮动  none 不浮动
+
+        clear:both;  清除浮动
+
+(4)display 显示属性
+
+	block （块状显示）
+	
+	inline（行内显示）
+
+	none  （隐藏）
+
+
+
+
+
+7.盒子模型
+
+（1）外边距属性
+	margin-top	设置对象的上边距
+	
+	margin-right	设置对象的右边距
+
+	margin-bottom	设置对象的下边距
+
+	margin-left	设置对象的左边距
+
+        margin：0px auto;上下外边距为0，左右位置居中；
+
+（2）边框属性	
+
+	border-style	设置边框的样式
+		
+	    值：solid （实线）
+
+		dashed（虚线）
+
+		dotted（点状）
+
+	border-width	设置边框的宽度
+
+	border-color	设置边框的颜色
+  
+        border-radius   设置边角弧度      像素是个边角弧度，百分百比是整体弧度（变椭圆或者圆）
+
+        
+（3）内边距属性	
+	
+	padding-top	设置内容与上边框之间的距离
+	
+	padding-right	设置内容与右边框之间的距离
+	
+	padding-bottom	设置内容与下边框之间的距离
+
+	padding-left	设置内容与左边框之间的距离
+	
+注意：（1）margin和padding四个属性可以缩写为 margin/padding：50px(上) 50px（右）50px（下）50px（左） 
+      
+      （2）border的三个属性可以缩写为border：1px（粗细）solid（样式） red（颜色）
+
+      （3）border可以单独设置其中一条边 如：border-left（设置左边框）：1px（粗细）solid（样式） red（颜色）
+       
+       (4)画月亮，可以先将盒子变为扁圆，单独调整某一边的边框线宽度
+
+
+
+
+
+
+
+10.导航栏
+	
+（1）列表的样式处理
+	
+	list-style-type（列表样式类型）： 
+	
+		disc 	    实心圆（默认）
+		
+		circle 	    空心圆
+
+		square 	    实心方块
+
+		decimal	    数字
+		
+		none        没有
+
+（2）去除超链接的下划线 
+
+	text-decoration: none;
+ 
+                        underline  下划线
+    
+                        line-throught 贯穿线
+
+                        overline   上顶线
+
+
+
+
+
+13.position  定位
+	
+（1）absolute  绝对定位
+
+	（元素可以通过设置left、right、top和bottom属性并以页面为参照来进行偏移，绝对定位的元素在标准文档流中不占用其空间，不影响标准文档流中的元素，看似悬浮于页面之上。）
+
+（2）relative  相对定位
+
+	（相对定位的元素可以设置其left、right、top和bottom属性来进行偏移。偏移时参照该元素在标准文档流中的原位置，偏移后仅在显示上出现了坐标变化）
+          （使用相对定位后可有改变绝对定位的起始位置）
+
+（3）fixed     固定定位
+
+	（固定定位参照浏览器窗口或其他显示设备的窗口，当用户拖动浏览器窗口的滚动条时，固定定位的元素将保持相对于浏览器窗口不变的位置。）
+
+    z-index  设置元素显示的优先级   
+    opacity 来设定透明度。opacity 属性能够设置的值从 0.0 到 1.0。值越小，越透明。
+   overflow:          内容溢出处理   需要设置宽和高
+           auto  内容溢出处理   会出现滚动条
+          hidden  将溢出内容全部隐藏
+          scroll   出现滚动条
+          visible  显示
+
+
+(4)  上下左右绝对居中
+      margin:auto;
+      position absolute
+      top：0；
+      left：0；
+      right;0;
+      bottom :0;
+
+
+
+
+
+
+ 
+14,剪切和虚影
+
+     clip   图片剪切后显示   clip:rect(0px 50px 200px 0px)
+
+                                             img{position: absolute;
+				                  clip:rect(100px 500px 200px 100px); }
+                                                             上   左     下    右        定位后剪切掉一部分后显示
+
+ 
+
+   
+
+     text-shadow   文字虚化 
+
+     -webkit-transform: skew(-25deg); 内容倾斜
+                       倾斜
+     -webkit-transform: rotate(-90deg); 内容旋转
+        内核    变形      旋转
+
+
+
+
+14.框架 
+
+<frameset></frameset>  框架集
+		属性  cols  分成列
+		    rows  分成行
+		    frameborder  框架线
+		    border  边线
+		   
+		<frame /> 框架中的每一项
+		属性  src  每一项的地址
+		    noresize  边框线不能移动
+		    scrolling  滚动条
+		    target  转跳框架名称名称    是超链接的属性<a href="#" target="名称"></a>
+		    name    给框架命名		
+
+15.动画，变化，过渡
+ （1） transition   过度，一种动画效果，由一种状态转变为另一种状态，低级的浏览器看不了效果
+
+       transition：3s 2s linear ；过渡速度匀速 时间3秒  延迟2秒
+  
+             ease    慢快慢   默认
+             ease-in  快慢
+             ease-in-out  慢快慢（和默认效果的区别要在十秒以上才看的出来）  
+             linear   匀速
+        transition-delay：3s；   延迟三秒
+  
+ 
+          过渡延迟效果简写
+         transition:2s 3s linear;过渡效果三秒延迟两秒过度匀速
+
+ （2）变化
+        transform   变化
+             rotate（0deg） 旋转     
+            translate（0px，0px）移动
+            scale（2,3）     缩放   宽为两倍，高为三倍
+            skew（20dge，30deg） 倾斜 x轴20度，y轴30度
+       matrix（）  matrix 方法有六个参数，包含旋转，缩放，移动（平移）和倾斜功能。          
+
+
+    opacity 来设定透明度。opacity 属性能够设置的值从 0.0 到 1.0。值越小，越透明。
+
+
+
+（3） 动画延迟效果简写 
+     animation: aa  5s    2s  linear infinite;  
+       /*动画  名字 时间 延迟  匀速  无线循环*/
+      
+         diaoyong
+      @keyframes aaa{
+	from{
+            transform: rotate(360deg);/* 设定播放什么时候开始*/
+
+             }
+
+	  to{
+              transform: rotate(0deg);/* 设定播放什么时候结束*/
+
+             }
+            
+}
+
+animation和@keyframes   配对存在
+transition 可以单独存在
+
+
+
+
+
+
+
+
+
+
+
+
+
+

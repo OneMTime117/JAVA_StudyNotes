@@ -1,0 +1,242 @@
+--安装swing插件
+
+-- 新建application windons（应用程序窗口）文件
+
+-- 进入design （设计）窗口 ，编辑窗口文件的内容布局
+
+-- 插入控件：JLabel （标签）,JTextField（文本） ,JpasswordField（密码） ,JButton（按键）
+JRadioButton （单选按钮）：多个单选按钮在正常时，可以都选择
+但有时我们需要只能选其中一个，则要创建一个分组（button group），将需要单选的按钮加入到一起
+JcheckBOX  多选框   JComobBox  下拉框
+
+-- 对控件插入事件event——————自动进入该控件的后台代码,进行代码编辑，在这里调用dao包中的功能事件类，实现相应的功能
+常见对控件进行操作的代码：
+
+//1、弹出对话框
+//前一个值（容器）有 frame（窗口名）以该窗口的中间弹出  null 以整个屏幕的中间弹出     
+//后一个值（弹出的窗口内容） 
+//JOptionPane.showMessageDialog(frame,"你点到我了");
+				
+//2、得到用户在控件中输入的数据
+//以字符串类型保存控件中的数据
+//该数据所在的控件名，得到其中的文本信息
+  String account =txtAccount.getText();
+// 方法名有黑横杠说明该版本下，这种方法过时，但也能正常使用
+     	        String password =txtpassword.getText();
+
+//对于密码的保存有，更加安全的方法(专门获取密码文本的方法)
+//不能用toString 将字符数组转换成字符串，而是用循环遍历字符数组，将它连接成一个字符串
+// char password []=txtpassword.getPassword();
+// String a ="";
+//for (int i = 0; i < password.length; i++) {
+//a=a+password[i];
+//	}
+		       
+// 3、对数据空进行连接操作
+      AccoutDao accoutDao=new AccoutDao();
+      Account a =accoutDao.login(account, password);
+       if(a==null){
+         JOptionPane.showMessageDialog(frame,"密码或用户名错误");
+        }else{
+      JOptionPane.showMessageDialog(frame, "欢迎登入"+a.getAid());
+          }
+
+
+
+
+
+
+
+
+---------->新建一个功能事件类，数据库连接操作类，数据库表数据类，每个类都在自己类型的包中
+dao包：数据库表数据类、功能事件类
+entity包：数据库连接操作类
+ui包：应用程序窗口类
+
+------------> 数据库连接操作类：  取名 （BaseDao）
+-- 由于对数据库的操作，都要重复的步骤：
+//		1、加载驱动  2、创建连接对象 3、关闭资源
+//		所以单独写个一个basedao类，用于将这些步骤写成一个方法调用
+//对数据进行处理的自定义工具类
+//创建连接对象、关闭资源两个方法
+public class BaseDao {
+//将方法中的连接路径，用户名、用户密码拿出来
+	private String user ="root";
+	private String  password ="";
+	private String url ="jdbc:mysql://localhost:3306/student?useUnicode=true&characterEncoding=utf-8";
+//这样可以更好的更改数据库连接信息，用来连接不同的数据库（每个JDBC都能调用）
+	
+	
+//	获得连接对象（不发生异常则返回连接对象，发生异常则返回空）
+	public Connection getConnection(){
+	
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn =DriverManager.getConnection(url, user,password);
+			return conn;	
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
+//	关闭资源的方法(JDBC的所有需要关闭资源的对象做为参数)
+	public void closeAll(ResultSet rst ,PreparedStatement pst ,Connection conn){
+		try{
+//			当对象不存在（若不存在，赋值为null）时，关闭资源会报错
+//			我们不能够确定调用该方法的类中开启了哪些资源，
+//			因此要先判断资源是否开启
+			
+			if(rst !=null){
+				rst.close();
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+//		每一个关闭资源都需要单独try，catch ，因为当放在一起时，
+//		前一个发生异常，后面的关闭将无法进行
+		
+        try{          		
+            if(pst !=null){
+            	pst.close();
+            }
+	    }catch (SQLException e){
+	    	e.printStackTrace();
+	    }
+        
+        
+        
+        try {
+			if(conn!=null){
+				conn.close();
+			}	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+}
+	
+}
+
+-----------------> 功能事件类：类名（数据库该表的名字Dao）
+
+//对数据库中的Account表进行操作的操作（增删改查）
+//对于每种操作，都写一个方法
+public class AccoutDao extends BaseDao{
+//登入的方法(返回表中的一组数据，则返回类型为自定义类（account）)
+	public Account login(String username ,String password){
+//		由于对数据库的操作，都要重复的步骤：
+//		1、加载驱动  2、创建连接对象 3、关闭资源
+//		所以单独写个一个basedao类，用于将这些步骤写成一个方法调用
+		
+//		声明所需要的对象
+		Connection conn=null;
+		PreparedStatement pst =null;
+		ResultSet rst =null;
+		try {
+//			编写sql语句，查询account表中用户名和密码为该方法的参数值
+			String sql="select aid,username,password from account where username=? and password =?";
+			
+//			赋值连接对象
+			conn=getConnection();
+			
+//			赋值处理sql语句对象		
+//	        AccoutDao继承了BaseDao ，因此可以直接调用BaseDao中的getConnection方法，其返回值为conn
+			 pst =conn.prepareStatement(sql);
+			
+//			对sql语句中的占位符赋值（将方法中的参数写入到sql语句中）
+			pst.setString(1,username);
+			pst.setString(2,password);
+			
+			 
+//			执行sql语句，并保存赋值到rst结果集中
+			rst =pst.executeQuery();
+			
+//			查询到的结果，若有数据则rst.next()返回1
+			if(rst.next()){
+				int aid =rst.getInt("aid");
+				String name =rst.getString("username");
+				String pwd =rst.getString("password");
+				
+//				用Account类型变量保存,并返回
+				Account account =new Account(aid, name,pwd);
+				return account;
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+//			不管程序是否出现异常，都要关闭资源，所以在finally中执行关闭操作
+			
+//			在finally中，是识别不到try中的代码对象的，
+//			因此在关闭资源时，应先在try外面声明资源对象，
+//			在try里面进行实例化赋值
+			
+//			可直接调用BaseDao中的关闭资源方法(在方法的所有参数中
+//			没有的参数，用null填充，表示该对象没有创建)
+			closeAll(rst, pst, conn);	
+		}
+//		当查询到数据时，返回NULL
+		return null;
+	
+		
+		
+	}
+	
+	
+}
+
+------------------------->数据库表数据类 （数据库表名）
+用于自定义一个数据类型，来整体操作数据库中该表的数据
+
+//创建一个保存数据库中Account表的类 
+public class Account {
+
+	private int aid ;
+	private String  username ;
+	private String  password ;
+	
+//	有参构造方法
+	public Account(int aid, String username, String password) {
+		super();
+		this.aid = aid;
+		this.username = username;
+		this.password = password;
+		
+	}
+//  无参构造方法
+	public Account() {
+		super();
+	}
+
+	
+//	各属性的封装方法（set（修改），get（得到））
+	
+	public int getAid() {
+		return aid;
+	}
+	public void setAid(int aid) {
+		this.aid = aid;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
+	
+}
+
+控件名应进行一定的规范，让程序员能快速找到该控件的代码
+修改控件properties（属性表）中的Variable（变量） ，可以修改该控件在代码中的类名

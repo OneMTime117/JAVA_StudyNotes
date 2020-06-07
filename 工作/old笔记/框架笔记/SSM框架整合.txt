@@ -1,0 +1,113 @@
+SSM框架：spring 、springMVC、mybatis
+SSM框架整合步骤：
+1、创建一个maven-web项目，并通过javaEE tools自动生成web.xml
+2、在pom文件中添加框架依赖：
+2.1、首先导入springMVC框架的相关依赖（包含了spring框架依赖），spring context，它会自动关联下载其他需要的依赖包（aop、beans、core、logging、expression），spring web、spring web MVC、还有用于整合mybatis的spring依赖包（将myabtis给spirng管理）：spring-oxm、spring-jdbc
+**********由于spring类型所有依赖包，需要版本一致，可以在pom中添加一个变量，来代替依赖包中的版本号，进行统一的版本管理
+*********** 还可以在maven中设置项目的编码格式，防止后面代码的中文乱码
+ <properties>
+      <springfram.version>4.3.9.RELEASE</springfram.version>
+	                <!-- 文件拷贝编码 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- 输出编码 -->
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<!-- 编译编码 -->
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+  </properties>
+
+2.2、导入mybatis框架依赖，mybatis、mybatis-spring（用于mybatis和spring框架的整合）
+2.3、配置数据库驱动、数据源依赖，mysql、commons-dbcp2
+2.4、配置servlet-api和jsp-api
+3、在web.xml中配置spring的容器监听器，和springMVC的前端控制器
+3.1、spring容器监听器：在启动Web 容器时，自动装配Spring applicationContext.xml 的配置信息（当获取spring容器中的组件时，需要先通过spring配置创建applicationContext对象***使用自动装配时，也是，因此这样就减少了创建该对象的过程）
+  <listener>
+  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+该包在：spring-web依赖包----web.context----contextLoaderListener类
+然后在设置该监听器的配置
+  <context-param>
+ <param-name>contextConfigLocation</param-name> name为已经添加的监听器类名
+  <param-value>classpath:applicationContext.xml</param-value> value为该监听器读取的配置文件
+  </context-param>
+3.2、springMVC前端控制器；截获发送到服务器的请求
+  <servlet> 配置一个servlet
+  <servlet-name>springMVC</servlet-name>  定义一个name
+  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class> 从依赖包中引入前端控制器DespatcherServlet（该serlvet在spring webMVC依赖包的web.servlet包中）
+   <init-param>     将springMVC的配置文件交给该控制器（serlvet）读取
+		<param-name>ContextConfigLocation</param-name>     
+		<param-value>classpath:springMVC-config.xml</param-value>  
+  </init-param>
+  </servlet>
+  <servlet-mapping> 配置该serlvet的映射，即该serlvet拦截条件
+  <servlet-name>springMVC</servlet-name>
+  <url-pattern>/</url-pattern>   拦截条件：/ 表示拦截所有请求（一般使用/，也可以使用.html）
+  </servlet-mapping>
+
+4、创建spring容器配置文件applicationContext.xml
+4.1、引入context命名空间、tx命名空间
+4.2、编写spring配置文件
+
+<!-- 打开spring扫描器 ，管理所有model层注解类-->    
+<context:component-scan base-package="com.xx.model"></context:component-scan>
+<!-- 打开spring注解解析器 -->
+<context:annotation-config></context:annotation-config>
+
+<!-- 配置DBCP2数据源组件 -->
+<bean id="myDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver">
+		</property>
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/test">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value="hanlei123"></property>
+	</bean>
+
+<!-- 配置mybatis的sessionFactory -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="myDataSource" />
+<property name="mapperLocations" value="classpath:*Mapper.xml"/>
+</bean>
+
+<!-- 配置spring事务管理器 -->
+<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="myDataSource" />
+    </bean>
+<tx:annotation-driven transaction-manager="transactionManager"/>
+
+<!-- 配置所有Dao接口 ，spring提供对mybatis的dao接口扫描注入配置方式，减少了注解每个dao层接口的工作量（ssm框架是没有dao层实现类的，因此需要调用dao层接口，并且在把dao接口放入到spring容器同时，也通过session实例化了dao接口）-->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<property name="basePackage" value="com.jdcy.model.dao" />
+</bean>
+
+5、创建springMVC的配置文件springMVC-config.xml(名字随意取，但要和前端控制器引入的该文件名一致)
+5.1、首先引入Context和mvc命名空间
+5.2、编写springMVC配置文件
+
+<!-- 打开spring容器扫描器，扫描controller层的所有类 -->
+<context:component-scan base-package="com.xx.web.controller"></context:component-scan>
+
+<!-- 打开springMVC注解解析器 -->
+<mvc:annotation-driven></mvc:annotation-driven>
+
+<!-- 打开静态资源访问 -->
+<mvc:resources location="/Views/" mapping="/Views/**" />
+<mvc:resources location="/css/" mapping="/css/**" />
+<mvc:resources location="/js/" mapping="/js/**" />
+
+<!-- 配置视图解析器 -->
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="prefix" value="/WEB-INF/Views/"></property>
+	<property name="suffix" value=".jsp"></property>
+</bean>
+
+6、使用mybatis的generator工具生成实体和dao，并创建services层（此时已经基本整合完毕，之后以网站登入为例编写）
+6.1、在mybatis的实体映射配置文件中编写查询账号的sql语句
+6.2、在对应的dao接口中添加其映射方法（所有的dao接口会被spring容器管理）
+6.3、创建services层接口和实现类（将services实现类通过@Service注解将其放入spring容器；*******和ssh不同不能直接通过@transactional注解来调用spring事务管理器）
+6.4、创建springMVC的controllers层的控制器（controller），并通过@controller注解将其放入spring容器；通过spring容器依赖注入获的services实现类对象；在web请求对应的执行方法中，调用其方法处理model层参数，并通过springMVC注解来将方法返回值传递给视图解析器，最后响应到jsp页面
+
+***************************在mybatis中，需要通过session来实例化dao层接口；而在ssm中，直接通过spring容器来实例化dao层接口对象（但本质上还是通过调用session来实例化dao接口）
+
+

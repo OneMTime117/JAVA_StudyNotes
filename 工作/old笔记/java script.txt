@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style></style>
+		<!--1、	外部javascript脚本引用
+		<script src="javascript文件名.js"></script>
+	
+	    2、内部javascript脚本引用
+那些老旧的实例可能会在 <script> 标签中使用 type="text/javascript"。现在已经不必这样做了。JavaScript 是所有现代浏览器以及 HTML5 中的默认脚本语言。
+		<script type="text/javascript">
+			.....
+		</script>-->
+		<script>
+		//显示输出文内容
+//	使用 window.alert() 弹出警告框。 (可直接写alert（）)
+//      使用 document.write() 方法将内容写到 HTML 文档中。
+//      使用 innerHTML 写入到 HTML 元素。
+//      使用 console.log() 写入到浏览器的控制台。
+//		var a =1;
+//		alert(a);
+//	    window.alert(a);
+//	    document.write(a);
+		
+//		变量，与java不同，基本数据类型有：字符串（String）、数字(Number)、布尔(Boolean)、对空（Null）、未定义（Undefined）
+//      引用数据类型有：对象（object）、数组（array）、函数（function）
+//      typeof操作符  用于检测变量的数据类型
+//      typeof的返回值有string、number、boolean、object、undefined
+//      其中null、对象、数组、函数都属于object类型
+        
+//      日期(date)属于object
+//      NAN属于number类型，指该变量不属于任何数字值，用于判断一个值是否为数字，因为NaN与所有数字、和他本身不相等
+//      isNaN(),true则该变量不为数字，即为NaN
+
+//      javascript 中的变量声明，统一用 var  （javascript拥有动态类型，即变量可由数据自动转变数据类型）
+
+//      声明字符串变量时，可用"",'',没有任何区别，但在声明数据带有引号的字符串变量时，不能用相同引号，应该用不同引号区分
+//      其方法和java类型
+
+//      声明数字变量时，数字小数点可有可无，因此在进行整数的除法运算时，没有值取整
+//      数字变量都是8个字节，精度整数最多15位，小数最大17位
+//      当数字第一个为0时，默认为8进制数，X 16进制数（数字不要第一个前面写0）
+//      转成整数 parseInt（num）
+//      转成小数parseFloat（num）
+
+
+//      声明布尔变量，值只有true、false，且不能有引号
+
+//      声明数组(三种声明方式)（数组是一种特殊的对象类型）
+//      var chars =new Array();
+//      chars[0]=1;
+//      chars[1]=2;
+//      
+//      var chars=new Array(1,2);
+//      
+//      var chars =[1,2];
+		
+//	javascript对象声明(包括属性和方法)
+//      var stu ={id:12 ,
+	             sex :"男",
+	             age:18,
+	             han:function(){
+	             	
+	             }};
+//      stu=null;
+//      alert(typeof(stu));
+//    
+//      stu=undefined;
+//      alert(typeof(stu));
+//    
+//	对象属性查询 stu.id和stu["id"]
+//      对象方法调用stu.han()
+//      对象循环遍历属性for in
+        var a =new Array();
+        for(i in stu){
+        	 a=stu[i];
+        }
+
+//      undefined类型，说明该变量没有赋值(当有值的变量重新声明时，若为赋值，则该变量的值还是原来的)
+//      可以用undefined赋值来清空对象变量，null类型不能做到（但undefined和null的值是相等的，但数据类型不同）
+//      null类型,说明该变量中的值为空，相当于变量赋值了一个空的对象（值为空的object类型）
+
+//     日期类 date 
+       var date =new Date();
+//     date 为当前系统时间
+//     date.gettime() 获得当前时间毫秒数（1970年）
+//     date.getfullyear() 获得当前时间年份
+//     date.getday     日数。。。。。。
+
+//     数学类 Math
+       不需要声明，直接调用，和java类似
+
+//     计时器
+//     setTimeout("",)延迟多少毫秒后触发  前一个为调用的函数名（要用双引号），后一个为毫秒数
+//     setInterval("",) 循环触发,每多少毫秒后
+//     clearTimeout,clearInterval  关闭计时器
+//     连续执行循环定时器事件，每多执行一次，循环延迟时间会减半，因此在重复执行前可以先关闭一次定时器
+
+
+//      函数（与java的方法类似），由于变量类型是动态的，都用var表示，因此函数返回值和参数类型都省略
+        function nn (){
+//      	有返回值时,添加return
+        }
+        
+        
+//       在函数中声明的变量为局部变量，函数外为全局变量
+//      局部变量在该变量所在函数运行完后删除，全局变量在网页关闭后删除
+//      在未声明的变量赋值时，系统默认为给window(全局对象)创建了一个该变量属性，属于全局变量，可通过变量名，或window.变量名调用
+//      因此当在函数中给一个未声明的变量赋值时，在调用该函数后，该变量也是全局变量
+//      name ="12";
+//
+
+//		javasricpt 运算符和比较符一致，但多一个绝对等于和不绝对等于（因为javasricpt的变量类型为动态，比较时系统不会因为变量类型不同而报错）
+//		var a =1;
+//		var b="1";
+//		if(a==b){
+//			alert("12123");
+//		}else{
+//			alert("你好");
+//		}
+//		当数据值完全一样，但数据类型不同时，==（等于）也能进行true的判断
+//		因此在需要对比数据类型是否也相等时，我们需要用到===（绝对等于）
+		
+//		javasricpt条件循环语句和java一致
+                javasricpt循环语句只有 for（） 和while（）
+
+
+//      HTML DOM  html的文本对象模型（document object model）
+       1、 DOM对象   document对象（文档）
+//      当网页加载时，浏览器自动创建dom，之后就可以调用document.后面的方法
+//      DOM可以提供查找HTML的元素方法：
+//      1、通过id找到HTML元素
+//      document.getelementbyid()
+//      2、通过标签名找到 HTML 元素
+//      document.getElementsByTagName()
+////      3、通过类名找到 HTML 元素
+//      document.getElementsByClassName()
+
+       2、element对象（HTML元素节点）
+        用于调用元素的方法或属性 ，得到或设置元素节点的属性
+
+       3、Attribute对象 （属性、节点）
+        用法已经被element对象方法代替
+       
+       4、Event对象  (事件状态（事件句柄 ，句柄指针的指针 即表示指向事件发生的函数）)
+        1、可以调用一些表现事件发生状态的方法
+        比如：onabort 图像加载中断事件 onerror 文档图像加载出现错误事件、、、
+
+        2、判断鼠标、键盘点击事件，触发的按键，event做为事件触发执行函数的参数
+        其属性有默认的参数，表示触发的按键，从而进行判断
+       比如：判断鼠标点击时，点击的那个键
+          <body onmousedown="whichButton(event)">
+            event.button==2 ,则为鼠标右键
+   
+//获取标签对象(通过HTML标签的id名，获取该标签对象（元素）)
+     var a =document.getElementById()  
+//获得该元素（标签对象）的属性值(标签里的属性)
+     a.属性名
+//显示获取元素（标签对象）的文本内容（标签之间的文本内容）
+     a.innerHTML  节点的代码文本属性 
+     a.innerText  节点的页面文本属性
+//innerHTML  （当标签中还有文本的修饰标签时，会将其中代码的文本全部获取）
+//innerText  （当标签中还有文本的修饰标签时，会将修饰后的，即在页面上显示的文本内容全部获取）
+********获得属性的同时，还可以对其赋值，来修改文本属性
+
+//改变标签的样式的一个属性
+       a.style.color="";
+//改变标签的样式的部分属性
+       a.style="color: red;bgcolor: blur;"
+//通过给标签一个类选择器，改变标签样式(并在css中编写该选择器的类属性)
+       a.className=""
+       
+//      给HTML添加新的节点（HTML元素，标签）  标签类型
+        var para =document.createElement("");
+//      给该新节点创建文本   文本内容
+        var txt =document.createTextNode("")
+//      将文本追加给新节点
+        para.appendChild(txt)
+//      将该节点追加给已有的父节点
+        document.getElementById("div").appendChild(para);
+//      必须要有父节点，最大的父节点为body
+    
+//       删除HEML中已有的节点
+//       首先获得需要删除节点的父节点(没有就省略)
+         var parent =document.getElementById("div")
+//       找到该节点
+         var  a =document.getElementById("p")
+//       删除该该节点
+         parent.removeChild(a);
+         //若没有父节点则
+         a.remove();
+         
+         
+//      DOM可以给HTML元素添加事件，触发时调用js中的函数
+//      HTML事件，当HTML产生某些变化时，触发事件（常见）
+//		onload 网页进入事件
+//      onunload 网页关闭事件
+//      onchange  元素发生改变事件
+//      onmouseover 鼠标移动到该元素上时
+//      onmouseout  鼠标移开该元素时
+//      onkeydown   键盘按键时
+//在需要触发事件的标签中添加该事件属性 
+事件名 ="调用js中的函数名（）"
+
+//在js中添加事件
+事件名= function 变量名（）{
+触发代码
+}
+
+
+		//window对象 表示浏览器窗口
+//		所有的全局对象、函数、变量都是window的成员
+//      DOM的document、body也是window的属性
+//      window对象下的一些对象(都不要window前缀)：
+//     1、 screen对象（屏幕对象）
+//      document.write(screen.availWidth+"\t");默认全屏的窗口大小（宽、高）
+//      document.write(screen.availHeight);
+        
+//     2、location对象（地址对象）
+//      location.hostname 返回 web 主机的域名
+//      location.pathname 返回当前页面的路径和文件名
+//      location.port 返回 web 主机的端口 （80 或 443）
+//      location.protocol 返回所使用的 web 协议（http:// 或 https://）
+//      location.href 获得当前页面网址URL 
+//		location.pathname 获得网页网址的路径名(网址保存的地方)
+//      location.assign("http://www.w3school.com.cn/") 加载一个路径为""的页面
+
+//      3、history对象（历史对象）
+//      history.back() - 与在浏览器点击后退按钮相同
+//      history.forward() - 与在浏览器中点击按钮向前相同
+//      history forward() 方法加载历史列表中的下一个 URL。
+//      这与在浏览器中点击前进按钮是相同的
+
+//      4、navigator对象（访问者对象）
+//       对象属性包含所有访问者的信息
+
+//      5、js消息框
+//      1、警告框  alert("文本");
+//      文本为提示文字
+//      2、确认框confirm("文本");
+//       文本为提示文字,确定返回true,取消返回false
+           
+//      3、提示框prompt("文本","默认值");
+//       要求用户输入文本,前一个为提示的文本,后一个为文本框的默认
+//       点确定就返回输入值,取消返回null;
+
+//      6、cookie对象
+//      用于保存页面的保存用户的登入信息
+
+
+//     正则表达式用于检索文本内容
+       声明正则表达式对象RegExp(txt1 需要检索的字符)
+       var a =new RegExp("txt1")
+      
+       RegExp有三个方法
+      1、test（）
+      a.test("文本")   该文本中存在a中的检索字符，则返回ture
+      
+      2、exec（）
+      a.exec("文本")   该文本中存在a中的检索字符，则返回被找到的值，反之返回null
+      a.exec("文本","g") 可以重复执行，下一次会重之前的位置开始（用于找寻文本所有该的字符）
+
+      3、compile（）
+      a.compile("字符")  改变正则表达式中需要检索的字符
+
+一般正则表达式验证字符串，因此不用上面的形式
+    var reg=/^$/    /^$/  ^代表开始的字符  $代表结束的字符  因此就可以检索整段字符
+    var reg=/^[0-9]{}A$/  []表示一个字符，满足里面范围，0-9 数字0到9 ABC A,B,C
+    不用中括号就是代表该字符为 A  {}代表字符的个数 4 字符要有4个  4,7 字符要有4到7个
+    {4,} 字符4到无穷  a|ab  指后面为a或者ab a|[ab] 后面为a或者a,b中的一个
+    当使用|（或）时，不同字符还需要匹配时，用（）扩上
+    如： /^a|([abcd]{2})|(ab)$/
+    
+常见字符：
+   限位字符：
+        *前面的字符可以出现0-多次  {0，}
+       +前面的字符可以出现1-多次    {1，}
+        ？前面的字符以出现0或1次  {0,1}
+          
+   特殊字符：（被字符占用的字符文本中需要匹配时，可以加\）
+        .代表所有字符 
+       [^abc] 表示出了这些字符外
+        \ 后面接字符   这些叫做转义字符 （不同的计算机语言，有不同的种类），如：
+        
+        \s  空白字符（空格 \t,\r,\n...）
+        \S  非空白字符
+        \d  数字字符
+        \D  非数字字符
+        \w  数字、字母、_ 字符
+        \W  非数字、字母、_ 字符
+        
+json js object notation  js对象符号（用于被ajxj使用，来传递数据，实现数据传递，但不用刷新页面）
+json是js中内置的一个格式化工具，能够将js中的数据以对象的形式进行传输
+与js中的对象不同，js中的对象都是由变量组成，只能在js中运用，不能作为数据传输
+json的对象格式化，能够将js中的对象变为一组数据，而不是js中的实例化的类
+js对象和json可以互相转换，用于网页中数据的传输与应用
+json格式式对象创建：
+//      var stu ={"id":12 ,
+	             "sex" :"男",
+	             "age":18,
+	             "han":function(){
+	             	
+	             }};
+与js对象创建写法区别是，属性名以字符串的形式创建，而js是以变量形式创建
+
+
+javascript 框架（库）
+JavaScript 高级程序设计（特别是对浏览器差异的复杂处理），通常很困难也很耗时。
+为了应对这些调整，许多的 JavaScript (helper) 库应运而生。
+这些 JavaScript 库常被称为 JavaScript 框架。
+
+常见js框架有：jQuery Prototype MooTools、、、、
+
+******************
+1、函数名和变量名不能出现重复的
+变量声明、函数声明的全局类都会被置顶，且优先置顶函数，但只置顶声明，赋值还是会在下面进行，所以当变量和函数同名时，函数名会被变量名替代，导致函数无法被赋值（定义）
+
+2、在函数中声明全局变量，和在外面声明全局变量是有区别的，
+当只有该函数被调用一次后，才会出现全局变量
+后者在代码被加载时，全局变量就已经生成，这样可以避免要调用该变量的代码，不用先执行操作该变量的函数，因此一般全局变量在函数外面声明
+
+3、在通过改变HTML元素的classname，进行css样式操作时，可以对其赋值多个classname，
+a.classname="name1 name2 name3"  后一个会覆盖前面相同已有的属性，不同的会保留
+
+4、所有HTML事件、默认标签（<body>)都是window对象属性，调用时window可以省略
+
+5、body、head等元素（标签默认、只有唯一）可以直接被调用，不需要通过名字查找
+
+6、匿名函数  function（）{}  在单独声明时，需要用（）括起来；
+需要直接在代码中运行时，在后面接个括号（匿名函数自我调用），
+单独运行时，将其整个扩起来
+（（function（）{}）（））
+在自我调用时，可以进行有参的传值
+
+js在函数外写代码时，是不存在代码块的，因此在{}中声明的变量全为全局变量，因此会污染全局变量池，可以用匿名函数自我调用执行在需要在函数代码外执行的代码；
+****所有匿名函数可以实现闭包，其中的全局变量会随代码运行后清除；
+
+匿名函数不能被调用，只能在编写的代码中运行
+
+7、在给HTML节点添加事件时，若在js代码中添加，会发生错误。
+因为代码时从上到下执行，先创建一个窗口，再扫描js代码，最后运行HTML代码
+因此在js添加事件时，程序会找不到该节点（可以找到window节点（窗口）），无法将事件添加
+1、可以在body后添加js代码，将添加事件的代码写在下面
+2、也可以将添加事件的代码写在页面<html>、<head>节点的onload事件中
+（js可写在head后面，body后面，也可以写在head中，和在head后面一样）
+
+
+
+转义字符，用于在字符串中代替无法打出的文字格式
+常见：\n 换行 ,\r 回车键 \t tab键，\b 退格键 \" 双引号

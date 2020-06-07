@@ -1,0 +1,40 @@
+JDBC连接oracle数据库url 三种格式：
+1、通过服务名连接（数据库服务名）        jdbc：oracle：thin@//(双斜杠可以省略) （服务器IP）：（端口）/(服务名)
+jdbc:oracle:thin:@localhost:1521/XE
+2、SID连接（实例名） jdbc:oracle:thin:@服务器IP）：（端口）：(SID)
+jdbc:oracle:thin:@localhost:1521:XE
+3、TNS name连接：在oracle客户端的network/admin/tnsnames.ora中添加TNS配置
+YH =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = DESKTOP-B9FUSHL)(PORT = 1521))     //连接数据库服务器地址和端口
+    (CONNECT_DATA =                 //连接的数据库信息
+      (SERVER = DEDICATED)         //数据库连接模式  （可以省略）  
+      (SERVICE_NAME = XE)           //选择对应服务名的数据库（也可以通过SID来指定数据库）
+    )
+  )
+在JDBC中，无法读取tnsnames配置文件，因此手动输入
+ jdbc:oracle:thin:@ (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = DESKTOP-B9FUSHL)(PORT = 1521))   
+    (CONNECT_DATA =               
+      (SERVER = DEDICATED)          
+      (SERVICE_NAME = XE)           
+    )
+  )
+
+TNS transparence Network Substrate透明网络底层，专门用来管理和配置Oracle数据库和客户端连接的一个工具；
+plsqlDeveloper使用TNS作为连接方式，它会自动扫描本地oracle安装文件中的客户端配置文件
+navicatPremium分为Basic和TNS连接，basic通过SID或者服务名来连接；TNS连接使用的客户端是自带的，因此不会扫描本地oracle客户端配置文件；需要在navicat自带的客户端文件夹中添加instantclient_10_2\Network\Admin目录，并添加tnsnames.ora配置文件，用于TNS连接
+
+服务名和实例名的区别：
+服务名是数据库级别的，可以设置多个服务名，通过数据库监听器管理，来访问数据库
+实例名是数据库实例的唯一标识符，可以用于访问数据库（且要保证当前数据库启动了该实例）；但由于到oracle8i后，允许一个数据库被多个实例共享（RAC集群），因此一个数据库对应有多个实例，SID不是唯一值
+慢慢被服务名取代，用于外部访问数据库
+
+
+数据库和数据库实例：
+1、数据库是一些数据文件的集合；而数据库实例是对数据库操作的程序
+2、一台机器可以创建多个数据库实例，并同时运行、提供服务
+3、一台机器也可以安装多个数据库
+4、一般一个数据库对应一个唯一的数据库实例；但也可以一个数据库创建多个实例，或者一个实例操作多个数据库
+
+RAC集群，一个数据库被多台服务器的实例使用；实现数据库服务器的负载均衡

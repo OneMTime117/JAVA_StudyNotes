@@ -1,0 +1,829 @@
+int   整数   字节4个   2的32次方
+long   长整数    8个   
+short   短整数   2个    范围（2的16次方，即-2的15次方 到  2的15次方-1   -32768----- 32767）
+float    单精度浮点型（小数）   4个
+double   双精度浮点型 （大范围的小数）  8个
+char      字符（单引号，一个字符）      2个  计算机在所以得字符数0-65535
+string    字符串（双引号，可以一串字符）
+boolean   布尔型（赋值为真假（turn false）对应的整数赋值为1，0 非零代指1）  一个字节  
+byte      字节型（-128-127整数）     1个   范围（2的8次方）
+
+定义float时，应在赋值数后加F，系统默认小数为double类型，以声明赋值数满足其float数据类型范围
+定义long时，应在赋值数后加L，系统默认整数位int类型
+float范围大于long范围
+float精度有效位数为7
+double 精度有效位数为16
+
+一个字节为八位二进制数    //bait byte(B字节)=8bit（位）//bit 1M=1024B
+
+输出时   System.out.println("XX"+h1) +用于字符串加变量同时输出
+
+定义类文件
+         public class 文件名{
+}
+进入JAVA程序执行入口
+         public static viod main(String[]args){
+}
+主函数是给jvm(JAVA虚拟机运行，一个特殊的类（无论怎样都会调用主函数）)
+
+由于jvm会直接调用main函数
+public static ：我们需要用public static 修饰
+让jvm不需要知道主函数方法所在的类的类名，就能直接调用
+
+
+void:jvm运行后不可能有返回值,提交给其他类
+
+
+main:表示该方法为主函数，是固定格式
+
+
+String 参数数组类型
+args 是Java编译器要求必须这样做的，因为args要用来存储命令行参数
+
+通过这个字符串数组将控制台的代码传递到程序中，如：获得控制台的输入。。。
+
+
+
+i++,++i 都是i的自增
+但a=i++,是先进行赋值，i再进行自增(a=i>i=i+1)；
+a=++i 是先自增，再进行赋值(i=i+1>a=i)
+i--，和--i 同理
+i+=1，相当于i=i+1
+
+cmd windows控制台 
+1.选择电脑盘执行
+2.cd +目录路径  导航目录，选择导航到执行文件所在目录
+3.javac +文件名.JAVA    将源文件翻译成CALLS文件
+4.java+文件名     java虚拟机执行calls文件
+
+java 编程语言
+jdk  java开发包 运行环境和开发环境
+jre  运行环境（是解析许多jar包的集合）
+jar  java编程应用程序文件（将可执行代码打包）
+jvm  java虚拟机（运行编译器编译后的calss文件）
+lib  库（装jar文件的目录） （保存外部jar文件，可被解析后添加到jre中）（即插件、用于扩展开发工具的功能）
+
+声明（就是需要new一下，一般自定义类、变量（系统类、一般new的过程省略）都需要声明）也叫做类的实例化（创建类的一个对象）
+需要声明的工具类都需要在类外上面，引入该工具包
+不需要声明（直接可以拿来用），一般是带有static的自定义类（方法、属性），或系统默认加载（默认为static修饰）的工具类
+
+
+
+
+
+Scanner工具类：（需要声明）
+Scanner sc= new Scanner(System.in)   SC为取的工具类名  从程序声明的类中拿出
+int a= sc.nextlnt()  以整数存入控制台数据
+string   a=sc.next()         获取控制台数据
+string   a=sc.nextLine()
+
+首先，next（）一定要读取到有效字符后才可以结束输入，对输入有效字符之前遇到
+的空格键、Tab键或Enter键等结束符，next（）方法会自动将其去掉，只有在输入有
+效字符之后，next（）方法才将其后输入的空格键、Tab键或Enter键等视为分隔符或
+结束符。简单地说，next（）查找并返回来自此扫描器的下一个完整标记。完整标记
+的前后是与分隔模式匹配的输入信息，所以next方法不能得到带空格的字符串
+而nextLine（）方法的结束符只是Enter键，即nextLine（）方法返回的是Enter键之
+前的所有字符，它是可以得到带空格的字符串的。
+//next()、nextInt。。。。当遇到有效字符才开始计入，并结束时不计入结束符
+nextLine（） 会计入所以得符号（包括结束字符）
+若next（）和nextLine输入时，next（）输入后，会将结束符不输入，自动输入到
+nextLine（）中，让其直接输入完成，保存了上一个next（）的结束符。进而不能
+输入。
+//所以在用next()\和next（）后，不能直接用nextLine（），这样会直接接受到结束字符，完成此次输入，（表现为跳过了这次输入）
+因此要用nextLine（）时，应先用一个nextLine(),接受掉之前留下的接受字符，在用后一个 nextLine()输入可以完整字符类型的字符串
+
+char a=sc.next().charAt(0)  获取控制台数据的第一个字符
+
+
+
+
+
+数学工具类（不需要声明，被static修饰了）
+int a=（int）（math.random（））  math.random产出0到1的随机数，不包含1
+自身进行运算扩大，在（int）将其强行转换为整数，以满足相应随机整数范围。
+
+8
+int num =rd.nextInt(1000)+1;   1到1000的随机数
+
+int num=(int)(math.random()*1000+1)
+
+格式化数字工具类（需要声明） 
+DecimalFormat df =new DecimalFormat("000.###%");  将小数转换为百分比
+System.out.println(df.format(0.012));      格式化后的数据为String类型
+//0.00%  0和#的区别，0可以显示可省略的0，#省略可显示的0
+System.out.println(df.format(0.101122));
+
+
+
+日期工具类（需要声明）
+显示当前时间（国际默认格式）   date date =new date()
+                               system.out.println(date)
+
+
+
+格式化日期工具类（需要声明）      simpleDateFormat sdf= new simpleDateFormat("yyyy-MM-dd HH:mm:ss")                           sdf.format(date)
+yyyy year 年      计算机年按1970年为第一年
+MM   month   月                月是以0计数
+dd   day     日
+HH  hh   时  24小时 12小时
+mm  minute 分
+ss  secend 秒
+（整个date类和日期类获得的时间不变）在运行时系统时间一定。因为在什么date和日期类时，系统就讲当前的时间保存在类内存中（即被声明的对象中，不会随时间改变），当系统运行一段时间后，想要重新获得系统时间时，需要重新声明对象。
+System.currentTimeMillis()  直接是系统类，直接拿来用，每次使用时，默认重新获取系统时间
+
+当前系统时间的毫秒数          date.getTime()     System.currentTimeMillis()(不需要声明类，系统类直接拿来用)
+
+计算当前系统时间的分钟数/小时/天数/月数/年数   (date.getTime()/60/60/24/30/365)
+                                  
+
+日历工具类(需要声明。。。相对于日期类更灵活)   
+获得当前时间               calendar c =calendar.getInstance()
+                           system.out.println(c.getTime())
+获得部分时间         年   c.get(calendar.YEAR)
+                     月   c.get(calendar.MONTH)+1 （从0开始）
+                     日   c.get(calendar.DATE)
+
+
+c.get(Calendar.DAY_OF_MONTH)       今年的第几个月
+c.get(Calendar.DAY_OF_WEEK)            当月第几周   
+c.get(Calendar.DAY_OF_WEEK_IN_MONTH)   当周第几天（星期天为第一天）
+c.get(Calendar.DAY_OF_YEAR)            今年的第几个天
+
+设置系统时间    c.set(2018,12,24)   set()时间有不同格式，参数不同
+
+
+
+
+-------------------->类的创建与实例化
+自定义类的类名 ，就属于一个类型，
+类有属性、行为（普通方法）、构造方法
+构造方法：用于该类在主程序中的实例化。无返回值，方法名与类名一致
+无参构造方法不能对类中属性直接赋值
+//定义类
+public class student_1 {
+	String name	;
+	 public student_1() {	
+	}   
+}
+//实例化类
+student_1 student_1=new student_1();
+	   student_1.name="朱佩云";
+
+有参构造方法可以直接在实例化时，对其属性赋值
+//定义类
+public class Student {
+//  属性
+	int xuehao;
+	String name ;
+    int  chengji;
+    String sex;
+public Student (int xuehao,String name ,int chengji, String sex ){
+	this.xuehao=xuehao;
+	this.name=name ;
+	this.sex=sex;
+	this.chengji=chengji;
+         }
+}
+//实例化类
+Student student=new Student(122,"袁欢" , 123," 男");
+	   System.out.println(student.name);
+一般无参的构造方法，系统默认有。如进行有参构造方法声明时（默认的无参构造方法将消失），为保证之后程序可能进行无参的实例化。
+
+
+
+---------------------------------->重写（只作用于方法，在继承的子类中重写（可以是抽象方法、普通方法））
+在子类继承父类时，可能有方法需求不同，因此需要对继承后的方法进行重写（内容不同，方法名相同）
+此时，属性的类型、属性名要一致；方法的返回值类型、参数列表要一致，且子类访问修饰符的安全性要小于等于父类（即父类访问的权限要大于或等于子类的，若父类为public，那子类只能为public）
+this.name  调用当前类中的属性name
+super.name  在类中调用当前类的超类的属性name
+super.xuexi()  在类中调用当前类的超类的方法
+构造方法不能被重写、静态方法和最终方法不能被重写
+
+
+----------------------------->重载（只作用于方法，可以在该类和子类中重载）
+用于表达一个类中，有几种方法名相同，作用不同的行为。其他的行为对于第一个行为，可以看做时被重载的方法。（方法可以在同一个类，或其子类中重载）
+每个方法时通过参数列表的不同（参数个数、参数类型）来区分的。
+被重载的方法可以改变访问修饰符、返回类型
+构造方法可以重载
+子类传承父类后，可以对其继承的构造进行重载
+改变有参变量的个数，从而使该类进行实例化时，有另一种属性种类的赋值
+
+
+---------------------------->抽象类
+当该类的行为无法定下来时，用抽象类的抽象行为表达
+（抽象类不一定有抽象行为，有抽象行为的一定是抽象类）
+abstract class xxx{
+public abstract void yyy();
+}
+抽象的行为由于之后重写的方法需求，是可以加参数和改变返回值类型的
+public abstract int  yyy (int a,int b);
+
+
+抽象类中可以有属性和实际行为，用于继承给子类
+而子类可以在对抽象行为进行重写
+public class xx extends xxx{
+piblic void yyy(){
+*******************};
+}
+
+
+------------------------------------->接口   
+接口类似于继承，但一个类可以实现/继承多个接口。而继承只能单一继承
+接口中只能有抽象的方法（默认被abstract修饰），且都不能被static修饰   
+接口中的属性都是静态的常量（类常量默认被final和static修饰，不能被重新赋值，直接可以拿来用接口名.常量名，）
+接口被类实现时，一定要重写所有的抽象方法，否则应声明为抽象类
+接口不可以被实例化，无构造方法   ，但接口可以通过被继承后的类实例化  ( 比如接口为 num ，实现类为numA ,
+接口能被另一个接口继承                                                 num  a=new numA();    )  
+
+ 
+------------------------------------->继承  xx extends yy  （类都能被继承）
+子类可拓展自己的属性和方法，子类时包含父类的
+接口实现   xx  implements yy,yyy,yyyy  （只有interface（接口关键词）代替class（即接口）才能被实现）
+创建接口（自定义接口）
+public interface  yy(){
+}
+接口中的属性都是类常量（默认被final和 static修饰）
+方法都是抽象的 在实现接口时，必须重写所有方法（否则应声明为抽象类）
+
+****接口的一个用法
+1.定义一个接口    
+2.定义多个实现接口的类（分别含有重写的方法）
+3.定义一个类，方法为执行以接口为类型，变量为实现接口类的参数列表，方法体是执行该参数所代表的类的方法
+3.在主程序中，声明选择方法的类，调用其方法，直接将选择的重写方法的类当参数带入，且该类应声明（快速声明并作为一个对象名使用   new 类名）
+-
+
+1.public interface yy{               接口YY17:08 2018/10/22
+     public void do()
+}
+2.public  class xx implenments yy{   实现接口的ZZ类
+     public void do (){
+      system.out.println("#####")
+}
+}
+  public  class zz implenments yy{   实现接口的xx类
+     public void do (){
+      system.out.println("******")
+}
+}
+3.public  class  ideal {       选择类的方法是：执行接口类型的参数（所有实现接口的类的对象）的do方法
+      public void  way(yy A){
+      A.do();
+}
+}
+4.ideal ID=new ideal();    声明创建一个选择类的对象
+ID.way(new xx());   创建一个对象作为参数，带入到选择类对象的方法中
+ID.way(new zz());
+
+
+--------------------------->异常
+java程序（编写、运行）中会存在一些错误，发生错误时，程序就无法继续执行
+
+其中不能通过程序员控制的问题，一般称为Error(错误)。（比如信号中断、JVA）这些是用户不能干预处理的,时JAVA运行时系统内部错误和资源耗尽的错误
+
+其他的能够通过程序员处理的问题，被称之为异常（Exception）
+在我们编写程序时，编译器就指出的错误，叫做检查性异常，比如类的声明、变量的定义等
+
+在程序运行时，由于程序代码的执行不满足相应规则、或产生不符合逻辑的运算时，编译器不会再编译时找出问题，但在运行时错误才会出现。这些叫做运行性异常
+
+在系统中会存在一个异常类，Exception  它是异常类型的所有父类，异常还可以细分成很多类型（包含检查性异常和运行性异常）
+一般为了增加处理类的灵活性，在调用异常类时，直接调用它们的父类（Exception）
+
+为了防止程序在运行时，产生异常，从而停止下面正常程序的运行
+我们可以在那些可能出现异常的程序，捕获出来，并确定它们异常发生时进行什么处理，之后再继续运行下面的程序
+
+捕捉异常 try{}catch(){}
+try{
+//可能出现异常的程序代码
+}catch（Exception e）{    //异常类需要声明（类似于String s ,new的过程被省略），在catch中判断此程序发生的异常，是否属于该异常（一般直接用Exception 类，它是所有异常类的父类，可省略该程序段中异常的类型判断）
+//出现异常时处理的方法（可以自定义想要执行的内容，也可以调用系统默认自带的处理异常的方法）
+//e.printStackTrace();   以红色字体在控制台显示系统默认的异常信息
+}finally{
+//  无论是否发生异常最后都要进行该操作（当在catch、和finally中都是有返回值时，catch执行返回值语句不会直接返回，而是继续执行finally的返回语句，将原来的返回值代替，因此最后输出的是finally中的返回值）
+}
+
+catch 可以写多个，用来在程序段发生不同的异常时，有不同的反应（可能存在不同种异常时，不应用Exception,它包含所有的异常类型，这样无法选择判断异常的不同）
+
+catch finally至少要存在一个，但其代码块可以为空的
+
+
+抛出异常（告诉系统这里可能会有异常，之后使用时都需要对这里进行捕捉或者继续抛出）
+在一个方法中抛出一个或多个异常
+public void A() throws remoteException (异常类型){
+方法体（可能出现异常的代码）
+}
+在调用该方法时，系统强制需要程序编写 捕捉异常 或者继续抛出异常（此时异常类型范围应该比实例化的对象方法要一样或者大）
+该方法在继承时，应继续抛出异常，并且异常类型范围要和父类一样或更小（精确）
+
+自定义异常类   就是创建一个类，并继承异常类型的大类（表示该类属于异常类） 内容为异常发生时，程序会返回什么
+制造一个类中的方法，可以满足条件时抛出异常（throw new 自定义异常类名）     
+在主程序中调用该方法，并进行捕捉，若抛出异常类型相同时，处理自定义异常
+class MyException extends Exception{
+属性和方法
+}
+所有异常都必须是 Throwable 的子类。
+如果希望写一个检查性异常类，则需要继承 Exception 类。
+如果你想写一个运行时异常类，那么需要继承 RuntimeException 类。
+
+怎样运行程序时判断异常是否属于该自定义异常类型
+1.创建一个类，继承异常类
+1.1.方法中返回异常出现后会返回的东西
+2.创建一个可以抛出异常的类
+2.1 该类抛出自定义类（这个类中有异常）
+2.2 当该类方法中的判断成立时，抛出一个异常对象
+3.1 在程序中捕捉异常，发现2中类抛出的异常对象时，异常发生
+
+
+
+-------------------------------->集合                      
+数组  声明时，若没有赋值就要定义长度，直接赋值可以不定义长度  int num []={1,2,3}   fils   s []=file.listfile(); 
+数据有序且可以重复的集合 ArrayList    
+集合相对以数组，不用定义长度，且长度自动变化，这种集合是动态的
+当进行访问时效率很高，但在删除时，他会将整个元素的内存拿走，之后在将之前连续的内存空间，向前补充，改变了现在的下边值。因此操作很多，增加了系统的运算
+声明
+ArrayList AL<> =new ArrayList<>()
+<>可以定义AL集合中的数据类型，只能是这种
+若不定义，则放在集合中的元素类型都会转变为object类型
+再将元素拿出来用时，元素需要进行类型转换
+ArrayList AL=new ArrayList();          ===       ArrayList<student>  AL= new ArrayLIst<student>
+AL.add(new student());                                    AL.add(new student());
+for(int i=0;i<AL.size();i++){                             for(int i=0;i,AL.size();i++)
+student a=(student)AL.get(i);                               AL.get(i).**           调用student对象的属性和方法
+a.**();                                                     AL.get(i).**()}
+a.**;}调用student对象的属性和方法
+
+foreach 遍历方式  for(student student :AL)   动态遍历，在循环是删除集合元素，会使之后的循环发生错误，因此remove后要加break
+
+AL.add(e)加入数据
+AL.addALL(e)加入一个集合的数据
+AL.get(e)获得数据
+AL.size()获得集合长度 （相对以lenth，这是一个获得的方法，返回长度；前者是一个属性）
+AL.remove(e) 删除数据
+AL.clear() 删除所有数据
+
+
+collection 为list和set的父接口 为子类提供对集合的多种操作算法
+list接口（列表集合） 有序且可重复接口 两个实现类：
+ArrayList  遍历，访问速度快，插入、删除时速度慢
+LinkedList  遍历，访问速度慢，插入、删除时快   链式结构，不会产生动态排序，直接插入一个链接点
+
+set接口  （简单集合） 无序  不能存放重复的元素  重复的元素返回值false     实现类：
+HashSet     访问最快的集合，元素顺序有哈希码（hashCode）决定，因此不能保证元素顺序的一定
+     没有get的方法，可使用迭代器
+    Iterator it = set.iterator();
+		//向下读取无序数据 
+		while (it.hasNext()) {
+			//next() 当前循环到的元素
+			System.out.println(it.next());
+		}
+		循环遍历迭代器中的数据
+		for (Object ys : set) {
+			System.out.println(ys);
+		}
+
+
+******************************三种循环遍历的差异
+for循环一般用来处理比较简单的有序的，可预知大小的集合或数组
+
+foreach可用于遍历任何集合或数组，而且操作简单易懂，他唯一的不好就是需要了解集合内部类型
+
+iterator是最强大的，他可以随时修改或者删除集合内部的元素，并且是在不需要知道元素和集合的类型的情况下进行的（原因可参考第三点：多态差别），当你需要对不同的容器实现同样的遍历方式时，迭代器是最好的选择！
+for需要知道集合或数组的大小，而且需要是有序的，不然无法遍历
+
+map接口 (映射集合)  元素组成包含一个key键和一个值Value 
+            元素无序  不能存放重复的Key,值可以重复，重复的Key的元素会覆盖前一个
+实现类： HashMap 允许出现nullkey，nullValue
+         HashTable   不允许出现key或者Value为null
+  
+加入元素 
+map.put(,)
+通过Key值来获得Value值:
+Value= map.get(key);
+  判断是否存在指定的KEY
+  map.containsKey(key)          
+   判断是否存在指定的Value
+   map.containsValue(value)
+获得所有的Key值
+   map.KeySet()
+获得所有的值
+   map.values()
+遍历map
+for （key的类型 key ：map.keySet()）{
+key;            键
+map.keyset(）；            值
+}
+遍历Map中所有的键，并找出它们映射的值
+
+
+栈集合  先入后出，后入先出
+stack s=new stack();
+s.push("a");  入栈
+s.peek（）; 查看栈顶
+s.pop(); 出栈
+
+Vector 集合   和ArrayList 类似   区别是Vector线程安全   ArrayList不涉及线程安全
+ArrayList 默认长度为10个，放满就自动增加原始长度的一半（5个）
+Vector   默认长度为10，放满增加一倍（10个）
+默认长度是系统值，实际长度（size（））是数据存放的长度
+
+
+
+----------------------------->file(文件、文件夹)
+创建文件对象   file（string path）   通过文件路径创建  文件有格式后缀（文件夹没有）
+文件在写入时，当没有该文件，系统自动创建（但不允许目录路径不存在）
+文件在读取时，系统不会自动创建
+
+手动创建文件   file(文件对象名).createNewFlie()
+手动创建目录   file(文件夹).mkedirs/mkedir()   makedirs (创建多级目录，父路径都可以不存在) mkedir（创建单级目录，即上多级的父路径要存在）
+
+创建文件时，如路径为多级，且路径中的目录不存在时，应先创建其目录
+
+删除file  file.delete()
+是否存在file   file.exists()    用于判断选择是否手动创建新文件
+是否为文件     file.isFile()    
+是否为目录     file.isDirectory()
+
+获得file的路径     file.getPath() （抽象路径（自定义的路径），如路径名没有写完整，系统会在默认的工作空间中创建该文件，显示的路径只有部分用户定义时的路径）
+获得file的绝对路径   file.getAbsolitePath()  （绝对路径，文件所在的完整路径（文件所在硬盘上的路径））
+获得file的文件名   file.getName()
+获得file的父级目录路径  file.getParent()  file.getparentfile ()  得到file父级文件夹
+
+file.list() 返回所有文件下的子文件名         string s[]= file.list() 
+file.listFiles()  返回所有文件下的子文件对象  file s []=file.listFiles() 
+Files对象：文件集合对象和 List<file>一样
+
+
+
+------------------------------------------->I/O流
+分为字符流和字节流
+字符流  输入输出直接为String类型
+文件输入（读取）  Filereader   
+文件输出（写入）  Fliewriter
+
+字节流   输入输出为byte  
+在读取时，将输入流的数据保存在字节数组中，在转换为字符串 string s=b.toString();
+在写入时，应先转换b= s.getbyte()将s字符串转换为字节   并用字节数组储存 byte b[] =new byte[1024]      字节数组的长度b.lenght 为数组最大字节个数  
+
+文件输入（读取）  Fileinputstream
+文件输出（写入）  Fileoutputstream
+I/O流构造方法有两种  按文件对象file 和文件路径 fileName
+输出（写入）时，outputstream out =new fileoutputstream（file，append）
+选择直接覆盖文件原有内容时，不用加appned 保存原有内容，在后面写入时，append为true
+
+输入流读取时
+in.read(e)   e为装字节数据的数组b（为保证读取数组中的有效字节，应in.read（b,0,b.len）），该方法还有一个返回值，读取的长度 int len =in.read(e)，当读取的字节为0时，in.read(e)返回值为-1
+当字节流没有读取完时（数组装不下时），字节输入流会将没被读取的数据继续保存，下一次读取时继续
+输出流写入时
+out.write(e)   e 为字节型数据   将该部分数据通过输出流保存到文件中 
+用完流后应关闭   流的对象名.close();
+
+缓冲流（输入缓冲流 Bufferinputstream和输出缓冲流 Bufferoutputstream）   
+不用缓冲流的话，程序是读一个数据，写一个数据，大量占用了CPU，（本来CPU可以一次多处理内容的）处理这样在数据量大的程序中非常影响效率。缓冲流作用是把数据先写入缓冲区，等缓冲区满了，再把数据写到文件里。这样效率就大大提高了。
+先创建I/O流对象 ，在其基础上创建I/O缓冲流。关闭流时，应先关闭缓冲流，再关闭I/O流
+
+对象流（与缓存流类似，对I/O流进行进一步包装，让流能以对象的类型用字节进行读写）
+I/O流转换为对象流时，当文件保存多个对象，读取时，只能读取到第一个保存的对象
+在读取字节时，若字节数组满了可以在多次读取完，但对象不能够多次读取（对象流只能传输一个该对象，因此只查询到第一个）
+
+当对象流读取对象时，文件中一定要有正确的对象，否则报错（流损坏异常）;文件为空的时，报错（结束符异常EOF）
+将对象写入文件时，应先将对象序列化（将对象所对应的类，实现Serializable接口（可序列化的） ，这样对象流才能正确将对象保存到文件中
+读写时，read（write）加Object  readObject(a)
+
+数据流（与缓存流类似，对I/O流进行进一步包装，让流能以八大基础类型进行读写）
+不用讲各种数据类型转换为字节类型保存，方便对数据的读写
+读写时， read（write）加基础数据类型  如readInt（a）
+
+
+
+---------------------------------------------->进程
+实现一些功能的代码的集合    程序
+在计算机上正在运行的程序    进程
+进程中大量功能需要单独的代码同时执行时   需要将这些代码作为一个小的执行单位运行（即线程）
+因此一个进程会由多个线程构成
+
+cpu一个单核只能同时间运行一个线程，cpu在运行程序时，会在线程池中无序（在没有规定各线程的优先级时）运行各个需要运行的线程（选择线程--给予运行时间--（完成则内存清空，线程消失），若在该时间没有完成，则停下放到线程池中，等下次选到，继续运行）---继续选择。。。。
+由于cpu的运行速度很快，所以一个程序的某个进程需要运行时，会达到看起来整个线程同时运行，保证功能的实现
+
+cpu在切换线程时，也是有时间损耗的，当创建太多线程后，cpu花费在线程切换的时间大于执行时间，那么cpu使用效率将大大降低。违背了多线程的使用优点（提升并发程序执行的效率，消除多个程序执行等待的时间）
+
+
+将一个类继承线程类 extends Thread  ,该类实现的对象即为一个线程，该中重写run方法的内容即为一个线程单独运行代码。
+Thread th1 =new 类名（）；
+th1.start() 运行线程
+创建线程时，实例化的类可以是不同的；
+相同，就是各线程同时进行同一个类中RUN中的代码
+不同，就是各线程同时进行不同类中run中的代码
+
+当执行相同类中的RUN的代码时，有时会用到相同的变量，在两个线程交叉间断运行时，会出现一个线程刚进行完操作后面操作需要的变量时，换成另一个线程也是该操作，之后又换回来，这样变量就被操作了两次，往下运行时，得到的结果就会改变
+为防止这种代码被多个线程交替影响时，应该让代码在进行时，应只能被一个线程运行（或者不要在多线程时，程序代码使用公共资源），即使用同步锁。
+//实现runnable接口 （thread是实现runnable接口的子类）相对于继承thread类，它能避免类的单一继承，且可以保证多线程的资源共享
+//修饰代码块    synchronized（this）{****}
+//修饰方法      public synchronized void sallTic(){*****}
+//让其被修饰的代码或方法都能在线程运行时，只能被一个线程运行，防止多个线程同时运行该代码
+//导致代码中的变量发生改变影响正确的变量使用
+1、实现runnable接口，重写run方法，若方法调用相同变量，则变量不需要static修饰,就被多个线程共享，随各线程发生改变
+2、调用实现runnable接口的类（实例化）
+3、将该类通过Thread类实例化（再次实例化）（创建线程对象）
+   thread th1=new threa d (实例化对象名)
+
+
+使用同步锁时，可能会发生死锁，就当线程1做完操作1，要去做操作2时，操作1还在被线程1调用
+而线程2做完操作2后，要去做操作1时，操作2还在被线程2调用，当有这个时间点发生（这个时间点发生的概率很低）。两个线程就无法继续进行下一步操作，一直在前一个操作等待。造成系统死锁，无法继续向下运行。
+
+
+thread.sleep()  此时该线程睡眠（ms），进入阻塞状态，时间过后，进入就绪状态（可以给所有就绪状态的线程使用）
+thread.currentThread()   得到当前线程对象
+thread.currentThread().getName()   得到当前线程对象的对象名
+thread.currentThread().setName(string s)    设置对象名
+getPriority ()     获取线程优先级
+getPriority(int p) 设置线程优先级
+isAlive（）      判断线程是否存活，返回布尔值（线程是否被CPU执行完）
+suspend（）      使线程暂停执行，不退出可执行态（就绪状态）
+resume（）       将暂停的线程继续执行
+yield（）        当前线程让步，让其他线程的到执行（放弃一次cpu执行，直接进入就绪状态，只给优先级相同或更高的线程使用这次执行机会）
+join（）         等待线程死亡     在一个线程中调用该线程的join（）方法，则该线程应先执行完该线程后，再执行
+wait（）         当前线程挂起（使线程进入阻塞状态）
+notify（）       随机唤醒一个挂起的线程（使线程进入就绪状态）
+notifyAll（）    唤醒所有挂起线程
+通过控制线程的阻塞、就绪、运行、死亡状态，来实现多线程的通信
+
+
+---------------------------------->JDBC(java data base Cinnectivity  java数据库连接)
+准备：加载JDBC的jar包
+(需要在打入JDBC的jar包：将jre文件保存到需要调用数据库的项目中（新建文件夹lib(库)，将jar文件保存，或直接放在项目文件夹下）对文件进行JRE的路径配置)
+
+1、加载驱动
+
+2、创建连接路径字符串（）（解决数据库汉字不能识别：在路径后加
+?useUnicode=true&characterEncoding=utf-8）
+String url= "jdbc:mysql://localhost:3306/studentdb
+?useUnicode=true&characterEncoding=utf-8";
+
+3、创建连接对象（connection 通过 Drivermanager.getconnection 实例化）
+Connection conn =DriverManager.getConnection(url, "root", "");
+
+4、编写sql语句
+String sql ="select id,name,sex,age from student ";
+
+5、创建处理sql语句的对象（对象类 preparestatement 是statement(处理)子类
+预处理,方便赋值）（通过调用连接对象的preparedstatement（）方法实例化）
+PreparedStatement pst =conn.prepareStatement(sql);
+
+6、创建保存数据的工具对象Resultset(直接调用，不用声明) 
+并保存执行sql语句的结果（调用执行sql对象的方法executequery（））
+ResultSet res = pst.executeQuery();
+		
+7、遍历显示查询的结果（不知道循环次数，res.next（）得到下个次循环是的数据是否为空，不是返回true）
+while(res.next()){
+System.out.println(res.getString("name"));
+
+8、结束资源（重后往前关闭）
+res.close()
+pst.close()
+conn.close()
+
+当对于数据库的数据进行修改或加入时，sql语句中的avlues 的值不是定值用 ？占位符
+string sql="insret into student(name ,sex ,age) values (?,?,?)"
+.....
+对占位符进行赋值   调用执行sql语句的工具对象pst中的setsrting方法（不同的数据赋值的方法不同 setint，setdate。。），
+前一个是，该对象中sql语句中的占位符？下标（从1开始） 后一个为赋值的值 
+pst.setsrting(1,"演员")
+
+
+
+--------------------------------->java指令
+break    跳出最近循环
+continue  调到下一次循环
+return（循环中）   在程序中执行，直接结束循环         
+return（方法中）    返回值
+System.exit(0）     结束程序
+当类结尾包含自身（即最后为  类名（）；）  则可以构成一个无限循环
+ 
+java就近原则，若在循环里面定义时，循环结束后，变量内存会被系统回收
+因此若之后程序，需要继续用此变量，可以先在循环外面定义
+
+
+--------------------------->数据类型转换
+————自动转换（除boolean类型不能转换）：
+转换数据类型大于原类型(兼容)
+byte->short->int->long->float->double   char->int
+object>>> 基础数据类型的包装类 integer，Boolean ,Long ，Charcter... >>>基础数据类型 int ，long ,bolean，char
+(string ,date  本身就是包装类）
+
+1、此时不需要（转换类型） 数据自动回通过保存数据的变量类型，自动转换  int a =0;  short b =a ;
+
+2、基础类型和其包装类可以自动转换
+**JDK自从1.5（5.0）版本以后，就引入了自动拆装箱的语法，也就是在进行基本数据类型和对应的包装类转换时，系统将自动进行。
+在这之前应  实例化包装类转换、 调用包装类方法intValue（）方法转换
+
+3、任何类型都可以直接自动转化为object类型
+
+————强制转换
+不满足自动转换时，用到（转换类型）（此时编译会自动提醒转换）
+
+1、用于Object转换为string类型  调用string类型的toString（）方法 和 (String)强转换
+
+2、数字类型(int,long...) 转换成String     +""  （默认调用string的to.string()方法）、和Valueof()方法
+tostring（）是以包装类为对象（只能被Object和包装类调用，且不能在基础数据类型强行转换为包装类型后直接调用）
+Valueof（）是以基础数据类型或者包装类为对象
+
+3、String类型转换为数字类型（int、long..）  通过其包装类的parse**方法（只有数字类型有）或valueof（）方法   Integer.parseInt(str)   
+Integer.valueof返回的是Integer对象，Integer.paseInt返回的是int
+Integer的Valueof（string）方法可以将字符串转换为ACII码值的数字
+
+4、object转换 数字类型
+1、(int) 直接将直接将object强制转换为int类型（该方法需要Object原类型为转换数字的真正类型（int），程序知道该数据最早为INT类型，一般不通过这样转换，容易出错）
+2、先将Object类型转换为string类型，再转换为数字类型
+int a =Integer.parseInt(object.tostring(）)
+**子类可以自动转型为父类，但是父类强制转换为子类时只有当引用类型真正的身份为子类时才会强制转换成功，否则失败。
+
+5、boolea类型转换
+转换为int 类型，通过代码判断赋值(boolea转string，int转boolea，都可以通过判断来完成)
+int a = Boolean ? 1 : 0;   true 为1 ，false 为0
+
+string转boolea
+boolea a= Boolean.valueOf(“true”)//此处的参数true忽略大小写
+其他的值都是false
+
+6、字符char转换
+字符自动转换为字符串 +"",或string类的Valueof（）方法，或先转换为包装类再调用tostring；
+
+7、字符串转换为字符类型
+---字符串转字符数组
+调用string 的tocharArray()方法 ，保存到数组中
+---字符串中取字符
+调用string 的charAT（字符下标）
+
+8、数组转字符串
+1、字符数组转字符串（调用string 类型的 copuValueof（char[]）方法 
+string s =String.copuValueof(ssz字符数组)
+2、循环遍历字符数组，将所有元素连接成一个字符串
+
+字符串数组转字符串
+1、调用StringBuff的append（字符串数组）连接字符串方法，之后在通过tostring()方法转换成string类型
+2、循环遍历数组，将所有元素连接一个字符串
+前者不需要编写循环代码，调用方法完成拼接
+
+8、集合与数组
+集合转数组调用List(集合类) 的toArray()方法
+object a [] =list.toArray();
+数组转集合 调用Arrays(数组类) 的aslist()方法
+List  list =arrays.aslist(a); 
+
+
+
+-------------------->操作string的工具类（不需要声明，被static修饰了）
+string F="ABCDEFG"
+string G="ABDFJJ"
+
+字符串长度    F.length()
+
+获得指定下标的字符串的字符    F.charAT(0)  (0为第一个。。。)
+
+得到指定字符出现的第一次的下标   F.indexof("A") (""里面为指定的字符，没有出现为-1)
+
+转换字符串的大小写    F.toUpperCase() (全部大写)
+                      F.toLowerCase() (全部小写)
+
+比较两个字符串  （比较第一次出现不同字母时，两字母（符号、汉字）ASCII码的大小
+）                     F.compareTo(G)  (F相对于G，相同为0，小为负，大为正)   
+
+
+比较两字符串内容是否一致  F.equals(G)
+(F==G)比较的是两个字符串变量的地址是否一样
+
+截取字符串
+从指定下标到结束    F.substring(1)    (1表示从第二个字符开始)
+从指定下标截取到下个下标   F.substring(0,2) (0,2表示从第一个字符到第三个字符)
+
+分割字符串      String strs [] = F.split(",");  （将字符串F以“，”分割成几个字符串，不包含","，保存在字符串数组strs中）
+"JJ,JKD,,JJJ,A,"   分为"JJ"、"JKD"、""、"JJJ"、"A"    五个部分（若以分割符结束，则后面部分没有，不算）
+
+拼接字符串          F.concat("A")   (在字符串F后接"A",但不会改变F)（F=F+"A"也可以连接，但会改变F）
+ 
+去除字符串两端的空格   F.trim（）
+用新字符替换字符串中所有的旧字符  F.replace(char old,char new)
+可实现出去所有字符串中的空格   F.replace(" ","")
+
+字符串是否以该字符开始　　　F.startsWith("A")  不管""中有几个字符，系统只识别第一个字符，对比开头第一个字符
+字符串是否以该字符结束      F.endsWith("B")
+
+字符串是否存在该子字符串  contains（） 有返回true
+
+
+StringBuff
+1.当（默认声明，即没有new）声明赋值的两string变量，内容一致时，它们是放在同一个内存空间的，只是有两个不同的指针（变量名），因此地址相同。
+一般像定义两个相同内容的string变量时，第二个应该进行声明（new一个）
+2.string类是不能改变的。因此string变量进行连续改变时，会重新分配一个内存给改变的值，并将之前的值的指针指向该内存，将不用的之前的内存清除。这样会大大增加计算机的运算。
+因此，应该用一个特殊的变量（stringBuffer），不用重新分配内存空间，直接在原内存中修改要赋值的值。
+StringBuffer F = new StringBuffer("hehe");   ""赋值的字符串
+------------------------------->String与StringBuffer的区别(StringBuff是string的子类)
+StringBuffer类属于一种辅助类，可预先分配指定长度的内存块建立一个字符串缓冲区。
+StringBuffer实例化时的效率低一点，但执行该字符串多次修改时，其效率远高于String（StringBuff在操作数据时，不需要连续被创建，string相反）
+简单地说，就是一个变量和常量的关系。StringBuffer对象的内容可以修改；而String对象一旦产生后就不可以被修改，重新赋值其实是两个对象。
+StringBuffer的内部实现方式和String不同，StringBuffer在进行字符串处理时，不生成新的对象，在内存使用上要优于String类。所以在实际使用时，如果经常需要对一个字符串进行修改，例如插入、删除等操作，使用StringBuffer要更加适合一些。
+StringBuffer具有String没有的方法
+1、append方法
+public StringBuffer append(boolean b)
+该方法的作用是追加内容到当前StringBuffer对象的末尾，类似于字符串的连接。
+
+2、deleteCharAt方法
+public StringBuffer deleteCharAt(int index)
+该方法的作用是删除指定位置的字符，然后将剩余的内容形成新的字符串。
+
+3、insert方法
+public StringBuffer insert(int offset, String s)
+该方法的作用是在StringBuffer对象中插入内容，然后形成新的字符串。
+
+4、reverse方法
+public StringBuffer reverse()
+该方法的作用是将StringBuffer对象中的内容反转，然后形成新的字符串。
+
+5、setCharAt方法
+public void setCharAt(int index, char ch)
+该方法的作用是修改对象中索引值为index位置的字符为新的字符ch。
+
+6、trimToSize方法
+public void trimToSize()
+该方法的作用是将StringBuffer对象的中存储空间缩小到和字符串长度一样的长度，减少空间的浪费。
+
+7、转换为不变字符串（string类型）:变量调用 StringBuff的toString()方法
+
+8、构造方法中可有参数，定义字符缓存区的字节数
+StringBuffer s0=new StringBuffer();默认分配了长16字节的字符缓冲区
+StringBuffer s1=new StringBuffer(512);分配了512字节的字符缓冲区
+
+
+
+------------------------------->修饰符
+私有的  只能在当前类中使用 
+private int numA = 1;
+默认的 只能在 当前类 或同一个包中的类 可以使用 
+int numB = 2;
+受保护的 继承的  当前类 同一个包中的类  不同包中存在继承关系 可以使用 
+protected int numC = 3;
+公有的  哪都可以 
+public int numD = 4;
+
+abstract  抽象的
+final     最终的    被final修饰的变量为最终变量 ，不能再被赋值（常量）
+                    被final修饰的类为最终类        不能被继承
+                    被final修饰的方法为最终方法    不能被重写
+
+
+static    静态的    被static修饰的变量、方法、都是共享的（在类被加载时，就会被执行（声明），反正内存空间中，随时被调用）
+不需要被声明，就可以直接被调用，不属于该类实例化任何对象中的属性或方法，是该类实例化所以对象公有的，唯一一份。
+静态变量也称为类变量，类变量是可以被赋值的，是被所以对象共享的
+静态方法的方法体中只能调用静态变量和静态方法。
+final 和static 常一起连用 不能被赋值的共享变量（即类常量），既能共享，直接调用又不会被修改
+
+abstract 不能和static、final一起，抽象的方法不能是静态，也不能是最终的 
+
+被static修饰的方法，即静态方法，不能在继承时被重写，但进行相应操作时，编码器不会报错。
+子类继承后，再又编写该方法时，父类中相同名的方法并没有与子类形成多态关系。
+在调用方法时，编码器只会执行相应类中的方法。
+A FF =new B()   此时只会执行A类中的静态方法，不会多态映射到B类中重写编写的方法
+B FF =new B()   此时直接执行B类中的静态方法，并会有限执行自己本身已有的，忽略掉父类继承的
+所有A、B两个中的同名静态方法完全不相关，B类会把父类继承下来的静态方法隐藏
+
+synchronized  同步化   修饰方法或代码块   该修饰的代码在被CPU运行时，即使有多线程运行，cpu也只能在该线程执行完该段代码后，在执行其他线程的该段代码（只要该段代码被一个线程访问后，不管该线程阻塞、执行、就绪状态，其他线程都不能再访问该段代码）
+
+
+------------------------>eclipse常用快捷键技巧
+   	   
+eclipse 自动调整代码Ctrl + Shift + F
+
+refactor （F2）  用于重命名、移动类文件，或者包
+
+Ctrl +/  快速注释所选行
+选中两行 shift ctrl /   注释块
+
+Ctrl +Q  定位到最后编辑的地方
+
+Ctrl +Alt +方向键（上下）  复制当行到下一行
+Alt +方向键（上下）        移动当行到下一行
+Ctrl +D            删除当行
+
+Ctrl +1            快速修复
+Ctrl +L            快速定位到某行
+
+Alt  +回车         查看文件属性（属性菜单）
+
+Shift+Enter      在当前行的下一行插入空行
+Shift+Ctrl+Enter 在当前行上面插入空行
+
+Crtl +shift +S   全部保存
+
+双击变量名  Alt+ shift +F  进行批量修改变量名
+
+Crtl +Y  下一步
+Crtl +Z  上一步
+
+------------------------->环境配置   
+配置环境路径 （用于在Windows下操作，给编辑器配置环境，让编辑器在哪个盘都能执行）
+设置Path  导入运行库的bin目录路径   (配置mysql时，要保证系统动态库的运路径（C:\windows\system32）也在Path，这样才能保证在其他盘中也能调用系统动态库）
+java不需要调用系统动态库，mysql需要调用
+c: 进入符盘
+cd + 目录路径  进入该目录
+之后就是运行该目录文件
+用户变量 只能在该用户生效
+系统变量 所有用户都生效

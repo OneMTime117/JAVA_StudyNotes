@@ -1,0 +1,384 @@
+jsp javaserver pages java动态页面技术
+是将java与HTML结合，通过java对HTML元素进行动态操作
+
+jsp插件配置  tomcat8.0 一款开源式WEB应用服务器，属于轻量级应用服务器，用于并发（多个一起发生）访问用户很少的场合，一般用于jsp程序的调试开发
+1、首先在开发软件中安装tomcat插件，在eclipse首选项中讲tomcat安装路径添加到server的运行环境（runtime environments）中
+2、新建Dynamic Web Project 动态网页项目，在项目的libraries（库）中添加服务器运行环境，并选择已经配置好的tomact服务器
+3、一般jsp项目都需要对数据库进行操作，因此应在WEB-INF文件的lib文件夹（用于存放项目的外部插件）中添加mysql插件，并配置插件路径到库中
+4、当项目编写完后，应先将工程发布到tomcat服务器上，在通过浏览器访问服务器页面路径 hptt：//localhost:8080/web页面名.后缀   （8080是tomcat默认端口，项目是在本机上发布时，就为localhost，当在其他电脑上发布时，通过其IP地址获的端口，（通过控制台窗口执行ipconfig，得到电脑ip的配置）  
+
+动态页面项目的文件结构
+java Resources  java资源  用于存放java代码和运行库
+
+webcontent文件夹：存放web内容 ，包含两个子文件夹META-INF、WEB-INF和外部文件
+
+META-INF文件夹：java打jar包时，自动生成的一个文件夹。相当于一个信息包，目录中的文件和目录获得java平台的认可与解释，用来配置应用程序、扩展程序、类加载器和服务。同时会生成一个manifest.mf文件。
+
+WEB-INF文件夹： lib文件夹（网页所需要的插件）和默认生成一个XML页面配置文件   
+外面存放文件有：存放静态页面（HTML文件）、动态页面（jsp文件） 
+
+build 存放编译后的文件
+
+jsp文件是servlet的一个特殊形式，通过jsp文件的产生，可以将servlet的页面展示和动态数据传输分离，将需要的
+动态数据的操作以java编译成一个servlet类，在jsp编译成servlet后，两者就能以java类的形式执行
+
+每个jsp页面都会编译生成servlet实例，我们可以通过正在java中编写jsp的servlet代码，即创建一个servlet类
+------------------------>servlet的生命周期：  
+1、编译阶段（当服务器上线，用户第一次访问时） 
+servlet容器（服务器）将jsp编译servlet源文件，生成servlet类（jsp文件生成的，与java类中编写的不同）
+
+2、初始化阶段（servlet创建后调用初始化方法） 
+加载与jsp对应的servlet类，将其实例化，并调用器初始化的方法
+
+3、执行阶段（用户多次相同该请求时，都重复执行该servlet中的方法，不会重新创建
+servlet对象可以多线程共享，从而满足多用户同时访问的问题）(因此当JSP项目上线到服务器后，第一个访问用户需要等待jsp页面编译成servlet文件保存，之后一直存在给其他用户共享，知道服务器下线)
+调用与jsp对应的servlet实例化的服务方法（对应jsp编写的java类），执行
+
+4、销毁阶段（服务器下线）
+将实例化的servlet对象销毁
+
+
+------------------------>jsp语法： 
+JSP语法中包含 HTML、注释、声明、脚本、表达式、指令、动作
+jsp是以HTML的结构为模板 
+1、在jsp页面中，有两种注释：HTML注释 <!-- 注释语句--> （可以在客户端检查代码时看到）
+和 JSP注释 <%-- 注释语句 --%>(在客户端看检查代码时，是看不到的)
+
+java代码可以通过<% %>在jsp的HTML结构中进行插入
+2、以声明的方式，在HTML中写java代码 
+<%! java代码 %>  用于声明变量或方法，供之后的java代码使用 （即为全局变量和方法）
+<%!
+    public String str = "声明元素";
+    public void show(){
+        System.out.println(str);
+    }
+%>
+
+3、以脚本的方式，在HTML中写java代码
+<% java 代码%>  执行java语句（用的是局部变量，不会影响其他的java代码）
+<%
+    String str = “脚本元素";
+    System.out.println(str);
+
+    for(int i=0;i<5;i++){
+        System.out.println(i);
+    }
+%>
+
+
+4、可以以表达式的形式，直接在HTML中输入变量值
+将java代码中变量，作为HTML标签内容输出
+<a><%=java  表达式或变量   %> </a>
+
+
+5、指令，有三种指令<%@ 指令类型 指令语句
+一、<%@ page   指令语句 %>  
+JSP有自己特有的一个page指令，用于设置jsp页面属性与功能
+language="java"  指定需要嵌入的语句（java）
+contentType="text/html; charset=UTF-8"  设置代码的文本类型：为HTML的文本，以UTF-8格式编码 
+pageEncoding="UTF-8"  设置页面编码格式
+
+二、<%@ include 指令语句 %>
+include指令用于调用一个文件，可以说jsp文件、HTML文件、文本文件。将其作为该jsp文件的一部分，同时编译执行
+<%@ include file="文件相对路径地址 "%>
+
+三、<%@ taglib uri="" prefix="" %>
+taglib指令用于导入自定义标签库 包括标签库的路径和标签库的前缀
+
+6、动作  
+与指令不同，动作在页面请求处理阶段才起作用 ，jsp动作是通过XML语法写的
+
+
+
+----------------------------->servlet
+jsp实现动态页面的核心是，完成页面（用户浏览器）与服务器的数据交换，
+因此就需要编写控制这些数据交换的java代码，这就是Servlet类（控制器）
+将servlet类单独编写为一个java代码，这样来这样控制jsp页面中的数据传输
+
+jsp页面编写java代码原理： 每个jsp页面在第一次被访问时，就会被翻译成一个servlet.java文件
+之后在被编译成calss类文件，然后在执行其中的java代码
+
+servlet直接是通过编写java代码，控制jsp页面标签传递过来的数据，进行操作。
+
+这两种编写方式侧重点不同，jsp更容易编写HTML代码，而servlet更容易编写java代码，因此在开发中，应将两种灵活运用： 
+JSP负责页面展示、servlet负责数据处理
+这样可以保证代码的整洁性和更好的维护
+
+------------------------------>servlet的数据处理
+servlet获取jsp页面数据
+1、通过jsp页面的form标签，进行数据提交 
+<form action="mainservitel"  method="post"  > （也可通过超链接进行数据提交，但只有显示方式）
+action为提交到的文件路径，在开发工具创建servlet类时，会自动以类名带设置一个该servlet类的相对路径
+method为提交的方式 有两种：
+1、post 隐式提交 安全  
+2、get 显示提交 不安全（数据会通过路径地址进行传递，且传递数据不可超过1KB）(默认为get的提交方式)
+以?分割URL和传输数据，参数之间以&相连，如：servlet/LoginServlet?username=“admin”&password=“123”
+（数据还是以request对象保存）
+
+两者提交都会使servlet调用其方法doget和dopost，因此对数据操作的java代码就是重写其doget和dopost的方法
+并且都是通过标签的name作为变量来获得标签中的数据
+
+2、在重写方法中，servlet通过其request请求对象，来获得传递过来的数据，并通过变量保存，然后通过java代码进行数据处理
+String username=request.getParameter("标签的name")
+因为客户端浏览器发出的请求（post方式提交数据），会被封装成一个HttpServletRequest对象
+servlet类是继承了HttpServlet接口的，因此requset对象包含的客户端传递的请求对象（HttpServletRequest）中的所有数据
+
+3、servlet通过request请求对象，调转jsp页面并传递处理后的数据
+request.setAttribute("", ) 前者为传递数据的变量名，后者为要传递的数据（为请求对象添加属性）
+
+调转页面有两种方法：
+一、转发（地址栏不变）：request.getRequestDispatcher("页面路径").forward(request,response);   
+ 获取要转发数据的页面对象，将request和response对象传递给下一个页面中（并跳转到该界面），只有一个请求，转发到下个页面（只需要服务器同样请求，速度快）
+
+二、重定向（地址栏跳转）：response.sendRedirect(“页面路径")
+也可以通过调转对象进行跳转（重定向）; 但它只能跳转页面，不能传递数据，两个请求，请求服务器进行跳转、服务器发出请求进行跳转（需要服务器处理请求再发出请求，速度慢一点）
+
+转发时地址栏不变，而重定向时地址栏改变
+转发只能在当前的WEB工程内页面调转，而重定向可以转到任何页面
+转发时，多个servlet可以共享同一个request对象，而重定位不共享
+
+4、在jsp页面中显示servlet传递过来的数据
+1、通过js代码来获的传递过来的request对象中的数据，并通过表达式的形式输出
+<%=request.getAttribute("username")%> 
+2、通过el表达式，直接搜索request对象中的数据
+ ${user.name}
+
+在重写get或post方法时，还需要设置编译格式（处理乱码）
+post：在开头添加代码
+    request.setCharacterEncoding("UTF-8");
+get：对获得的数据内容进行处理(替换变量数据中的编码格式，变为UTF-8)(集合中的中文数据不需要进行乱码处理)
+username=new string （username.getBytes("ISO8859-1"),"utf-8"）
+
+
+jsp的九大内置对象（隐式对象，无需声明直接使用）
+1、request:为Http ServletRequest 接口的实例
+请求对象，用于jsp向servlet，或者servlet向jsp传递数据。
+
+2、response:为Http ServletResponse 接口的实例
+跳转对象，用于跳转页面，设置servlet返回数据类型等。
+
+3、out：为JspWriter类的实例
+输出对象，在java代码中通过这个对象输出信息到页面
+out用来在页面上直接输出数据，和js表达式类似，但out只输出文本内容
+（一般都不通过out对象进行输出）
+
+4、session:为HttpSession类的实例   
+浏览器会话对象，服务器会为每一个用户创建一个session对象，适用于保存用户登录信息，用户与浏览器对话。
+与request对象相比，request对象是一次性的，通过转发传递信息，通过请求进入到下个页面时，就随着页面跳转消失，产生新的request对象
+而session对象会一直保存在浏览器端，只有浏览器和服务器不关闭，都存在
+当浏览器发生请求给服务器时，就会与服务器创建一个Session回话，来保持两者的交流
+
+通过request对象的getsession（）方法得到session对象，并给它添加属性值
+request.getsession().setAttribute("",)
+当该浏览器触发新的request对象后，session保持的变量任然存在，而request不存在
+
+5、application:为ServletContext类的实例
+服务器对象，所有用户共用一个服务器对象，服务器关闭后失效，适合用于存储公共数据，禁止乱用！非常占据服务器内存；
+在服务器启动时，就会创建一个application对象，所有用户都同时共享这个内置对象
+
+6、pageContext: 为pageContext类的实例
+代表整个jsp页面对象集，所有内置对象都可以通过它获得，提供了对JSP页面所有的对象及命名空间的访问
+
+7、config: 为ServletConfig 类的实例   （servletconfig类可以获得mxl配置文件初始化参数）
+Config对象就是提供对初始化JSP的配置数据的访问，取得服务器的配置信息。
+
+8、page:为自身（jsp页面文件运行产生的类）的实例
+代表JSP本身的类对象，页面级对象
+
+（config和page对象不常用，在实际运用中极少用到）
+
+9、exception:Trowable类的实例 
+捕获页面异常对象，通过与jsp页面的page指令配合使用，来捕获页面中可能出现的异常
+
+
+
+
+jsp的四大个作用域：pageContext ，request，seesion，application（范围从小到大）
+作用域是jsp四种保持共享信息的范围的区域，每个作用域保存信息的范围不同
+page 当前页面  request 当前请求 seesion 当前会话 application 当前所有程序
+
+el表达式取值 会自动搜索作用域{会从页面的最小作用域中往上逐一筛选同名的属性}
+el表达式可以直接选择指定作用域来搜索 ${requestcope.name}
+
+核心标签库插件 jstl js标签库
+配置插件-----在jsp中添加加载标签指令-------选择核心标签库（方便显示数据）
+ prefix="c"  uri="http://java.sun.com/jsp/jstl/core"
+
+简化循环遍历数据
+    <!--  var 当前循环的变量名  items要循环的数据 -->
+     <c:forEach var="act" items="${list }">
+            <tr>
+          <td>${ act.aid}</td>
+          <td>${act.username }</td>
+          <td>${act.password }</td>
+          <td><a href="#">删除</a></td>
+      </tr> 
+
+简化判断  
+    1、if语句
+    <c:if  test=“要判断的逻辑表达式”>        
+     条件为真时执行的代码
+    </c:if>
+
+    2、if else语句
+     <c:choose>    
+     <c:when test="条件1">        
+     条件1为真时执行的语句    
+     </c:when>    
+     <c:when test="条件2">        
+     条件2为真时执行的语句     
+     </c:when>    
+     <c:otherwise>        
+     没有匹配条件时执行    
+     </c:otherwise>
+     </c:choose>
+
+------------------------------->控制器servlet类
+单独将servlet代码写在java类中，在jsp页面编译成servlet文件时，通过xml文件配置（servlet的配置文件，即为jsp转成的servlet文件上添加外部类文件）
+被servlet文件调用，即servlet类是一个继承了HttpServlet对象（web协议控制器，即servlet文件执行用户请求所产生的对象）的java类
+用eclipse创建servlet类时，自带servlet模板类，只需要重写模板中的doget、dopost方法，
+用模板创建servlet类时，系统会自动在xml配置文件在配置 
+
+------------------------------->配置web项目的初始页面（HTML、JSP、Action）
+  <welcome-file-list>   初始文件列表
+    <welcome-file>login.jsp</welcome-file>  初始文件
+  </welcome-file-list>
+这样可以直接通过web项目名来访问初始页面：http://localhost:8080/项目名/
+系统会自动在webcont（web文件根目录）目录下从上到下搜索初始文件，进行跳转
+
+------------------------------->过滤器
+编写一个类、与servlet包中的类类似，当jsp被服务器编译成servlet时，通过xml配置文件配置，
+动态拦截jsp页面的请求与响应，在传递个servlet类执行之前，对其进行过滤
+在客户端的请求访问后端资源之前，拦截这些请求。
+在服务器的响应发送回客户端之前，处理这些响应。
+
+过滤器是一个实现 javax.servlet.Filter 接口的 Java 类
+该接口提供三个方法
+dostroy()
+	过滤器销毁时，执行的代码
+
+doFilter()
+//		过滤器的过滤代码
+//		提供HttpServlet对象（request、response）、过滤器链对象（filterchain)
+//		过滤器链对象（filterchain）提供dofilter方法，将拦截的请求响应对象正常传递给sevlte类中
+		filterchain.dofilter(arg0,arg1);
+//		过滤器将jsp传来的数据，传递给servlet类执行
+
+init()
+//		过滤器被实例化创建时执行的初始代码
+//		提供jsp过滤器配置对象（FilterConfig），提供获取jsp配置信息的方法
+
+配置：
+<filter>	
+<!-- 别名,唯一 -->	
+<filter-name></filter-name>	
+<!-- filter全类名 -->	
+<filter-class></filter-class>
+</ filter>
+
+<!-- 把Filter类映射成url可访问的资源 --><filter-mapping>	
+<!-- 别名,唯一 -->	
+<filter-name></filter-name>	
+<!-- 请求filter时url的地址格式，必须以/开头 -->	
+<!-- 还可以拦截多个请求，使用*进行匹配 -->	
+<url-pattern></url-pattern></filter-mapping>
+
+------------------------------->监听器
+创建一个类 实现HttpSessionListener 接口
+该接口提供两个方法
+	public void sessionCreated(HttpSessionEvent arg0) {
+		会话被创建时，执行的代码
+	}
+	public void sessionDestroyed(HttpSessionEvent arg0) {
+		会话被销毁时，执行的代码
+	}
+它们的提供一个HttpSessionEvent会话活动对象，来提供获得会话信息的方法
+
+因此可以通过对其会话的状态监听，来记录当前会话个数，和每个会话的信息。。。
+
+配置：    
+<listener>		
+<listener-class>监听器类路径.监听器类名</listener-class>	
+</listener>
+
+
+-------------------------------->jsp项目文件
+java资源包：
+com.web.controt：controt包，servlet类文件集合，对完成servlet与jsp之间的数据交换,调用Service层里面的接口控制具体的业务流程
+com.xx.service.imp：service包（对业务功能方法进行包装，供外部调用，时业务功能代码具有独立性和可重复利用），为servlet类文件提供数据处理的服务方法
+com.xx.service：service接口包，为service包的实现类提供接口
+com.xx.dao.impl: dao包（Data Access Object数据访问接口，对访问数据的方法进行包装），为service类文件提供连接并操作数据库的方法
+com.xx.dao:为dao包的实现类提供接口
+com.xx.entity:实体包，为项目提供数据的实体类（将项目需要的数据对象化）
+com.xx.tools: 工具包，为其他包提供代码功能的重复调用，如对日期、数字和字符串的重复处理代码、BaseDao类（连接数据库的重复代码：创建连接对象、关闭资源）
+
+
+WEB-inf文件夹：
+lib文件夹：存放该jsp项目所需要的插件
+jsp动态页面文件、html静态页面文件、xml配置文件
+
+
+-------------------------------->jsp通过服务器上传下载文件
+----------上传jsp页面的sevlet：用于上传jsp请求传递的文件
+1、配置smartupload插件，用于文件的上传
+1.1 实例化插件
+SmartUpload smartUpload = new SmartUpload();
+2、初始化插件，让其和jsp页面的sevlet连接在一起
+smartUpload.initialize(getServletConfig(), request, response);
+之后可以设置上传文件的类型（通过限制后缀）、编码格式、数据大小（数据的字节长度）
+3、通知上传，准备就绪
+smartUpload.upload();
+4、获取该servlet的requset对象中的提交的文件集合（自动获得jsp页面提交的所有文件对象，保存在文件集合中，jsp提交多个时文件 name需要不一样）
+Files files = smartUpload.getFiles();
+5、获得jsp项目的保存文件的文件夹路径（保存不同的文件，文件夹名不同）
+String realPath=request.getServletContext().getRealPath("/imgs")（文件夹名为imgs）
+使用getServletContext().getRealPath("/")获取地址得到\eclipseworkspace\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps，而不是对应项目，
+
+该目录为eclipse中发布工程的临时目录。
+因此需要将服务器重新创建，并配置服务器运行目录在tomcat的webapps中
+
+6、循环遍历将request中提交得到的文件集合循环遍历，保存到该文件夹中
+for(int i=0;i<files.getCount();i++){
+//得到当前文件对象
+   File file=files.getFile(i);
+//保存到该文件夹中(拼接文件保存的完整路径)
+   file.saveAs(realPath+"/"+file.getFieldName());
+		}
+7、将该文件夹即其中文件上传
+smatrupload.save(realPath)
+文件的传输一般都是以
+-------------操作页面的sevlet：获得上传的文件列表，传递个下载页面(通过表单传递文件，设置以附件的编码格式(以二进制的方式)提交表单文件
+表单中enctype="multipart/form-data"的意思，是设置表单的MIME编码。默认情况，这个编码格式是application/x-www-form-urlencoded，不能用于文件上传；只有使用了multipart/form-data，才能完整的传递文件数据，进行下面的操作. 
+enctype="multipart/form-data"是上传二进制数据; form里面的input的值以2进制的方式传过去。在接收文件时，不能用request直接接收，应用插件的getFiles方法获得request对象中的提交数据
+smartUpload.getFiles()
+
+因此需要在表单标签中添加一个属性  ：enctype="multipart/form-data")
+//	获得下载列表
+		//去得到imgs文件夹下面的文件名的列表 
+				//真实路径
+				String realPath = request.getServletContext().getRealPath("/imgs");
+				//获得该路径下的所有文件的名字 
+				//通过IO包的File来实现  file就代表了imgs这个文件夹
+				File file = new File(realPath);
+				//返回该文件夹中所有的子文件的名字
+				String fileNames []= file.list();
+				//将文件名交给页面去显示
+				request.setAttribute("fileNames", fileNames);
+				request.getRequestDispatcher("down.jsp").forward(request, response);
+
+
+-------------下载页面的sevlet：通过get提交的文件名，来下载该文件
+
+//		获得要下载的文件名
+		String fileName = request.getParameter("filename");
+		
+		//在imgs的真实路径下 去下载指定的文件 
+		String realPath = request.getServletContext().getRealPath("/imgs");
+		//1.实例化工具
+		SmartUpload smartUpload = new SmartUpload();
+		//2.初始化工具
+		smartUpload.initialize(getServletConfig(), request, response);
+		//3、禁止浏览器自动打开文件(浏览器会通过文件后缀自动选择软件打开)
+		smartUpload.setContentDisposition(null);
+//		4、下载该文件
+		smartUpload.downloadFile(realPath+"/"+fileName);

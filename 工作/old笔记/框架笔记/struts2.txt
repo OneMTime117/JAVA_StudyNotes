@@ -1,0 +1,431 @@
+struts2框架：是MVC开发模式的控制层（servlet）框架，代替了jsp项目中的servlet类
+
+struts2是由struts1发展过来的，但其核心完全不是用的struts1的代码，而是用的xwork（和struts1原理一样，但核心代码实现业务更好，后来被struts1开发团队收购，推出了struts2用了xwork的核心代码，因此struts2拥有两个核心core即：struts2 和xwork，到struts2.5版本后，将两个核心整合到了一个jar包中，单jar包中的文件还是为xwork）
+
+--------------------->strust2框架实现控制层配置过程（页面跳转）
+1、创建maven-web项目，在pom配置文件中添加struts2插件的依赖
+创建<dependencies>依赖节点，在maven资源网中搜索struts2 core插件，复制依赖配置代码，放入<dependencies>依赖节点中
+保存，maven会自动下载与struts2 core有依赖的其他插件（插件会保存到Maven Dependencies库文件夹中）
+
+2、为maven-web项目添加web的配置文件（默认只有webapp文件夹，相当于动态web项目中的webcontent文件夹（存放与网站相关的文件，如HTML文件））
+
+3、在web.xml配置文件中配置过滤器，获的struts插件中的核心过滤器（前端控制器FilterDispatcher：StrutsPrepareAndExecuteFilter类，即struts的准备、执行过滤器）
+1、因为struts文件都是编译的.class文件，无法添加注解来获的该过滤器，因此只能通过配置文件来进行类的查找
+通过xml配置文件的过滤器节点设置过滤器
+ <filter>
+      <filter-name>firstStruts</filter-name>  该类的名字（用于调用获的的类）
+       <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>StrutsPrepareAndExecuteFilter类的限定名（在struts2-core中的struts2.dispatcher.filter包中）
+ </filter>
+2、设置该过滤器的作用域（可以拦截哪些请求）
+  <filter-mapping>
+  <filter-name>firstStruts</filter-name>
+  <url-pattern>/*</url-pattern>（拦截所有请求，struts框架拦截全部请求还有两种写法 *.do  *.Action）
+  </filter-mapping>
+
+******这个过滤器就改变了服务器的运行流程
+jsp：服务器先执行过滤器（执行过滤器中的servlet），再执行JSP（将servlet执行后的参数响应到页面中）
+struts：服务器在执行过滤器后，不会直接执行JSP，而是通过调用struts的前端过滤器拦截的所有请求，全部传递到struts2的框架中处理，最后通过框架响应页面的请求。（此时过滤器中的servlet也就被struts2框架代替）
+
+3、编写Action类（简单类，代替servelt类）
+//默认action类全部返回字符串   默认方法名为execute（执行方法）
+	public String execute(){
+		
+//		要返回的页面
+		return "index";
+	}
+}
+
+4、对web项目添加tomcat服务器的运行环境（到libraries中，这样jsp才能被eclipse识别）
+也可以通过maven插件添加tomcat运行环境包中的 javax-servlet-api.jar(这样eclipse才能是被servlet类，jsp是一种特殊的servlet类)
+*****由于这个包和tomcat服务器的运行环境包有冲突，因此需要在配置改包依赖时，对其作用域（默认不写，什么时都能用）进行设置
+ <scope>provided</scope> compile用于编译时才用 ； provided 私有，只用于自己写项目时使用（发布时不使用，不会再项目发布时一起上传）；runtime 运行时用；system 系统调用时用；test 测试时用         
+
+5、编写JSP页面文件
+
+6、创建struts.xml文件，来配置action类（在src/main/resources中创建）
+1、由于自己创建的xml没有文档声明，因此没有标签提示（如spring的context容器配置文件中默认的容器命名空间配置时，就指定了该解析和校验XML的定义文件，sxd文件）
+可以在struts-core中的寻找struts2框架版本对应的struts.dtd文件,打开找到struts的dtd文档声明代码，复制到struts.xml中
+   <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+	"http://struts.apache.org/dtds/struts-2.5.dtd">
+
+
+2、配置action类（struts配置文件）
+1、添加struts框架的类包，取一个名字，继承struts核心包中的默认配置文件（struts-default.xml）中的包 struts-default
+2、配置action类：
+<action>节点：name为请求访问的名字，class请求访问时执行的Action类文件
+<result>节点：name对应该action类中执行方法的返回值；/index.jsp 当该action类执行方法返回值为name的属性值时， 将请求重定位到web根目录下（webapp）index.jsp页面文件中
+<struts>
+    <package name="hello" extends="struts-default">
+	   <action name="index" class="com.xx.web.action.HelloAction">
+	   <result name="index">/index.jsp</result>
+	   </action>
+    </package>
+</struts>
+
+
+-------------------------struts2的框架实现流程
+1、客户端传来请求对象（HttpServletRequest） 给服务器的web容器，web容器就会首先执行web的配置文件，执行其中的servlet过滤器（ActionContextCleanUp、SiteMesh等其他过滤器、FilterDispatcher按顺序）
+2、从而struts通过前端控制器（FilterDispatcher）拦截请求，并提交给struts框架的Action映射对象（ActionMapper）分析该请求，判断该请求是否需要调用某个action处理
+3、若不存在则继续交个服务器处理；若存在，则会告诉前端控制器停止后面其他过滤器，并创建Action代理对象（ActionProxy）
+4、此时Action代理对象通过询问配置管理器对象（ConfigurationManager），来读取、管理struts的配置文件。结合请求对象中的url信息，知道需要执行的Action对象、result对象和相关拦截器的所有信息，从而建立action调用器对象（ActionInvocation）
+5、action调用器对象就会调用执行所需要的拦截器（interceptor）如拦截器1、2、3，之后再执行action类中的execute方法，通过返回的参数匹配相应的result对象execute方法，找到要跳转的页面，通过struts模板对象（Template）获的页面数据，生成需要的页面
+6、action调用器对象之后在反向执行之前的拦截器，即3、2、1，然后得到响应对象（HttpSerletResponse），响应对象在通过web配置中的过滤器反向执行，最后响应到客户端
+
+
+
+----------------------struts2框架怎样传递数据（参数）：
+
+--------------------------------->通过action属性传递数据（参数不是通过request对象进行传递的，而是在action代理询问配置管理器对象，结合请求对象中的url，读取struts配置文件，找寻该请求需要执行的action类时，将参数传递，并创建action调用器）
+1、获得request对象中的参数：
+在相应的action中创建与传递参数name相同、并数据类型相同的属性，添加get、set方法
+request请求被struts框架处理时，其中传递的数据会自动被action类的set方法匹配，从而对action类的属性赋值
+
+2、action将参数传递给request对象
+定义该参数类型的属性，添加get、set方法；并在执行方法中对属性的赋值
+request请求进行struts处理后，自动会执行get方法获的该属性的参数（并且保存的数据类型与该属性相同）
+
+*******************从用属性的get、set方法传递参数，进一步也可以用对象属性来传递参数：
+在action中定义对象属性，然后创建该对象的实体类，并且在提交参数时，以name=“对象名.属性名”的格式，通过 获得对象属性 来实现对象数据的传递
+
+
+---------------------------------->通过action 继承ModelDrvien
+和上面方式一样，但写法复杂，唯一好处是可以不用在name中声明对象名，而是在Action中自动将属性匹配给你确定的实体对象（但需要前提：对象一定存在，所有要添加对对象属性的判断）
+
+
+
+-------------------------------------------------------------->struts2框架获取request、session、application对象（怎样使用servletapi接口包）
+通过对servletApi的解耦或耦合来获取（jsp直接用的servlet，所以很方便的直接使用servletapi，而action则通过struts框架来使用servletapi）
+servletApi servlet接口包，java代码通过servlet接口来调用服务器中的实现类（每个服务器中的实现方式不同，但接口和接口的方法种类相同，因此所有语言都通过接口来调用服务器中的对象）
+一、解耦：可以分为两种方式进行：
+1、实例化actioncontext对象，它提供获的request等解耦对象的方法；
+   实例化actioncontext接口对象（通过自己的get方法来实例化）
+ActionContext context = ActionContext.getContext();
+   创建一个map集合，通过actioncontext对象的getsession()方法来实例化（获的struts框架提供的session解耦对象）
+Map<String, Object> session = context.getSession();
+   将信息保存到session解耦对象中 
+session.put(“msg”,"账号或密码错误");
+
+其他对象的获取方法：  
+Map<String, Object> request =(Map<String, Object>) context.get("request");
+Map<String, Object> application = context.getApplication();
+2、通过继承request等解耦对象的接口，来注入相应的map集合属性
+创建map集合属性
+Map<String, Object> session ；
+action类继承SessionAware接口，该接口只提供一个方法，用session属性接收该方法的参数值（session解耦对象）
+public void setSession(Map<String, Object> age) {
+session1=age;
+}
+之后在对该属性值进行操作
+不同的对象只需继承不同的接口：RequestAware、SessionAware、ApplicationAware
+
+ 解耦方法，通过创建一个map<string、object>的集合，来接收struts框架提供的相应http的request的解耦对象。之后该集合中的所有键值就可以被struts框架放入到真正的request对象中。
+request的解耦对象，即与request有联系，但不会直接影响request，只会通过struts框架进行交流（因此集合接收request的解耦对象时，只能添加新信息，不能获取、修改request之前的信息，如我们需要修改编码格式时，就需要用耦合方式）
+
+二、耦合：同样分为两种：
+1、通过直接调用servletActioncontext对象，提供获的request等耦合对象（即真正的request对象）的方法；
+和解耦方式不同，直接通过调用servletActionContext对象方法，获得reuquest对象（可以通过request对象获的session对象request.getSession()）
+HttpServletRequest request = ServletActionContext.getRequest();
+获的response对象
+HttpServletResponse response = ServletActionContext.getResponse();
+获的application对象（servletcontext对象）；     也可以通过request对象的getServletcontext方法     ServletContext application=request.getServletContext();
+ServletContext servletContext = ServletActionContext.getServletContext();
+获的ActionContext对象（该对象可以提供struts框架中的解耦方法）
+ActionContext context = ServletActionContext.getContext();
+
+2、通过继承request等耦合对象的接口，来注入相应的对象类型属性；
+同样创建对象属性
+private  HttpServletRequest request；
+继承对象接口（ServletRequestAware、ServletResponseAware、ServletContextAware） 
+通过接口提供的方法，将参数值注入到属性中，从而使属性变为request对象
+之后可以通过request对象获的session对象；servletcontext对象即为application对象；
+
+耦合的方式，就是直接获取request对象，对象进行操作，struts2框架通过对servletapi接口包的调用获的，可以对servletapi接口包中的对象直接进行操作
+
+
+
+---------------------->struts2框架的配置文件（当使用maven时，配置文件放在src的resurces目录中，不使用maven时，配置文件放在src根目录下）
+struts配置文件：
+struts.properties   设置struts框架中的一些属性（如编码格式等），struts默认的属性配置文档在struts-core包中的struts2目录下default.properties文档（可以直接在这里面修改属性）
+struts-default.xml   struts框架的默认配置文件（配置好了struts框架默认的行为、必要的拦截器），其他XML配置文件只有继承了该配置文件包，才能被struts框架处理
+struts-plugin.xml   struts框架的插件配置文件（每个插件都要有一个该配置文件）
+
+struts.xml  自定义配置文件，每一个项目都需要该配置文件（struts2框架默认只读取一个配置文件，即名为struts.xml）
+struts.xml配置文件标签：
+<struts>标签（只有一个，包括了其他所有标签）
+1、<include> 引用其他的配置文件(一个项目实际开发时，会有个人同时工作，每个人的模块对配置的需求不同，因此每个人都有自己的配置文件，方便修改)
+通过include来引用其他的配置文件，要确保每个文件名都不同，struts框架再读取总配置文件struts.xml
+<include file="子配置文件名"></include>
+
+2、<bean>  struts框架的组件，用于将自己写的类添加到框架中（即修改、扩展框架的功能）
+
+3、<constant> 配置struts属性常量（和struts.properties 配置文件一样，修改属性简单些）
+<constant name="属性名" value=“属性值”></constant>
+
+4、<package>  配置文件包（将下面的所有元素组合在一起，类似于java包）
+<package>子标签：
+1、result-types  框架在action中返回的类型（如返回时重定向、转发、以数据流形式、源代码形式等，默认返回类型为dispatcher转发）
+2、interceptors  拦截器配置（添加拦截器），分为两种：
+interceptor  单个拦截器
+interceptor-stack  拦截器栈（多个拦截器） <interceptor-ref> 引用的拦截器（struts-default.xml 中提供了多个基本拦截器栈）
+3、default-interceptor-ref  框架默认引用的拦截器栈（struts-default），用于设置框架使用的拦截器栈
+4、default-class-ref  框架默认引用的action类（当没有指定action标签的class时）
+5、default-action-ref  框架默认当找不到需要的action类时，自动引用的action（很少用）
+6、global-results  resutls的全局引用，减少多个相同resutls的代码编写，程序自动会扫描resutls的全局引用，进行匹配
+7、global-exception-mappings 全局的异常处理映射，出现异常时，谁来管
+8、<action> 添加配置action类(让struts框架识别action类)
+results    返回结果
+interceptor-ref 配置action中的拦截器
+exception-mapping  异常处理
+
+
+
+
+-------------------------------------------------->action的配置
+action的配置都在一个包（package）中
+1、一个包中所有的配置可以通过包的继承来进行传递（因此包名name是惟一的）
+2、包被abstract（抽象的）修饰声明时，里面不能配置action，只能被继承（比如框架中的默认配置文件包）
+3、package标签中还有一个namespace属性，用于确定该包的action限定名（有时不同包中的action名会出现相同的，不能相同）
+因此在跳转action时，应通过namespce+action的name+前端过滤器配置的后缀（若为/*则可以省略）来跳转，用于区别不同包中的相同action名
+如：namespce="/ord"  action="he"  则在表单跳转时，action=“ord/he”
+当在指定空间中找不到时，会查找默认空间（默认为空）的action ,"/"不能省略，相当于是根目录下的文件
+
+action的运行环境对象：ActionContext
+action的映射（请求）
+action的name属性中不能出现“/”
+action的属性method 是执行action类中的那个方法，不写默认为execute
+<action naem="action配置的name" class="action类" method="要执行的action方法">
+
+action中多个方法的调用：
+1、声明多个相同的action，每个action一种方法（但action太多）
+2、actionname ！methodname的动态方法调用（通过直接在url中附加“！方法名“，method属性省略，需要打开动态匹配方法。有安全隐患，不用）
+3、通配符*调用（也是一种动态方法）
+1、打开动态匹配方法（配置属性）
+<constant  name=“struts.enable.DynamicMethodInvoction"  value="true"></constant>
+2、配置action    actionname_* 会自动匹配action（超链接）提交的url   {1}代表获的第一个*中的字符串，作为此时该action要调用的方法名
+<action name="actionname_*" class="" method="{1}">
+
+设置允许匹配的方法：
+<allowed-methods>允许的方法名，方法2
+允许使用正则表达式 如：<allowed-methods >regex:*</allowed-methods>  regex：.*表示用正则表达式*筛选，即允许全部方法
+
+3、在jsp页面跳转action时，在url后面接上_方法名
+ action=“actionname_execute”
+
+这样可以减少action配置个数，增加每个配置的action的利用率
+
+struts的所有标签是由一定顺序的，同意标签下的子标签顺序不正确会编译器报错。action标签下的顺序为：
+param|result|interceptor-ref|exception-mapping)*,allowed-methods
+因此allowed-methods一定要在最后面
+package标签下的子标签顺序：
+result-types?,interceptors?,default-interceptor-
+
+?ref?,default-action-ref?,default-class-ref?,global-results?,global-exception-mappings?,action*)
+按照前后顺序，action的配置在最后面
+
+result-type的常见属性值：
+chain（用于Action的链式处理）   
+diapatcher（转发）
+freemarker（用于freemarker集成）
+httpheader（用于控制特殊的HTTP行为）
+redirect（重定向）
+redirectAction（重定向到另外的action）<param name="actionname">otheraction</param>；<param name="namespace">/namespacename</param>
+stream（返回一个流）
+plainText（显示特定页面的原始内容）
+
+
+
+
+---------------------------------->struts拦截器(类似于过滤器，在调用action方法（action请求）前后进行逻辑代码处理，类似于aop（面向切面编程）)
+编写拦截器类的方式有三种：
+1、实现interceptor（拦截器）接口，重写其中的intercept方法，其中提供一个invocation（调用器）参数，可获得action的上下文context对象
+2、继承AbstracInterceptor类（interceptor接口的实现类，空重写了into、destroy方法，因此继承之后只能重写interceptor方法），重写interceptor方法
+3、继承MethodFilterInterceptor类，重写deIntercept方法（当该拦截器在struts.xml中配置引用时，会提供拦截器的属性标签参数（<param name="参数名">），有两种：excludeMethods（要排除的方法）；includeMethods（要拦截的方法） 
+ <param name="includeMethods">loging,log</param></interceptor-ref>      只能写在单个拦截器的引用标签的属性中
+
+
+**************前两个方法可以针对不同的action编辑拦截器，但有时拦截器需要对action某个方法进行拦截，因此需要用第三个方法（struts框架默认拦截器栈已经设置好了，因此不能使用拦截器属性标签）
+**************  拦截器类的编写（拦截器在action执行前后都会运行，因此分为前后两组逻辑代码）：
+action执行前的逻辑代码
+String result=invocation.invoke();     当该方法执行时，执行给下个拦截器，若没有则执行action（若只需要编写拦截action执行前的代码，则直接返回该方法结果  return invocation.invoke（））
+action执行后的逻辑代码                    当action执行后，回到最后一个执行的拦截器，执行该段代码
+return result;                                    返回invoke方法的结果时，结束拦截器，执行下一个拦截器
+    
+拦截器的使用：
+1、编写拦截器
+2、在struts.xml中配置拦截器（让struts框架知道有这个拦截器）、并将配置的拦截器设置为默认该包的拦截器（让这个包中的所有action运行这个拦截器）
+当我们改变默认拦截器设置时，包所继承的默认拦截器设置就会失效，此时由于struts框架需要使用自己默认配置好的拦截器栈，因此需要先将自己配置的拦截器和默认拦截器栈一起作为一个新的拦截器栈，然后将其设置为该包的默认引用拦截器栈
+	<!-- 声明拦截器（拦截器、拦截器栈） -->
+	<interceptors> 
+                 声明自定义拦截器
+	<interceptor name="loginginterceptor" class="aom.xx.web.interceptor.LogingInterceptor"></interceptor>
+                 声明自定义拦截器栈
+	<interceptor-stack name="mystack">
+                 调用struts框架默认拦截器栈（由于拦截器执行有顺序，默认拦截器（defaultStack）为struts框架提供了许多功能，如表单参数，文件上传，异常处理，因此这些拦截器应该先执行，定义就写在前面）
+                <interceptor-ref name="defaultStack"></interceptor-ref>
+                 调用已经声明的自定义拦截器
+	<interceptor-ref name="loginginterceptor"></interceptor-ref>
+	
+	</interceptor-stack>
+	<interceptor name="heinterceptor" class="aom.xx.web.interceptor.heinerceptor"></interceptor>
+	</interceptors>
+（当需要对单个action添加自己的拦截器时，只需要配置好的拦截器添加到action标签拦截器引用中）
+<interceptor-ref name="heinterceptor"></interceptor-ref>  在action配置中，引用已经声明的拦截器或栈
+
+****************当在单个action中添加拦截器时，该action就不会执行包的全局默认拦截器
+
+*****************拦截器类不要定义类的属性，进行调用，因为拦截器可以被所有action共用，不安全。
+
+struts2自带默认拦截器常用：
+alais（在请求之间转换名字不同的相似参数）
+chain（将所有属性从前一个action复制到当前action，一般和resultType=‘chain’一起使用）
+checkbox（添加自动的复选框处理代码）
+cookie（基于cookie的键值对设置action的属性）
+ConversionError(将类型转换错误从ActionContext中取出，并添加到Action的字段错误中)
+creatSession（自动创建HttpSession，对于需要Session才能正常工作的拦截器有用）
+debugging（struts.devMode属性设置为true时才能激活）
+execAndWait(为需要长时间执行的action提供等待信息，并防止超时，此拦截器必须是action的最后一个拦截器)
+exception（提供了异常处理的核心功能）
+fileUpload（用于对文件上传提供支持）
+i18n（提供国际化的支持）
+logger（记录一个action执行的开始和结束）
+Prepare（如果Action现实了Prepare接口，拦截器将调用prepare方法，在execute之前做一些事情）
+
+还有一种特殊的拦截器，存在于action执行后返回result结果和result匹配jsp直接，比如修改本来要返回的页面（使用场景少，不多见）
+通过实现PreResultListener接口，重写一个方法void beforResult（ActionInvocation，resultCode）
+
+
+
+--------------------------------->struts2的文件上传和下载
+需要使用struts2的commons-fileupload组件（默认在struts2的核心包的依赖中，通过maven下载struts2核心包时自动下载）
+
+struts实现文件的上传和下载：
+通过FileUploadInterceptor拦截器实现（是struts框架的默认拦截器，不需要编写）
+文件上传：
+1、首先在action类中定义文件对象属性
+private File myfile；
+当需要变量来保存文件信息时可以定义
+private String myfileFileName      文件名
+private String myfileContentType  文件内容类型
+2、添加get、set方法，用于属性的数据传递
+3、编写action的方法（用于文件保存）
+获的application服务器对象（它是servletcontext的实现类,通过request对象的getServletcontext方法实例化）
+	ServletContext application=request.getServletContext();
+通过application获的web根下保存上传文件目录的绝对路径（通过相对路径获的绝对路径）
+	String realpath=application.getRealPath("/fileups");
+创建文件字节输入、输出流
+	FileInputStream fis=null;
+	FileOutputStream fos=null;	
+读取文件放到输入流中
+fis=new FileInputStream(myfiles[i]);
+通过绝对路径创建一个空文件对象（即要上传的文件）
+File file=new File(realpath+"//"+myfileFileName);
+确定文件上传所保存在服务器的文件,并设置输出流指向该文件
+fos=new FileOutputStream(file);
+有一个工具，可以直接进行输入流与输出流的数据传递，这样不需要循环遍历字节数组来完成数据传递
+IOUtils.copy(fis,fos);
+4、修改提交表单设置
+添加文件提交input标签，name与文件对象属性名一致，表单属性添加enctype="multipart/form-data"（用于文件的提交）
+
+***************当多个文件上传时，多个input标签的name一样，文件对象改为文件数组，文件名、文件类型也改为字符串数组
+通过if循环创建多个文件，并将数据复制到这个文件中
+
+
+文件下载：
+1、编写文件下载的action类
+一、定义inputPath属性，并添加set方法，来接收要下载文件的地址
+private String inputPath;
+//  set方法可以在action中接收jsp传来的文件地址（或者在action配置的param标签中配置文件地址）
+	public void setInputPath(String inputPath) {
+		this.inputPath = inputPath;
+	}
+
+
+二、定义一个返回文件输入流的方法，用于配置stream类型result标签的InputName属性值
+	public InputStream getInputStream() {
+//		通过servletactioncontext对象获的应用（servletcontext即application）对象
+//		在通过application对象的getResirceAsStream方法获的文件输入流，即通过文件路径，创建输入流
+		return ServletActionContext.getServletContext().getResourceAsStream(inputPath);
+	}
+
+三、该action直接继承ActionSupport类，该类实现了action的execute方法，减少其方法的代码编写（execute方法为一个空方法，返回的字符串为success，也可以自己写方法）
+2、配置action
+ <action name="down" class="com.xx.web.action.DownAction">
+	  <!-- 配置action中的inputPath属性 -->
+	     <param name="inputPath">/fileups/maven.txt</param>
+           <result name="success" type="stream">
+           <!--设置文件的内容类型  -->
+           <param name="contentType">text/plain</param>
+           <!--指定action中获的文件输入流的方法，属性name为inputName，方法为方法名去掉get，首字母小写 -->
+           <param name="inputName">inputStream</param> 
+           //文件下载的处理方式，包括内联(inline)和附件(attachment)两种方式，附件方式会弹出文件保存对话框，内联方式是浏览器会尝试直接显示文件（前一个值默认为inline，不用添加，后一个值为下载后的文件名）
+           <param name="contentDisposition">attachment;filename="jejje.jsp"</param>
+          </result>	  
+
+
+
+
+struts2数据验证：
+我们整个web应用中，空用户名、空密码的情况不会引起太大的问题。但如果数据需要保存到数据库，或者需要根据用户输入的用户名、密码查询数据，这些空输入可能引起异常。
+为了避免用户的输入引起底层异常，通常我们会在进行业务逻辑操作之前，先执行基本的数据校验。
+1、创建处理数据的action类，其继承actionsupport类，它实现了validateable接口中的validate方法，其方法可以在action的执行方法前通过validation（验证器）拦截器进行数据验证
+在action类中只需要创建数据属性，并添加get、set方法。继承的actionsupport类也提供了execute方法（返回值为success）
+当验证通过时，将返回action类执行其execute方法，若验证有误，则返回值为input
+2、配置action，添加两个result，name为success时，验证成功；name为input时，验证失败
+3、在action类的同包下，创建其验证器的配置文件，文件名为 action类名-validation.xml
+创建一个新的xml文件，将xml文档声明复制到新建xml中（为自定义xml文件提供标签提示）
+<!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.3//EN" 
+"http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+****validator的dtd版本选择struts-core依赖包中最高的
+
+<validators>
+也可以自定义配置器（即自定义过滤器，需要通过struts标签库中的<s:filelderror>获的需要验证的数据）
+<field name="ename">
+验证类型为不能为空（type的类型可以通过查找struts-core依赖包中的avlidator.validators包下的default.xml（验证器默认配置文件），来获的struts框架内置所有验证器类型）
+    <field-validator type="requiredstring">    
+对数据验证前的处理：开启去除前后空格
+    <param name="trim">true</param>
+失败返回的错误信息
+    <message>username shuold</message>
+    </field-validator>
+</field>
+</validators>
+
+
+----------------------在struts中使用AJAX（通过json对象传递数据）
+1、首先struts使用ajax需要依赖ajax插件（struts2 json plugin），通过maven添加依赖（所有struts2插件版本应与struts2的版本对应）
+2、在struts.xml中继承json插件的配置文件包json-default，因为该包已经继承了struts默认配置文件包struts-default，因此直接继承该包就可以了
+3、编写处理数据的action类：
+创建需要传递的数据对象属性，并提供get、set方法
+编写处理数据的方法，通过属性获的数据，或者自己赋值属性来添加数据，最后返回一个字符串来匹配result
+4、配置action：
+需要修改action中result的返回类型type=“json”，这样struts就会自动将所有的对象数据序列化，然后转化为json对象以变量名data保存
+一般action中的属性不一定需要全部传递到jsp页面中，因此result标签添加param属性标签来确定需要序列化的属性（只有序列化的属性才能转换为json对象）
+<param name="root">list</param> 需要的就添加其属性名
+
+5、在webapp根目录中添加js插件：jquery，来使用其ajax的方法，获得action中以保存的data变量
+通过$.get("actionname",funtion(data)){}  将在action中返回的保存json对象的变量data传回到jsp
+之后再回调函数中编写对数据处理的逻辑代码
+jquery提供get和post两个ajax的方法，post用于提交数据给服务器处理，并返回数据为josn对象的data变量；get只用于请求获得服务器数据
+
+******************struts框架的ajax方法，就简化了从服务器中获得数据的代码，直接将要提交的数据交个struts框架，并设置其返回类型为json数据对象，之后再通过jquery的ajax的get方法获的其数据
+
+
+
+******************可以发现很多时候action的编译都可以继承actionsupport类，actionsupport是一个工具类，它已经实现了action类，此外还实现了validateable（验证器）接口，提供可以重写的validate（）方法，用于执行验证器。并且提供getText方法，可以在资源文件中提取国际化提示信息。
+
+******************struts2框架提供struts标签库，一般不用
+******************struts2框架的ognl表达式，OGNL ( Object Graph Navigation Language )，对象图导航语言。这是一种强大的表达式语言，通过它可以非常方便的来操作对象属性。 
+在 Struts2 中，OGNL 需要和 Struts2 标签库配套来使用。
+
+************************在struts.xml配置时，不能对没有该action类的进行action配置，这样上传服务器时，请求会无法执行（服务器无法正常运行）
+************************在action类中属性的get、set方法中的大小写一定要对（最好通过快捷键进行快速编写）
+
+************************http协议采用的是请求/响应模型；客户端向服务器发送一个请求，请求头包含请求的方法、URI、协议版本、以及包含请求修饰符、客户 信息和内容的类似于MIME（ 多用途互联网邮件扩展，用于设定消息的内容类型的一种协议）的消息结构。服务器以一个状态行作为响应，相应的内容包括消息协议的版本，成功或者错误编码加上包含服务器信息、实体原信息以 及可能的实体内容。
+通常HTTP消息由一个起始行（http://），一个或者多个头域，一个只是头域结束的空行和可选的实体（消息体，即请求数据）组成。HTTP的头域包括通用头，请求头，响应头和实体头四个部分。每个头域由一个域名，冒号（:）和域值三部分组成。域名是大小写无关的，域 值前可以添加任何数量的空格符，头域可以被扩展为多行，在每行开始处，使用至少一个空格或制表符。
+在请求或响应的消息中都包含实体信息，而实体信息一般是由实体域头和实体（比如要传递的文件）组成，而实体域头就包含了实体的原信息
+Allow、Content- Base、Content-Encoding、Content-Language、 Content-Length、Content-Location、Content-MD5、Content-Range、Content-Type、 Etag、Expires、Last-Modified、extension-header
+而其中的content-type就是决定了客户端如何返回消息的实体内容，原则上浏览器会根据Content-Type来决定如何显示返回的消息体内容。
+
+**********************域名（Domain）：是由一串用点分隔的名字组成的Internet上某一台计算机或计算机组的名称，用于在数据传输时标识计算机的电子方位（有时也指地理位置）（即该计算机的ip地址）
+**********************DNS，Domain Name System网域名称系统：是因特网的一项核心服务，它作为可以将域名和IP地址相互映射的一个分布式数据库，能够使人更方便的访问互联网，而不用去记住能够被机器直接读取的IP地址数串。连接不同地点的DNS，由于地域网速原因，其解析域名的时间也不一样（全球一共有13个DNS服务器，为加快对某些域名的解析，可以在本机的Hosts添加其域名的对应ip地址，即hosts文件为本地DNS配置文件）

@@ -1,0 +1,73 @@
+ Maven是一个项目管理的Java 工具，在JavaEE中，我们可以使用Maven方便地管理团队合作的项目，现在我们在学习JavaEE框架，使用Maven可以管理类库，有效方便地供团队中的其他人员使用。
+
+maven在eclipse中的配置：
+1、在Maven官网下载插件，解压并进行环境配置（将bin文件路径添加到系统环境变量PATH中）
+通过在cmd界面，输入mvn -version 来查看版本，确定是否安装成功
+2、设置maven的仓库位置，进入settings.xml配置文件中修改，将 ${user.home}/.m2/repository（默认仓库文件夹）修改为你自己选定的仓库位置。（注意不能是注释状态，即添加  <localRepository>C:\JAVA\maven-workspace</localRepository> xml代码）
+-------->仓库，即通过maven插件管理类库、存放文件的地方.。maven仓库分为本地仓库和远程仓库，在项目构建时，会先在本地寻找依赖，没有才回去远程仓库，settings中的仓库路径为本地仓库路径，类文件或插件都存放在其中。
+
+3、在eclipse中配置maven插件，在首选项中找到Maven-installations ，添加maven的文件目录，将其勾选为maven插件
+配置maven的setting（安装环境配置文件），在首选项中找到Maven-User Settings  选择添加maven文件目录中的settings.xml配置文件
+让eclipse中使用maven保存管理的文件，全部放在相应的文件夹中
+
+maven对插件的管理和安装：
+1、在maven中，任何一个依赖、插件或项目构建的输出，都可以称为构件
+2、maven的构件全部存放在仓库中，仓库分为本地仓库、远程仓库（远程仓库有分为：中央仓库、私服、其他公共仓库）
+3、仓库中每一个构件都有唯一的坐标，用于定义构件在仓库中的唯一路径，远程仓库如下：
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>5.0.3.RELEASE</version>
+</dependency>
+该代码即为远程仓库中插件的配置文档，可直接作为配置文档获的改插件，并配置到项目中
+
+4、在通过远程仓库获的依赖包后，会自动保存到本地仓库中，之后可以直接通过依赖寻找到
+
+
+maven对项目安装插件时，可用通过maven资源库网站，搜索插件的配置文档，添加到该项目的POM（项目对象模型）配置文件中。
+eclipse会通过配置文档自动将该插件下载保存到maven本地仓库中
+添加POM中的过程：
+打开pom.xml文档，在创建  <dependencies>（依赖性）标签，在其中把插件的依赖配置文档复制进去，直接下载并完成插件的配置
+
+maven资源库就是一个远程仓库，也是其中的之一：中央仓库
+中央仓库是默认的远程仓库，在maven安装时，就自带了远程仓库的配置
+中央仓库包含了绝大多数开源的java构件，一般的java项目依赖构件都可以在这里下载
+
+
+----------------------使用maven插件，即创建maven项目，设置该项目的坐标（用于发布到远程仓库）：
+Group id  分组id（类似于写自己的包名）
+Artifact ID  模块id（项目名）
+Version  版本   （自定义该项目的版本，SNAPSHOT指测试版）
+Packaging  打包后缀  （jar、war、pom）设置该项目打包后的文件类型
+jar代表普通java项目 开发时要引用的通用类，打成包便于存放管理，jar包一般放在lib目录下，引入项目中，导包调用
+war代表web项目  war包是Sun提出的一种web应用程序格式，与jar类似，是很多文件的压缩包。War包可以放在Tomcat下的webapps或者word目录下，随着tomcat服务器的启动，它可以自动被解压。
+pom用于集合MAVEN组件的时候使用
+
+---------------------maven项目的文件目录：
+1、web项目：
+Java Resources 文件夹 （存放java资源的）分为：  src/main/java(存放工程java源代码)    、src/main/resoutces (存放工程配置文件目录)   src/test  默认有测试项目文件夹（和工程代码目录一致）
+-------------->test项目文件夹由于保存写单元测试的代码，单元测试即对实际项目中的最小可测试单元进行检查和验证
+src文件夹 即java resources文件夹下的src  ，源代码目录
+target 输入目录 存放编译好的class文件、war包、jar包
+------------->web项目在src/main/默认生成一个webapp（网站的根目录即jsp中的webcontent）因此默认需要添加网站生成所需的基本文件(网站配置文件)WEB-INF/web.xml
+添加方式，右键项目--java EE  tools--generate Deployment Descriptor stub(生成部署配置根（web配置文件）)
+pom.xml文件 maven项目配置文件，用于添加插件依赖包，从而简单快速的配置、管理插件
+
+2、java项目：和web项目类型相同，不需要创建webapp中的配置文件及目录
+
+
+maven注意事项：
+
+------>当用maven在中央仓库下载依赖包时，可能会出现包下载错误，导致无法被解压。
+1、可通过错误提醒（Markers窗口）找到错误包所在位置，在系统盘中将包删除
+2、文件管理窗口--右键选择 maven---UPdate-project ，选择需要更新的maven项目，就会更新POM配置文件中的依赖包
+
+------>UPdtt-project的作用：
+1、检测项目配置文件，从而更新依赖，
+2、当Maven工程被做了一些改变后（主要是结构上的改变），
+必须让maven重新生成相关文件。否则eclipse不能引用变化后的文件。
+这时候需要运行“update project”来更新相对应的eclipse的.classpath文件，让eclipse知道这个包是buildpath。
+
+------>Maven  可以直接下载开源插件的源代码（选择项目，通过maven--downresources  下载整个项目的源码    down javadoc  源码的文档注释）
+------>Maven项目引入js插件时，直接将插件文件放入webapp目录下，通过js标签的src引入，不需要通过eclipse进行编译配置

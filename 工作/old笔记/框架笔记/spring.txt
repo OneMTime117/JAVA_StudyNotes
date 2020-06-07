@@ -1,0 +1,181 @@
+Spring boot 是 Spring 的一套快速配置脚手架，可以基于spring boot 快速开发单个微服务，
+Spring Cloud是一个基于Spring Boot实现的云应用开发工具；
+Spring boot专注于快速、方便集成的单个个体，Spring Cloud是关注全局的服务治理框架；
+spring boot使用了默认大于配置的理念，很多集成方案已经帮你选择好了，能不配置就不配置，Spring Cloud很大的一部分是基于Spring boot来实现。
+Spring boot可以离开Spring Cloud独立使用开发项目，但是Spring Cloud离不开Spring boot，属于依赖的关系。spring -> spring boot > spring cloud
+
+spring框架的两大功能：
+1、控制反转（Inversion of Control （IOC））（依赖注入Dependecy Injection （DI））：将类与类之间的代码耦合交个spring处理（），当你代码调用接口时，Spring IOC容器会通过配置文件自动初始化，调用所依赖的实现类进行接口的实例化
+控制反转IOC：就是讲类与类之间的依赖，通过spring容器进行管理，减少了代码之间的调用和耦合
+依赖注入DI：通过spring容器来类之间的依赖注入（实现）
+控制反转和依赖注入实现的面向接口的编程（更好的面向对象编程，减少了对象之间的代码耦合，使代码的可扩展性和易维护性大大增加）
+对于之前通过new一个实现类在实例化接口，现在可以直接从容器中获取该实现类。在之后想要修改该接口的实现类时，可以直接修改IOC容器中该组件所表示的实现类，这样就不会影响修改源代码，也不会重新编译（源代码编译成class文件）和打包（将整个项目的文件打包成jar文件）
+但是修改的实现类还是需要重新编译，并打包
+
+2、面向切面编程（AOP）
+将遍布逻辑功能代码的其他功能分离出来，形成可重用的组件。切面组件比如有：日志功能、事务管理、安全验证等系统服务，它们被称为横切关注点。
+它们分布在整个系统的各个组件中，单又不是业务核心，且有大量的代码重用。AOP则可以将它们模块化的分离出来，在配置文件中来调用插入这些组件。完全不会显示在业务代码中。
+这样可以使各个步骤之间有良好的隔离性，并且不会写入源代码
+Spring AOP其实是通过动态代理来实现业务逻辑的插入，是开发者在开发是不用关注其他与业务无关的点，通过代理的方式做到了插拔式操作
+
+
+spring框架:(IOC运用)
+在引用框架插件时，为了更好的管理文件，我们会用到Maven插件，方便管理文件。
+前提：安装Maven插件
+1、建立一个maven project 项目，选择原型（也可勾选）create  a simple project （skip  archetype selection），跳过原型选择，直接创建一个简单的项目
+2、配置spring插件，通过spring-context插件（spring 环境）的依赖配置文档，添加到项目的POM.xml配置文件中，并用<dependencies>包含
+<dependencies>依赖性标签，和插件的依赖配置文档结合使用，用于引用该项目中所有的依赖组件
+（通过用maven的依赖到jar包时，会自动下载与spring-context插件产生依赖的其他jar包，极大减少了我们导jar包的操作）
+
+3、通过eclipse市场（eclipse marketplace）下载spring tool suite（spring 集成开发工具）
+类似于java的jdk，spring提供了针对Spring开发的Spring Tool Suite集成开发工具，通过该工具，可以很轻易地生成一个spring的工程，比如web工程，工程里的配置文件都会自动为你生成，你再也不用操心配置文件的格式及各种配置文件了。
+
+4、通过sts（spring 集成开发工具）直接创建模板化的spring配置文件applicationContext.xml
+(也可通过手动创建spring配置文件XML文件)
+设置<beans>组件的配置文档，并将需要注入的类添加到beans（组件容器）中，以组件<bean>标签进行添加。
+<bean id ="person " class="springdemo1.chinese"></bean>
+id为改依赖组件的名字，用于该依赖的注入；class为该依赖组件类的限定名（qualified name），通过限定名来获的该类
+
+5、在接口实现时，通过IOC容器获的其实现类（面向接口）
+先创建springcontext对象，用配置文件名作为参数实例化
+ApplicationContext context=new ClassPathXmlApplicationContext("applicationContext.xml");
+实例化接口对象，通过context的getBean方法获的IOC容器组件，作为实现类（但获得的实现类是以Object类型，需要转换），有两种方式
+person person = (springdemo1.person) context.getBean("person");    通过强制转换‘【/’‘’
+person person =  context.getBean("person",person.class);   直接在获取组件时，转换其类型
+
+这样就能通过IOC容器来实现面向接口的编程，代码在优化或扩展功能时，不会影响修原来正常代码，只用在配置文件中修改相应接口的实现类组件名
+
+AOP的应用：
+前提：安装Maven插件、spring-context依赖包、sts插件
+1、继续添加AOP所需要的spring依赖包：spring-aspects依赖包（通过Maven获的配置、管理）
+2、在spring配置文件中，添加AOP模块的命名空间，并指定schema文档，完成AOP模块的配置
+3、在IOC容器中添加AOP切面组件、AOP节点、切面子节点、切入点、切入方式（前置、后置、、）
+AOP 组件 （将单独的横切关注点作为组件，进行AOP编程）
+<bean id="log" class="springdemo1.Logging"></bean>
+//AOP节点(进行一个横切关注点配置)
+<aop:config>
+//切面子节点（选择要切入的组件）   ref（参考）属性值为bean的id名（用于获的需要的组件）
+   <aop:aspect ref="log">
+//切入点（配置切入表达式和切入点的id）切入表达式用于设置切入到哪个代码的方法（主程序代码中的一个方法） ，执行切面代码
+   <aop:pointcut expression="" id=""/>
+//切入方式(选择不同方式切入的节点，设置要进行AOP组件的方法名 和 其切入点（通过切入点id）选择)
+   <aop:before method ="xie  " pointcut-ref=“pc”
+   </aop:aspect>
+</aop:config>
+
+AOP切入点表达式execution(* *.MethodName(..))   第一*代表返回值类型，第二个代表方法的限定命，MethodName要进行AOP的方法名， .. 该方法的所有参数列表
+通过这几个表达式参数，准确的让IOC容器找到要进行AOP的源代码，进行依赖注入。
+
+
+spring 配置文件中的命名空间（xml namespace  简称xmlns）：
+Spring的配置管理是利用XML方式进行配置，而XML里面就有命名空间这个概念，
+给一个命名空间以后，这个XML文件里面就可以用那个命名空间上下文里面的标签了，通过这些标签，来简化该命名空间对应Spring模块的配置（即通过命名空间配置spring模块）
+xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance
+这两个命名空间是必须有的，一个是beans的、另一个是XML的
+
+之后每个命名空间指定了对应的Schema文档（提供其模块功能代码）：
+用于其模块指定解析和校验XML定义文件的（xsd文件，通过命名空间得到的）位置，添加在xsi：schemaLocation=""中
+ xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd">
+默认有beans的schema文档配置 前一个为模块的命名空间，后一个为其模块的xsd文件
+
+
+
+Spring的容器 (Beans)  
+spring有两种类型的容器：BeanFactroy（工厂）和 ApplicationContext（应用上下文）
+一般通过上下文来作为容器（也是一个对象），该容器一共有三种获的Bean的方法
+ClassPathXmlApplicationContext      从JAVA项目类路径（src）下寻找XML配置文件，将应用上下文（容器对象）实例化
+FileSystemXmlApplicationContext    从系统文件路径（文件绝对路径）下寻找XML配置文件，将应用上下文（容器对象）实例化
+XmlWebApplicationContext            用于WEB应用，从WEB项目的src下寻找XML配置文件，将应用上下文（容器对象）实例化
+
+spring的组件（bean,java类）
+bean的生命周期  ： spring对Bean进行实例化-----spring将Bean的属性值注入到Bean的对象中-----将Bean交給容器管理-----随着容器的销毁而死亡
+
+spring框架的模块
+可以分为6个不同的功能模块
+数据访问：JDBC 、OXM、ORM、JMS、TRANSCATION
+Web和通讯：WEB、Servlet、Protlet、Struts
+AOP：AOP、ASPECTJ 
+instrumencation： instrumen、instrumenTomCat
+核心容器：Core、Beans、Context、Expression、CpntextSuppor
+测试：Test
+
+spring对Bean的装配：
+1、bean在容器中的声明（将java类作为bean放到spring容器中）：
+bean是spring的最基本元素、spring通过元素创建对象
+id属性是bean在容器中的标识
+bean在spring配置文件中声明时，都默认是单例的，一个bean只有一个java类（对象），通过容器创建多个相同对象时，这些对象时同一个（指向一个内存空间）
+bean的作用域（bean能够使用的范围），通过Scope属性设置：
+singleton（单例，默认） prototype（每次调用都会创建一个实例） request（web项目中作用于当前请求）session（web项目中作用于当前会话）
+
+2、bean通过在容器中的声明，来注入Bean属性：
+1、通过构造器注入，需要在源码中写构造器（但有时类需要的属性个数会有变化，需要多个不同属性的构造器才能实现属性值的依赖注入）
+<constructor-arg name="name"  value=“yuanhaun"></constructor-arg>
+如果没有相应个数属性的构造方法、则代码会报错
+
+2、因此选择第二种方式：通过属性的get、set的方法注入
+先对属性添加get、set方法，在通过property标签来引用set的方法对属性注入
+<property name="name" value="yuanhuan"></property>
+
+--------->组件属性值注入（注入对象）
+ 通过这种方式我们可以实现对象的注入，在源代码中声明一个对象属性，通过依赖注入，在Bean装配时，将另一个对象组件注入到该对象属性中，实现类在另一个类的实例化
+<property name="logg”ref="log"></property>    此时由于需要用组件Bean作为属性值注入，因此用ref代替value 表示此为对象注入
+
+--------->集合组件属性注入（注入集合对象） 
+<property name="aihao">
+<list>
+       <value>1</value>
+      <value>2</value>
+      <value>3</value>
+</list></property>
+根据集合对象的不同，节点名也不一样:
+1、List集合节点名为<lsit>；
+2、set集合节点名为<set>（相同值取前面的，后面的不要）
+3、map键值集合，其特殊有两个值键key和值Value (相同键取第一个键和值)： 
+  <map> 
+ <entry key=“1”><value>abc</value></entry>
+</map>
+4、键值对集合文本 peops
+< props > 
+          < prop  key ="身高" > 165 </ prop > 
+          < prop  key ="体重" > 45kg </ prop > 
+          < prop  key ="学历" > 大学本科 </ prop > 
+</ props >
+peops创建：创建FILE文件 ，将其名后缀加上.properties
+键值对文本，编写为：key=“value”; #为注释
+
+*****对于编写注入的方法，对于第二种getset的注入方式，可以通过引用P标签的命名空间，用其中的注入代码方式编写（即只是改变了代码标签的书写，实质没有变化，不常用）
+
+
+spring最小化XML配置（简化spring中Bean的装配过程：将类放入容器、实例初始化、依赖注入）
+******************通过java的注解，来让spring自动检测到需要的类，并进行自动装配
+
+------------------------->自动检测（autodiscovery）：将指定类作为组件放到spring容器中
+1、在spring配置文件中添加context命名空间（需要用到context模块）
+2、确定需要扫描检测的组件所在文件夹（会扫描该文件夹下的所有文件和子类文件）
+<context:component-scan base-package=" 需要放入容器中的类的文件地址，地址2"></cpmtext:component-scan>(默认在项目的src目录下扫描)
+3、打开java注释的配置（让spring能识别java注解）
+<context：annotation-config></context：annotation-config>
+4、在指定类的声明上面添加java注解代码
+@Component（“放到容器中作为Bean的id”）（不写默认id默认该类名首字母小写，一般都不写直接用类名做ID）
+
+java注解组件类的写法：
+1、@Component（标识该类为spring组件）注解一般的类
+2、@Repository（标识该类为数据仓库） 用于注解DAO层的类
+3、@Service（标识该类为服务组件） 用于注释Service层的类
+4、@Controller（标识该类为MVC-controller）用于注释spring MVC框架的控制器类
+注解是为了将该类放到spring的容器中
+
+
+---------------------------->自动装配（autowiring）：  当类被自动检测放入容器后，实例化依赖注入属性值（此时通过注解，自动创建apptionContext对象，来获取beans容器中的对应组件，进行注入）
+1、简单值注入 ：在属性声明代码上面添加注释 @Value("简单属性值")
+spring容器会自动搜索该类中对应组件中，已经配置好的属性值（即完成在spring配置文件中，对类的属性值赋值）
+2、对象值注入：在对象属性声明上添加注释 @Autowired
+spring容器会自动搜索组件中是该对象属性类型的Bean，将其依赖注入（且相对于在spring配置文件注入，不需要给该对象属性添加set的方法，但获得时需要get方法）
+
+****当容器中有两个该类型的Bean时，会造成有两个相同Bean，系统不知道该用哪个Bean注入该对象属性，代码就会报错
+为解决该问题通过@Qualifier（“id”）,直接通过Bean的id来获取该注入的对象
+（通过注释自动检测放入到容器的Bean也会自动生成一个id，id即为该类名首字母小写如China类的Bean的id为china）
+
+****有时程序允许该属性值为NULL，如在使用属性值是添加NULL判断；为保证当容器中没有可注入该对象属性值的Bean时，代码不会报错。可为@Autowired添加属性值（required=false）默认为true

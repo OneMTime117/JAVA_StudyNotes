@@ -1,0 +1,284 @@
+ Hibernate框架：是一个优秀的ORM框架（ Object Relational Mapping 对象关系映射），解决数据库表数据和实体类对象之间的映射，减少对数据库处理的代码编写；且支持大多数主流数据库
+提供了数据关联、事物管理、缓存管理、延迟加载机制；当时hibernate框架的底层还是编写数据库的sql语句来进行操作，但是用户的代码会简单许多。
+
+Hibernate的优/缺点
+优点：
+
+1.不需要编写的SQL语句(不需要编辑JDBC)，只需要操作相应的对象就可以了，就可以能够存储、更新、删除、加载对象，可以提高生产效
+
+
+2.使用Hibernate，移植性好(只要使用Hibernate标准开发，更换数据库时，只需要配置相应的配置文件就可以了，不需要做其它任务的操作)
+
+
+3.Hibernate实现了透明持久化。当保存一个对象时，这个对象不需要继承Hibernate中的任何类、实现任何接口，只是个纯粹的单纯对象—称为POJO对象(最纯粹的对象—这个对象没有继承第三方框架的任何类和实现它的任何接口)
+
+
+4.Hibernate是一个没有侵入性的框架，没有侵入性的框架我们一般称为轻量级框架
+
+
+5.Hibernate代码测试方便
+
+
+6.有更好的二级缓存机制，可以使用第三方缓存
+
+
+ 缺点
+
+：
+1.使用数据库特性的语句，将很难调优 
+
+2.对大批量数据更新存在问题 
+
+3.系统中存在大量的攻击查询功能 
+
+4.缺点就是学习门槛不低，要精通门槛更高，而且怎么设计O/R映射，在性能和对象模型之间如何权衡取得平衡，以及怎样用好Hibernate方面需要你的经验和能力都很强才行。
+
+
+hibernate框架创建：
+1、在eclipse中添加hibernate开发工具包（通过下载eclipse对应版本的Jboss Tool插件包，安装时只选择需要用到的hibernate开发工具包（hibernate tools包和maven hibernate configurator包，用于maven中调用hibernate开发工具包插件），该工具包是为了在使用hibernate插件时，快速创建配置文件（通用配置已经配置好，和spring开发工具包sts一样，简化hibernate插件的配置与使用）
+2、在创建maven项目，并添加hibernate-core依赖包、和连接数据库mysql的依赖包：MySQL Connector / J（根据本机安装的mysql版本选择相应的依赖包版本如：安装5.6则使用5.1系列版本）
+3、打开hibernate视图（hibernate开发工具包提供），来通过hibernate框架设置java项目与数据库的连接：
+选择hibernate核心包对应版本
+选择需要连接数据库的java项目
+新建一个数据库连接：
+选择连接数据库的类型（如mysql），为该数据库连接添加一个name，设置其连接属性：
+新建一个drivers（引擎），选择需要创建的对应的mysql版本的引擎版本（修改该引擎名，不要有空格），添加jar包路径（删除默认的包（是一个无效包））：即MySQL Connector依赖包
+之后设置需要连接的数据库名、url、username、password（即创建数据库连接对象的基本属性）
+选择创建propertyfile或者configurationfile，一般创建configurationfile文件，即hibernate.cfg.xml配置文件，保存着resources目录中
+3、创建hibernate.cfg.xml配置文件，设置属性：点击get values from vonnection ，可以从derivers配置中获取部分属性参数，之后再选择数据库方言版本（database dialect），与mysql对应（5.6选择msyql5（InnoDB））
+4、创建数据库表对应的实体（pojo），并生成创建实体与数据库表映射的配置文件 ：表名.hbm.xml
+点击run（带有hibernate）的下拉选项hibernate code generation configurations（自动生成hibernate的配置代码，即实体与实体的映射配置文件）；
+选择生成的实体文件目录---》勾选reverse engineer from jdbc connection（开启jdbc连接的反向工程），通过对msyql的连接获的的数据来创建实体与实体的映射配置文件；
+设置保存实体文件（pojo）、实体映射配置文件（hbm.xml）的；创建并设置实体映射配置文件（hbm.xml）的配置文件（hibernate.reveng.xml、逆向工程配置文件），选择该文件存放在resources目录下，next--》通过刷新获的连接的数据库中所有表，选中通过include添加到该工程所需要操作的文件列表中
+完成后，在exporters页面中选择需要生成的文件（domain code 实体文件、Hibernate XML Mappings 实体映射配置文件、实体的DAO方法文件、、）
+*********方便文件管理，一般配置文件都保存着resources中，因此可以在resources目录下创建一个mappers文件夹，将实体映射文件全部保存在其中
+5、通过在hibernate.cfg.xml配置文件中添加mapping节点，来添加实体映射配置文件设置，完成实体对象与数据库表的映射
+<mapping resource="mappers/Account.hbm.xml" /> （值为实体映射配置文件在resource目录下的相对路径）
+resource的值为“calsspath：resource目录下实体映射配置文件的路径“；且每一个实体配置文件对应一个mapping节点
+*******************为了消除hibernate框架修改数据库数据时，中文乱码，应在hibernate配置文件jdbc的url中添加编码格式设置（?useUnicode=true&amp;characterEncoding=utf-8）
+ <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/hibernatedemo?useUnicode=true&amp;characterEncoding=utf-8
+******************** <property name=“hibernate.show_sql“>属性（不是必须要写），默认为false，当属性值为true时，程序执行数据库操作时，会自动打印执行的sql语句 
+
+hibernate框架使用：
+通过maven的测试模块进行代码测试：
+1、添加测试插件Junit，添加到maven的依赖库中
+2、在maven的tset模块中创建java类
+创建tset类中所需要的一些对象，用于test方法调用
+//     创建session工厂对象
+private SessionFactory factory;
+//     创建session对象
+private Session session;
+
+测试模块class一共有三种方法（方法名是自定义的，没有限制）；
+1、test执行前的方法通过@Before 注释
+public void init(){
+//	创建配置文件对象（此时是一个空的配置文件）
+	Configuration configuration = new Configuration();
+//	通过configure方法，自动获得hibernate项目中的.cfg.xml配置文件
+	configuration.configure();
+//	创建注册服务对象(通过配置文件中的属性进行实例化)
+	ServiceRegistry sr = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+//	创建session工厂（由于sessionfactory和session对象在之后方法都会有到，因此作为属性进行创建）通过注册服务对象进行实例化
+	factory=configuration.buildSessionFactory(sr);
+//	创建session对象（由于hibernate访问数据库的数据需要多次使用，因此需要一个会话对象进行保存，该对象是通过session工厂创建打开的）
+	session=factory.openSession();
+}
+
+2、test执行之后的方法@After 注释
+//test代码执行后关闭对象资源
+public  void destory(){
+//	只有factory、session对象是使用后一直打开的，需要关闭
+	session.close();
+	factory.close();
+
+3、test方法 @Test  //test代码执行的方法（由于test代码测试，是最小的单元执行模块，即只执行该段代码，类似于jvm，没有返回值因此都用viod）
+数据库处理基础为增删改查：
+------------------------------>查找数据
+public void selsectTest(){
+//	通过id（数据表中的主键）取一组数据对象
+	Account act = (Account) session.get(Account.class, 1);
+	System.out.println(act);
+}
+
+------------------------------>修改数据
+public void UpdateTest(){
+//	获取一组数据
+	Account act = (Account) session.get(Account.class, 2);
+//	创建事务对象（增删改都需要用事务来处理，查不需要），通过session的开始事务方法实例化
+	Transaction transaction=session.beginTransaction();
+//	修改获得的数据
+	act.setName("你好");
+//	将修改后的数据上传到session中，替换掉原来的数据
+	session.update(act);
+//	提交事务
+	transaction.commit();
+}
+
+------------------------------>增加数据
+public void insertTest(){
+//	创建一个空的数据对象
+	Account act = new Account();
+//	对该对象中的属性赋值
+	act.setId(4);
+	act.setName("hehe");
+	act.setPassw("1234");
+//	创建事务
+	Transaction transaction=session.beginTransaction();
+//	将数据保存到session中
+	session.save(act);
+	transaction.commit();
+}
+
+------------------------------>删除数据
+public void deleteTest(){
+	Account act = (Account) session.get(Account.class, 1);
+	Transaction transaction=session.beginTransaction();
+	session.delete(act);
+	transaction.commit();
+}
+
+
+hibernate框架使用的三大类：
+1、configuration类(配置类)，从配置文件中获的配置文件的属性，进行数据库连接
+所有的ORM框架（ Object Relational Mapping 对象关系映射）都需要这配置属性，其中必须的有：
+数据库URL、数据库JDBC驱动类、数据库用户名、数据库用户密码、数据库方言（用于hibernate底层对sql语句的编写，不同数据库的sql语句不同，则方言也就不同）
+***********通过该类对配置文件的读取，来减少对项目本身java代码的修改，这样只用修改配置文件就能改变configuration类的属性，从而减少修改代码所带来不好（需要重新编译，重新打包）
+
+2、sessionFactroy类，用于创建session实例
+会加载很多内容，性能消耗很大，其线程是安全的，是单例模式：通过自身实例化创建自己，且确保只有一个对象被创建
+
+3、session类，用于实现hibernate对数据访问的持久化，session类线程不是安全的，可以多线程创建多个对象，对数据访问
+session类负责提供数据访问的API（应用程序编程接口），就是为hibernate对数据的访问（增删改查）提供了多个封装的方法
+1、增加：save方法、persist方法（它会比save更快的保存到数据库中，由于hibernate的数据库访问提供了缓存管理，save就是先将要保存的数据放在内存中，之后再写入数据库；而persist会直接保存到数据库，所以更快；）
+缓存管理功能：减少了hibernate访问数据库连接的次数，将要保存的数据先放在内存中，当缓存满了或不需要进行修改后，一并连接数据库保存数据
+
+2、删除：delete
+
+3、修改：update、merge、SaveOrUpdate（在修改前都会先查找数据库数据）
+update：若存在数据时，update会直接同步到数据库、不存在则直接报错
+merge:若数据库存在数据，先将缓存中的数据修改，然后查找数据库中的数据，进行对比，不一样则同步数据库中的数据，一样则不同步（在修改时和之前没变的情况下，节省sql语句的执行）
+若数据库不存在该组数据，则将改组数据添加进去（该方法可以保证程序不出错、但不能保证数据处理正确）
+saveorupdate：当数据库存在该数据，则执行update方法；没有就执行merge方法（将数据添加到数据库）
+
+4、查询：load，get
+延迟加载机制：查询数据库，是在你查询的数据使用时才去查询数据库，这样可以减少数据库对象创建的而load就是使用延迟加载机制
+get则是直接访问数据库，查询到数据
+
+5、flush方法：将缓存中的数据同步到数据库，即session执行sql语句，将数据同步到jdbc连接中，默认执行时间点为：
+1、某些数据查询（get查询）执行前
+2、在提交事务commit（）的时候（增删改方法都需要调用事务执行）
+3、调用session.flush()的时候
+flush方法执行时，所有sql语句执行顺序（同步增删改数据顺序：从前到后）：
+1、执行插入，按照save方法代码的顺序
+2、执行更新
+3、执行删除
+
+
+hibernate框架映射配置文件说明：
+<hibernate-mapping>
+<calss name=“实体类的限定名” table=“表名” catalog=“数据库名”optomistic-lock="默认为version">
+ <!-- 主键字段映射 -->
+        <id name="id" type="int">id的name为实体中的变量名（通过hibernate框架逆向生成的实体变量名即为字段名）
+            <column name="id" /> column中的name为数据库表中的字段名
+            <generator class="assigned" /> 用于设置该字段为数据库的主键（通过id节点来配置主键）
+        </id>
+<!-- 非主键字段映射 -->
+        <property name="account" type="string">
+            <column name="account" />
+
+********************************外键关系映射，一定是映射为另一个表的主键字段（多对一），或者自身为主键（一对多）
+<!--     多对一外键映射（该字段在表中有多组数据相同，且指向另一表中唯一一组数据）
+                          此时将该表的用户名字段指向另一个表（实体中的account对象属性） -->
+        <many-to-one name="car_account" class="com.xx.model.entity.Account"  class为对应的表的class实体类的限定名 >
+        <column name="account_id"></column>
+        </many-to-one>         
+<!--    一对多外键映射 该字段对应另一个表中的多组数据
+        set中的name为该字段对应另一个表中的多组数据为集合的对象属性名；table为对应的数据库表的表名
+        <set name="" table="">
+        column为该字段名
+        <key column=""></key>
+        class为对应的表的class实体类的限定名
+        <one-to-many class=""/>
+        </set> 
+</hibernate-mapping>
+
+
+
+
+Hibernate框架中实体对象状态：
+分为三种状态：Transient（临时）、Persistent（持久）、Detached（托管）
+Transient（临时）：有new操作符创建，尚未与session对象产生关联的实体对象；使用session的方法（增删改查）可以将其变为持久对象
+Persistent（持久）： 在数据库中有对应数据，且有持久化标识（实体对象中的主键（id）被赋值，不为null），在存在于相关联的session中，hibernate发现该实体对象改动时，调用flush时，就会将该实体对象数据同步到数据库中
+Detached（托管）：当一个持久化实体对象相关联的session被关闭时，此对象就变为托管对象，期间可以对该对象数据进行修改，但不会调用flush同步数据库，只有当再次关联session，变为持久化对象，其托管期间的修改，才会被同步到数据库
+
+hibernate框架实现数据库中的表与表关联：
+通过关系映射来实现，分为：一对一、一对多、多对一、多对多；但一般常用一对多和多对一
+1、一对一可以当做成一对多（一对一的方式不利于表的数据扩展，不使用）
+2、多对多，是通过第三张表来创建其关系映射的，其实就是A表双向多对一，B表双向多对一，且A,B主键对应在第三张表的字段不同；两边都通过set集合来保存中间表数据对象，在通过中间表的双向映射获的另一表的数据（且需要由一方放弃关系维护）
+3、关系映射都分为单向和双向，当在数据库中确定表的外键后，用hibernate创建实体和实体映射配置文件时，默认生成双向的映射关系，这样就会产生死循环（即A表的外键查询B表数据，B表数据查询时，通过外键又去查询A表数据。。。。）
+因此常用的只有一对多和多对一的单向（因为一对多的双向就是多对一的双向）；
+一对多：当一个表中的字段对应另一个表的多组数据
+配置方式为（需要配置的表为字段所在的表）：
+set中的name为该字段对应另一个表中的多组数据为集合的对象属性名；table为对应的数据库表的表名；column为该字段名； class为对应的表的class实体类的限定名
+    <set name="" table="">
+        <key column=""></key>
+        <one-to-many class=""/>
+        </set> -->
+
+多对一：当一个表中的多组数据的一个字段多次相同，对应另一个表中的一组唯一数据
+配置方式为：
+name为字段对应另一个表的一组数据实体对象属性名；class为对应的表的class实体类的限定名；column为该字段名
+<many-to-one name="car_account" class="com.xx.model.entity.Account" >
+        <column name="account_id"></column>
+        </many-to-one> 
+
+******************************双向时，一定需要有一方放弃关系维护，这样才能不产生死循环，放弃关系维护需添加属性insert="true" ，一般有被选择方来放弃关系维护（当查询自己数据时，不会由于关系映射来查找外键对应的表数据）
+
+hibernate框架的高级查询：
+hibernate框架提供的方法只能进行一般的数据处理（增删改查），无法提供更复杂的查询或批量修改（删除），因此它提供了另一种HQL语句，它和sql语句相似，但是是面向对象编程
+***********************hibernate框架和Navicat Premium数据库可视化软件一样，提供一个查询功能，用于直接执行hql语句。在hibernate数据库连接窗口-----右键HQL设置
+1、一般语法结构为：from 实体对象名 where 属性名=属性值 and 属性名=属性值（ or 属性名=属性值） orderby  属性名 asc/desc(升序/降序）
+from语句查询到的对象，被session对象管理，可以继续使用session的方法执行数据处理，再同步数据库
+from语句不能实现多表查询，只能通过各表实体的映射来联系查询
+from只能查询一整个对象数据，因此不能使用聚合函数、group by …… having，但可以使用orderby、limit
+2、select语法也是一种查询方式（投影），但相对于from从句来说，获得的是一个对象数组，且其中的对象实体都不被session管理，不能改变同步到数据库，只是单纯的查询数据库中的表数据
+select从句和sql语法的多表查询类似，能进行子查询、连接查询、和聚合函数、分组查询
+**********select从句的写法和sql语句一样，只是数据库表名替换成实体对象名，字段名换成属性名
+3、HQL语法是通过hibernate的Query对象来实现hql语句转换为底层的sql语句，之后再数据库中执行：
+     String hql="from Account ";
+     通过session的createQuery方法来实例化Query对象
+     Query createQuery = session.createQuery(hql);
+     之后通过query对象的list方法来获的对象（对应表的实体对象）集合
+     List<Account> list = createQuery.list();
+之后通过循环遍历来获的集合中的对象
+4、HQL语句实现参数的传递，有两种方式。“：”使用变量名 和“？”用占位符
+一：“：”使用变量名方式为：String hql="from Account  where id=：id1";
+     Query createQuery = session.createQuery(hql);
+createQuery.setString(“id1”, "2");  :后的变量名，值
+二：“？”用占位符方式为：String hql="from Account  where id=？";
+     Query createQuery = session.createQuery(hql);
+createQuery.setString(0, "2");占位符的下标（从0开始），值
+*************************在JDBC中参数传递用占位符方式，下标从1开始
+**************************也可以通过setParameter来进行参数传递；String也可以传递int类型，但需要写成字符串，之后再自动转换（或者使用setIntter）
+**************************当参数是集合时，可以使用setParameterList（）方法来注入参数集合
+5、session也提供执行编写的sql语句的方法session.createSQLQuery()，这样可以直接编写sql语句来执行
+6、select语句的数据处理：
+String hql="select a.id,a.account,a.password from Account a order by a.id desc";
+Query createQuery = session.createQuery(hql);
+List<Object[]> list = createQuery.list();
+//	 循环遍历该集合
+	for (Object[] objects : list) {
+//	  循环遍历对象数组（每一个对象为一个字段名）	
+		for (Object object : objects) {
+			System.out.print(object);
+		}
+		System.out.println();
+	}
+*********************注意
+1、当只有一个字段时，list类型为该字段数据类型
+2、多个字段时，用object[] 对象数组类型，当然也可以自己构件一个这些字段的实体，方便对这些数据进行调用，在hql中需要添加该实体对象类名  new  类名（字段。。。）
+3、在select语句不能用select * 来代表选择数据表的所字段，必须一个一个写出来
+4、select语句在使用分组时，having子句中不能使用字段的别名
+5、select语句编写连接查询时，和sql语句不同，没有on后面的部分（即不用写表与表之间的匹配条件，而是通过配置文件中的字段映射，来进行匹配）
+两个连接的对象必须是对象和其属性对象，且两个对象建立了关系映射
+select c.cid,c.account,c.car,a.password from Car c  left  join c.account_id a

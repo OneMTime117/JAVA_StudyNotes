@@ -1,0 +1,318 @@
+Mybatis框架：和hibernate类似，也是一个ORM（对象关系映射）
+Mybatis和hibernate的区别：
+1. hibernate是全自动，而mybatis是半自动：
+hibernate完全可以通过对象关系模型实现对数据库的操作，拥有完整的JavaBean对象与数据库的映射结构来自动生成sql。而mybatis仅有基本的字段映射（且在不使用其他工具的情况下映射配置文件、实体、DAO层代码需要自己手动书写），对象数据以及对象实际关系仍然需要通过手写sql来实现和管理。
+2. hibernate数据库移植性远大于mybatis：
+hibernate通过它强大的映射结构和hql语言，大大降低了对象与数据库（oracle、MySQL等）的耦合性，而mybatis由于需要手写sql，因此与数据库的耦合性直接取决于程序员写sql的方法，如果sql不具通用性而用了很多某数据库特性的sql语句的话，移植性也会随之降低很多，成本很高。
+3. hibernate拥有完整的日志系统，mybatis则欠缺一些：
+hibernate日志系统非常健全，涉及广泛，包括：sql记录、关系异常、优化警告、缓存提示、脏数据警告等；而mybatis则除了基本记录功能外，功能薄弱很多。
+4. sql直接优化上，mybatis要比hibernate方便很多
+由于mybatis的sql都是写在xml里，因此优化sql比hibernate方便很多。而hibernate的sql很多都是自动生成的，无法直接维护sql；虽有hql，但功能还是不及sql强大，见到报表等变态需求时，hql也歇菜，也就是说hql是有局限的；hibernate虽然也支持原生sql，但开发模式上却与orm不同，需要转换思维，因此使用上不是非常方便。总之写sql的灵活度上hibernate不及mybatis。
+5.hibernate比mybatis更注重细节，mybatis开发更快，但也会导致项目bug多。
+总的来说：
+mybatis：小巧、方便、高效、简单、直接、半自动
+hibernate：强大、方便、高效、复杂、绕弯子、全自动
+
+因此相对于hibernate来说。mybatis的优缺点如下：
+优点：
+1. 易于上手和掌握。
+2. sql写在xml里，便于统一管理和优化。
+3. 解除sql与程序代码的耦合。
+4. 提供映射标签，支持对象与数据库的orm字段关系映射
+5. 提供对象关系映射标签，支持对象关系组建维护
+6. 提供xml标签，支持编写动态sql。
+缺点：
+1. sql工作量很大，尤其是字段多、关联表多时，更是如此。
+
+
+2. sql依赖于数据库，导致数据库移植性差。
+
+
+3. 由于xml里标签id必须唯一，导致DAO中方法不支持方法重载。
+
+
+4. 字段映射标签和对象关系映射标签仅仅是对映射关系的描述，具体实现仍然依赖于sql。（比如配置了一对多Collection标签，如果sql里没有join子表或查询子表的话，查询后返回的对象是不具备对象关系的，即Collection的对象为null）
+
+
+5. DAO层过于简单，对象组装的工作量较大。
+
+
+6. ?不支持级联更新、级联删除。
+
+
+7. 编写动态sql时,不方便调试，尤其逻辑复杂时。
+
+
+8?提供的写动态sql的xml标签功能简单（连struts都比不上），编写动态sql仍然受限，且可读性低。
+
+
+9. 若不查询主键字段，容易造成查询出的对象有“覆盖”现象。
+
+
+10. 参数的数据类型支持不完善。（如参数为Date类型时，容易报没有get、set方法，需在参数上加@param）
+
+11. 多参数时，使用不方便，功能不够强大。（目前支持的方法有map、对象、注解@param以及默认采用012索引位的方式）
+
+
+12. 缓存使用不当，容易产生脏数据。
+
+Mybatis框架创建：
+1、新建一个maven项目，导入Mybatis框架依赖包（Mybatis）
+2、创建mybatis配置文件，和struts2框架一样，在eclipse中没有开发工具包插件，因此需要自己创建xml配置文件，***只能取名叫做mybatis-config.xml,并添加其配置文件的文档声明
+<!DOCTYPE configuration
+ PUBLIC "-//mybtis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+3、创建实体、实体映射文件、dao层接口
+和hibernate不同的是，mybatis不提供开发工具包，不能快速生成这些文件，因此我们需要用到mybatis的一个生成工具
+该工具有两种用法：
+1、在外部使用该工具包生成文件
+2、在maven中使用该工具包：
+创建一个maven jar项目，在pom配置文件中添加数据库连接依赖包mysql-connector、mybatis生成工具包mybatis.generator(生成器)，并添加一个maven的bulid节点，进行一系列配置
+编写一个generatorConfig.xml文件，保证其文件路径和maven Bulid的配置的配置文件路径相同，并修改生成器配置文件中的一些配置（该文件在网上找）
+右键项目----执行runAs - mavenBulid，在执行命令中添加mybatis-generator:generate 语句，run。就会自动在项目中生成数据库表对应的文件
+之后将获得的文件移动到实际项目中
+
+
+4、mybatis配置文件编写:
+ <configuration>
+ <environments default="he">
+ <!-- 可以配置多个环境参数，默认选择其中的一个使用，通过id来调用 -->
+ <environment id="he">
+ <!-- 设置环境中的事务管理类型（使用JBDC进行事务管理） -->
+ <transactionManager type="JBDC"></transactionManager>
+ <!-- 设置数据库的数据源类型-->
+ <dataSource type="POOLED">
+  <!-- 设置数据源的四要素 -->
+ <property name="driver" value="com.mysql.jdbc.Driver"/>
+ <property name="url" value="jdbc:mysql://localhost:3306/hibernatedemo?characterEncoding=utf-8"/>
+ <property name="username" value="root"/>
+ <property name="password" value=""/> 
+ </dataSource>
+ </environment>
+ </environments>
+ 
+为实体映射配置文件，值为该文件的限定名
+ <mappers>
+ <mapper resource="mappers/AccountMapper.hbm.xml" /></mappers>
+ <mapper resource="mappers/CarMapper.hbm.xml" /></mappers>
+</mappers>
+ </configuration>
+
+
+Mybatis框架的使用：
+同样使用测试模块进行测试，导入Junit依赖包，编写一个测试类
+//   在resources中找到配置文件，并转化为一个数据流
+Reader reader = Resources.getResourceAsReader("mybatis-config.xml");配置文件的路径（直接在resources下）
+//创建session工厂
+SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+创建session
+SqlSession session=factory.openSession();
+在session通过配置文件中的映射节点信息，来创建一个需要获得的实体对象的处理接口（DAO层接口对象）
+相对于hibernate，maybatis不直接提供底层sql语句增删改查的方法，而是通过DAO层来提供
+AccountMapper  mapper = session.getMapper(AccountMapper.class);接口的类名
+该接口对象已经提供了对应实体表数据的基础增删改查的方法
+		Account account = mapper.selectByPrimaryKey(2);
+		System.out.println(account.getAccount());	
+之后再关闭session、reader(相对于hibernate，mybatis的session工厂不需要关闭，但多一个输入流关闭)
+		session.close();
+		reader.close();
+
+
+
+Mybatis实体映射配置文件
+1、mybatis和hibernate相比，没有直接提供处理数据的封装方法，也没有hql这种查询语法，而是直接通过在映射配置文件中编写sql语句，来处理数据。
+2、并且映射配置文件中的每个sql语句，都会对应一个该映射实体DAO层接口的一个方法，通过在java代码中调用这个方法，来使mybatis框架将这条sql语句在数据库中执行
+3、在需要进行多表查询时，mybatis是通过创建所有的查询字段的映射，来执行sql语句
+配置文件的映射分为：
+1、mapper根节点 ：
+其中namespace属性，属性值为接口的限定名
+表示了该实体映射配置文件指向哪一个实体的DAO层接口，该接口就可以提供该配置文件中的sql语句对应的方法 
+
+2、resultMap节点：
+这是映射数据库表字段的配置节点，属性有id（该映射的名字）、type（对应的实体限定名）
+其中的子节点有id（表示映射表的主键）、result（表示其他字段）；其中column为字段名，property为对应实体的属性名 jdbcType为在数据库中的数据类型
+在映射配置文件自动生成时，只有对应数据库表的实体属性映射（将查询到的表字段数据填充到对应实体属性中；将实体属性发生改变的同步到数据的对应字段中），但它还能在mapper根节点下，创建多个映射配置（即多个resultMap节点）
+配置resultMap前，为了保存查询的数据，还需要对映射的字段创建一个实体，将实体的属性与字段一一对应，然后在resultMap配置中建立映射关系（该字段映射会根据执行的sql语句涉及到的数据库表，来寻找要映射字段，***因此不需要管每个表的字段名字是否有重复，只有保证要查询的表之间的字段没有重复就可以）
+    <resultMap id="BaseResultMap1" type="com.xx.model.entity.Car_account">
+ 
+    <id column="cid" jdbcType="INTEGER" property="cid" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="car" jdbcType="VARCHAR" property="car" />
+    <result column="account_id" jdbcType="INTEGER" property="accountId" /> 以上字段为car表中的
+     <result column="password" jdbcType="VARCHAR" property="password" />   该字段为account表中的
+  </resultMap>
+其他表中的字段通过对应的sql语句可以实现多表查询，还有另一种方式（和hibernate一样，对另一张表的实体对象进行关系映射，但也是通过一个select节点提供的sql语句来进行映射配置）：
+resultMap中还提供association节点（多对一映射），collection节点（一对多）；一般只使用多对一：
+
+ <association property="accountObject" select="selectaccount" column="account_id"></association>
+创建一个select节点，sql语句为查询该另一表的全部数据，并以这张表的外键（对应原来表中的一个字段）为where条件参数
+resultType为该select查询的结果对应实体类型
+  <select id="selectaccount" resultType="com.xx.model.entity.Account" parameterType="java.lang.Integer">
+  SELECT * from account where id=#{id,jdbcType=INTEGER}
+  </select>
+当执行该resultMap中account_id字段的select查询时，会执行以该字段作为外键的映射节点（association节点）中的select语句，对应其sql语句，并以映射字段account_id的值作为参数执行，得到一个实体对象数据，从而实现在一个表中查另一个表的全部数据
+（但是这种方式会有一个弊端，当一次查询多条account_id字段数据时，会多次执行association中select对应的sql语句，大大增加了查询次数，本来只用查一次，现在要查n+1次）
+********但以上方式可以修改为之前的使用联合查询，在association节点中添加其对应表的所有字段映射，然后在执行多表连接查询的sql语句（相对于上面，只使用了一次查询，就将每一个account_id字段对应的car对象数据查出来，（之前是将需要的字段重新组合成一个实体，并创建其resultMap映射，这个也需要创建实体和resultMap映射，但是部分字段是以一个对象属性形式存在，配置时还需要对外键进行关系映射），在调用数据时，需要通过对象的get、set方法调用对应字段的属性
+    <association property="accountObject" select="selectaccount" column="account_id">
+        <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    </association>
+综上所述，这三种方法一般还是使用第一个（更加清晰、方便）：根据需要的字段创建一个新的实体和对应的resultMap，并编写与实体字段相关的sql语句
+
+3、select节点：
+用于编写sql语句，来映射对应实体DAO层接口中的方法，每写一个sql语句都可以在其接口中编写一个对应 返回值类型、参数类型的方法，之后在业务层java代码中进行调用，从而执行数据库的查询语句
+ <select id="myselect"  resultMap="BaseResultMap1"  parameterType="java.lang.Integer">  id对应接口方法的方法名；resultMap为对应映射字段节点ID；其映射节点对应一个实体类，就是对应接口方法的返回值类型（只有一组数据时，为该实体类型；多组数据时，为该实体类型的集合list）；parameterType为参数类型，对应接口方法的参数类型（方法参数名随意）
+  SELECT c.*,a.password from car c ,account a where c.account_id=a.id and c.account_id=#{account_id,jdbcType=INTEGER}   #{需要赋值的字段名，jdbcType=该字段在数据库中的类型}
+  </select>
+
+**********************resultMap和resultType都是为了设置查询语句执行获的结果保存到了实体位置：
+resultMap是通过字段映射来将数据保存到实体，
+而resultType其实也是一种resultMap，但他是通过对应的实体属性来自动生成一个resultMap（此时字段名和属性名一致），然后再通过字段映射来保存到实体；因此只有查询到的数据字段名与实体属性名一致时，才能使用resultType，否则会使实体中的属性名不同于字段名的属性赋值为NULL（一般自动生成的实体文件，字段有_时，对应属性名会不一样）
+
+**********************sql语句中的参数传递：
+是通过在映射配置文件编写的sql语句中，用#占位符进行参数传递，account=#{account1,jdbcType=VARCHAR}，并为该参数取一个名字，设置其字段在数据表中的类型
+****单个参数，使用parameterType=java.lang.Integer、java.lang.String,  来设置传递的参数类型：#占位符中的参数名没有强行要求，对参数传递没有影响
+****多个参数：
+方法一：通过对象传递参数，使用parameterType=对象类的限定名，该对象属性包含需要传递参数类型，并以该对象作为参数，mybatis框架会根据sql语句中的#后面的参数名来匹配对应参数对象中的属性名，将其属性值传递给sql语句进行执行；#占位符中的参数名对应了参数对象中的属性名，因此一定要与对应属性名一致
+
+方法二：通过Map键值对传递参数，设置参数类型和设置返回值的类型一样，也提供parameterMap属性，通过创建parameterMap节点，属性type=java.util.Map，通过parameter子节点创建多个需要设置参数类型（java.lang.Integer）的键值对，然后property的值与#占位符中的参数名一致
+<parameterMap id ="aaaa" type=java.util.Map >
+<parameter property=“aa” javaType=“java.lang.Integer”
+<parameter property=“bb” javaType=“java.lang.String”
+sql语句中  id=#{aa,jdbcType=INTEGER} and password=#{bb,jdbcType=VARCHAR}
+然后在Dao层接口中写对应的方法  Account myselect （Map<string,object>）
+在业务层调用其方法时，输入的参数map应该有两个键值对：aa：int类型数据、bb：string类型数据
+但这种方式设置东西太多，一般不使用
+
+方法三：通过@Param注解传递参数，通过注解直接将参数传递到sql的#占位符中，只需保证@Param注解的value属性值和#占位符中的参数名一致
+在映射配置文件中，不设置参数的类型，而是在Dao层接口方法编写时，用@Parm注释形参，并使其中的value值为对应#占位符中的参数名
+Account myselect2(@Param(value = "account1") String ss);
+该方式不用在sql语句映射配置时设置参数类型；在多个参数传递时，只需要在方法定义时，添加注释；不用以对象作为参数，减少在使用接口方法时，创建参数对象、参数对象属性赋值的过程
+
+4、sql节点：
+定义一些常用的sql语句块，给sql语句来快速代替编写，加快slq语句的编写速度，（一般在sql语句中不使用*，以使其他人对代码修改理解更加清晰）
+  <sql id="mysql">
+    cid, account, car, account_id
+  </sql>
+通过include标签在sql语句编写时引用
+ select <include refid="mysql" /> for car
+
+5、delete节点、insert节点、update节点：
+这些节点（增删改）和查询类似，一样也有参数传递、返回值类型设置、Dao层接口方法编写，但在调用方法执行sql语句时，和hibernate一样也需要提交事务，但不需要创建事务对象（在mybatis中Sqlsession对象被创建时，会自动创建一个事务，在执行增删改操作后，需要调用sqlsession中提交事务的方法，才能在将数据同步到数据库，不然数据库会在(SQLsession对象关闭)连接关闭时，进行回滚，之前执行的slq语句就失效）
+ CarMapper mapper = session.getMapper(CarMapper.class);
+       Car record =new Car();
+       record.setCid(4);
+       record.setCar("heheheh");
+//		该接口对象已经提供了对应实体表数据的基础增删改查的方法
+	   mapper.insert(record);
+	   session.commit();
+
+*************当一张表的主键时自动递增时，一般添加一组新数据时，不需要对对象的主键属性赋值。在这里mybatis和hibernate框架会有不同：
+hibernate中默认执行增删改操作，同步数据库是，会自动将数据库中的改组数据同步到对象中，因此能自动获取自动递增的主键属性值
+mybatis默认则不会重新查询数据库的改组数据，从而同步该对象属性。但在实际应用中常常需要返回添加的全部信息，而mabatis就会需要重新再次查询，增加了查询代码的编写
+所以mybatis需要在映射配置文件中insert节点，添加返回主键信息的设置：
+  <insert id="insert" parameterType="com.xx.model.entity.Car" useGe十大撒发的发士大夫·11
+neratedKeys="true" keyColumn="cid" keyProperty="cid">
+useGeneratedKeys="true"  开启主键字段的数据生成   keyColumn="cid" 主键的字段名  keyProperty="cid" 主键返回对应对象的属性名
+
+
+mybatis实现数据库查询分页：
+可以直接用SQL语句调用存储过程（分页函数）来实现分页
+1、在网上找到实现分页功能的mysql的存储过程代码，在mysql数据库中创建该存储过程（保存到函数中）；
+2、创建一个实体对象，属性为分页函数所需要的参数
+3、在对应Dao层接口创建执行方法，返回值为List<查询数据的实体对象>   ，参数为新创建的实体参数对象
+4、在映射配置文件中创建一个select节点，并添加statementType="CALLABLE"（默认为prepare）
+（在JDBC连接数据库中，执行sql语句之前，需要创建一个preparestatement，这里也是一样，用于设置mybatis框架执行sql语句时，创建哪种执行对象
+一共有三种statementType，1、statement，最原始的执行方式，不能进行#{}参数传递（不能进行预编译）；2、prepare，可以进行#{}参数传递{先对sql语句进行预编译}；3、用于执行调用存储参数的语句类型
+）
+5、编写SQL语句代码：调用已经在数据库中创建好的实现分页的存储过程，并将需要的参数全部用#占位符实现参数传递
+6、在业务代码中调用该sql语句对应的方法，并将已经注入好的参数对象放入，执行，获得分页产生的对象集合，
+sql语句编写：使用{}将语句括起来，表示此为调用存储过程的语句，在调用的存储过程中的参数进行#占位符代替（其中设置其参数名、参数数据在数据库中的数据类型、该参数在存储过程中的变量形式，out输出参数，in输入参数），实现参数传递
+  {CALL CommonPageProc1(
+  #{biaoming,jdbcType=VARCHAR,mode=IN},
+  #{ziduan,jdbcType=VARCHAR,mode=IN},
+  #{geshu,jdbcType=INTEGER,mode=IN},
+  #{yeshu,jdbcType=INTEGER,mode=IN},
+  #{paixun,jdbcType=VARCHAR,mode=IN},
+  #{where,jdbcType=VARCHAR,mode=IN},
+  #{rows,jdbcType=INTEGER,mode=OUT}
+  )  
+  }
+
+除了通过#{}来传递参数为，还可以用${}，${} 是直接传入一个字符串对sql语句参数进行拼接，不会管其参数的JDBCtype，直接将传入的字符串拼接上去。
+*********一般只用#{}来传递参数，因为${}会产生sql注入（有可能传入的字符串不会作为本来的参数，而是修改sql语句本身的逻辑，这样大大影响了项目的安全性）；
+但${}也有可用之处，当变量是为字段名或表名时，用#{}进行预编译时，就会发生错误，没有相应的表名或字段提示；此时就需要用${}来传递参数，且需要将statementType类型修改为statement：原始执行方式（当有参数传递时，不执行预编译），此时还有其他参数时，也只能用${}传递
+#{}在传递参数时，是先对编写好的sql语句进行预编译，放在缓存中，然后对其进行参数赋值，因此在下次又使用该sql语句时，只需要重新赋值就可以执行，大大减少了sql语句的编译过程；而${}需要先将字符串拼接到sql语句中，然后进行编译、执行。每一次使用该sql语句，都需要相同步骤，大大影响效率
+
+
+mybatist实现动态sql语句：
+1、if标签：先判断传来的对象参数的属性是否为空，不为空则将参数传递到sql语句中，执行同步到数据库；为空，就不需要写，数据库自动为null
+      <if test="account != null">
+        account = #{account,jdbcType=VARCHAR},
+      </if>
+
+2、choose标签：有两个子标签when、otherwise，类似于java中的switch语句，when为case，owherwise为default
+按顺序执行when标签中的test判断，成立则不往下执行，跳出choose标签；而所有when中的判断都不成立，则执行owherwise中的sql语句，并跳出choose标签
+<choose>  
+            <when test="username !=null ">  
+                u.username LIKE CONCAT(CONCAT('%', #{username, jdbcType=VARCHAR}),'%')  
+            </when >  
+            <when test="sex != null and sex != '' ">  
+                AND u.sex = #{sex, jdbcType=INTEGER}  
+            </when >  
+            <when test="birthday != null ">  
+                AND u.birthday = #{birthday, jdbcType=DATE}  
+            </when >  
+            <otherwise>  
+            </otherwise>  
+        </choose>  
+
+3、where标签：当可能存在sql语句有条件查询、或者没有条件查询时，where直接作为sql语句写的话，就会产生不确定性错误
+因此就有了where标签，作为代替sql语句中的where，当where标签下的子标签中，有sql语句的拼接时，sql语句动态编译时，会自动添加where
+<where>  
+        <if test="studentName !=null ">  
+            ST.STUDENT_NAME LIKE CONCAT(CONCAT('%', #{studentName, jdbcType=VARCHAR}),'%')  
+        </if>  
+        <if test="studentSex != null and studentSex != '' ">  
+            AND ST.STUDENT_SEX = #{studentSex, jdbcType=INTEGER}  
+        </if> 
+</where> 
+当if条件都不成立时，不会自动添加where这个多余字符，只要有一个if成立，则自动添加where
+
+3、set标签：用在处理update语句中，动态添加set的赋值时，最后一个set会多一个“，”的情况，用set标签将所有的动态赋值包含，它将自动去除最后一个字段赋值语句后的逗号
+<set>  
+        <if test="studentName != null and studentName != '' ">  
+            STUDENT_TBL.STUDENT_NAME = #{studentName},  
+        </if>  
+        <if test="studentSex != null and studentSex != '' ">  
+            STUDENT_TBL.STUDENT_SEX = #{studentSex},  
+        </if>
+</set>
+当不用set标签包含if标签时，只要有if标签成立，sql语句set字段中就会多一个逗号
+
+4、trim标签：trim与set标签类似，但能做到更强的功能，可以直接代替where标签，或set标签
+trim标签可以自动设置其标签下的，整个拼接语句中的前缀（prefix属性）、后缀（suffix属性），和去掉整体前面的某个字符串（prefixOverrides属性）、去掉整体后面的某个字符串（suffixOverrides属性）
+1、代替where ，将trim标签中的前缀prefix属性值写为“where”；和where语句一样，只有当trim标签下的子标签生成sql语句的拼接字符串时（if成立、、、、），trim标签才会生效
+2、代替set，将trim变迁中的prefixOverrides属性值写为“，”，在sql语句的拼接字符串时，会和set标签一样，自动删除最后面的","
+3、也可以实现动态insert语句，insert语句会根据添加的字段的多少，来编写sql语句；此时就需要删除最后一个需要添加的字段名后的“，”，
+并且insert语句中要添加的字段名和字段的值，都需要用括号括起来，因此可以用到trim的prefix属性和suffix属性
+insert into car
+    <trim prefix="("  suffix=")" suffixOverrides=",">
+      <if test="cid != null">
+        cid,
+      </if>
+      <if test="accountId != null">
+        account_id,
+      </if>
+    </trim>
+..........
+
+5、foreach标签：当编写sql语句，需要where 字段 IN中的大量数据时，编写一个一个的参数名，就很复杂，此时就需要用到数组来传递参数，foreach就用来循环遍历该参数数组，将其一个一个添加到IN后面
+此时并不需要在select等节点标签中添加parameterType，而是在foreach节点中使用collection属性，来自动接收接口方法中传递过来的参数（当传递过来的类型为数组时，collection值为"array"；当传递过来的类型为集合时list，collexction值为“list”）
+item为接收到的参数取id（与#{}中的参数名一致）；separator为每次迭代的分割符；open为前缀；close为后缀
+     <foreach collection="array" item="classIds"  open="(" separator="," close=")">  
+        #{classIds}  
+     </foreach>  
+ 根据查询字段的JDBCtype，集合或数组的类型也与之相对应

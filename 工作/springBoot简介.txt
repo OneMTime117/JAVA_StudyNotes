@@ -1,0 +1,128 @@
+Spring Boot 是对spring系列所有技术框架的整合框架，大大简化了spring应用开发；为javaEE开发提供了一站式解决方案
+Spring Boot优点：
+1、快速创建独立运行的Spring项目以及其主流创建的集成
+2、使用嵌入式的servlet容器（服务器），无需打包成war包
+3、提供的starters（spring启动器）自动依赖与版本控制（无需自己在maven中导入依赖包，并控制版本）
+4、已经提供了大量的自动配置，不需要进行配置，当然也可以自己修改这些默认值
+5、无需配置XML
+6、准生产环境的运行时应用监控
+7、与云计算的天然集成
+但springBoot的入门容易，精通难，由于大量的配置都是自动封装，在不了解spring系列框架时，是无法理解springBoot的底层工作的
+
+spring Boot的出现，主要是为了满足现在应用开发的一种架构风格（微服务化）
+微服务：一个应用应该是一组小型服务；可以通过HTTP的方式来进行沟通；每一个功能元素最终都是一个可独立替换和独立升级的软件单元
+如果将应用以微服务化的方式开发时：
+1、这样每个功能都需要构建一个应用，也就需要配置其环境，而springBoot就能很好的解决这个问题，能够快速创建一个独立运行的spring项目
+2、每一个服务功能都需要大量分布式的连接调用，就通过spring cloud来实现，来简化分布式微服务式架构
+3、在微服务分布式之间，还有进行一些数据流处理，这就通过spring cloud data flow来实现
+
+springBoot项目创建：
+1、创建一个maven-web项目
+2、导入springBoot依赖
+2.1、该节点表示继承starter-parent该项目的pom.xml文件（将所有的springboot的子项目都继承该pom，这样就能统一管理所有依赖），该pom提供了所有Spring Boot项目相关的Maven默认依赖（但不直接引入依赖，而是确定该所有依赖和依赖版本；因此当导入的依赖没有在父项目的pom中时，需要自己确定依赖版本）
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.5.7.RELEASE</version>
+</parent>
+2.2、引入Spring Boot应用的starters（springboot的场景启动器，将所有功能所需的依赖分为个个模块（starters启动器），需要开发某个功能，就添加对应的启动器，从而引入所需的所有依赖）
+  <dependencies>
+  <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+3、编写项目主程序，执行spring应用
+//来说明该类为spring Boot的主配置类，让springboot通过该类的main方法启动springBoot应用
+@SpringBootApplication
+public class SpringbootMain {
+	public static void main(String[] args) {
+//		用于启动spring应用
+		SpringApplication.run(SpringbootMain.class, args);
+	}
+}
+4、编写该是该spring应用代码（web层、view层、model层）；*****其目录应在主程序类所在目录下
+5、开发测试
+直接通过运行主程序，就可以将spring应用发布到内置的tomcat服务器中
+6、部署应用（将应用打包，上传到服务器）
+6.1、导入一个maven插件，功能为自动将spring应用打包成一个可执行的jar包（若没有导入默认parent节点，需要对该插件依赖进行配置）
+<build> 
+	<plugins> 
+		<plugin> 
+			<groupId> org.springframework.boot </groupId> 
+			<artifactId> spring-boot-maven-plugin </artifactId> 
+		</plugin> 
+	</plugins> 
+</build>
+通过maven的项目lifecycle（声明周期）的package函数，来执行maven中的打包插件，获的打包好的jar文件
+6.2、在cmd窗口，通过使用java -jar  文件名   来执行jar包，即将web项目上传到内置tomcat中
+
+
+
+SpringBootApplication注解的含义：
+SpringBootApplication注解用来代替三个注解的整合：@Configuration,@EnableAutoConfiguration,@ComponentScan
+1、@Configuration：
+提到@Configuration就要提到他的搭档@Bean。使用这两个注解就可以创建一个简单的spring配置类，可以用来替代相应的xml配置文件。
+2、@EnableAutoConfiguration：
+启动SpringBoot自动配置功能：
+2.1、将主配置类（被@springBootApplication标注的类）的包及子包的所有组件扫描到spring容器中（这些组件为代码模块组件，如配置dao层类）
+2.2、在容器中导入大量的自动配置类，该类为对应spirngBoot应用场景所需的依赖包中的组件的配置类
+3、@ComponentScan：
+会自动扫描指定包下的全部标有@Component的类，并注册成bean，当然包括@Component下的子注解@Service,@Repository,@Controller。
+
+配置类：将之前的配置文件，通过java类来代替进行配置，然后作为组件放入spring boot容器中；这样减少了我们手动配置功能组件（如配置视图解析器）的工作
+*****************springBoot的自动配置全都通过该包中的类来完成：org.springframework.boot.autoconfigure
+
+
+spring Boot 项目的快速创建，通过spring tools开发工具来完成：
+可以快速创建项目，自己选定需要的模块，自动下载对应的依赖包，不需要自己手动配置pom.xml文件
+1、创建一个项目spring Starter Project（eclipse）或者spring Initializr（IDEA）
+2、选择该项目的包类型（jar、war）、语言（java）、java版本、包名、项目名
+3、选择项目需要的模块（如web）
+4、在默认生成的pom中，默认有选择的web模块启动器、springboot父项目、项目的maven打包插件、还有一个test模块启动器
+生成的项目默认文件目录：
+java目录：
+1、com.xx.demo文件夹：默认编写application主配置类
+resources目录：
+1、static文件夹：保存所有的静态资源，js、css、images
+2、templates文件夹：保存所有模板页面（spring Boot默认使用jar包中嵌入式Tomcat服务器，默认不支持jsp页面；一般使用模板引擎编辑的页面如freemarker、thymeleaf）
+3、application.properties文件：默认提供一个空的springboot配置文件（properties类型文件，类似于键值对写法），用于修改springBoot默认的自动配置
+
+
+springBoot的配置:
+SpringBoot 使用一个全局的配置文件，有两种文件格式：
+application.properties和application.yml （两种文件格式的文件名是一定的，都为application）
+*****配置文件的作用：修改springBoot自动配置的默认值；因为springBoot在底层都给我们自动配置好了
+
+yml类型文件是用的YAML（YAML Ain't Markup Language 不是一种标记语言）语言
+YAML和xml类似，都是用来描述数据的；但yaml是以数据为中心，而不是以标记语言为重点，语法简单明了，比json、xml等更适合做配置文件
+YAML的语法：
+1、基本语法：
+K：(空格)v     表示一对键值对；空格必须要有，通过空格的缩进来控制层级关系，同一左对齐的数据为同一层级的
+server： 
+         port： 8081
+         path： /hello
+******YAML的属性和值对大小写敏感
+
+2、值的写法：
+2.1、字面量：普通值（数字、字符串、布尔）：
+k: v（字面量直接写）如： name： 袁欢
+——：值加上双引号，不会影响字符串的表达（如转义字符）；值加上单引号时，会影响字符串的表达，如转移字符还是原来的字符串符号
+2.2、对象、Map（键值对）
+有两种写法，分为行内写法、多行写法
+行内写法：将两级写在一行
+friends：（name： yuanhuan，age： 18）
+多行写法：将对象、Map最为一级，在下一级来写其中的属性和值
+friends：
+       name： yuanhuan
+       age： 18
+2.3、数组、集合（list、set）
+多行写法：
+pet：
+ -cat
+ -dog
+ -pig
+行内写法：
+pet: [cat,dog,pig]
+
+

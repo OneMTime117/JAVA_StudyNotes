@@ -1,0 +1,214 @@
+java NIO:            https://www.cnblogs.com/DreamDrive/p/7505474.html
+I/O被称之为BIO，即阻塞式IO，NIO就是非阻塞IO了，还有异步IO（AIO)
+**为所有的原始类型提供(Buffer)缓存支持,字符集编码解码解决方案；
+Channel ：一个新的原始I/O 抽象。 支持锁和内存映射文件的文件访问接口。 提供多路(non-bloking) 非阻塞式的高伸缩性网络I/O 。NIO也是I/O多路复用的基础，已经被越来越多地应用到大型应用服务器，
+
+成为解决高并发与大量连接、I/O处理问题的有效方式。
+
+1、Java IO的各种流是阻塞的,当一个线程调用read() 或 write()时，该线程被阻塞，直到有一些数据被读取，或数据完全写入。该线程在此期间不能再干任何事情了。
+2、Java NIO的流是不阻塞的，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取。而不是保持线程阻塞，所以直至数据变的可以读取之前，该线程可以继续做其他的事情。 
+ 线程通常将非阻塞IO的空闲时间用于在其它通道上执行IO操作，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
+
+传统IO读写文件：
+1) 先将文件内容从磁盘中拷贝到操作系统buffer
+
+2) 再从操作系统buffer拷贝到程序应用buffer
+
+3) 从程序buffer拷贝到socket buffer
+
+4) 从socket buffer拷贝到协议引擎.
+
+Socket编程：https://www.cnblogs.com/rocomp/p/4790340.html
+
+为什么需要NIO：
+1、两个字，效率，NIO能够处理的所有场景，原IO基本都能做到，NIO因效率而生，效率包括处理速度和吞吐量(Througthout, Scalability)。Java原IO都是流式的(Stream Oriented)，一个Byte一个Byte的读取，且需要在JVM(用户空间)和操作系统内核空间之间复制数据(Bytes)，速度较慢。
+
+2、NIO技术省去了将操作系统的read buffer拷贝到程序的buffer, 以及从程序buffer拷贝到socket buffer的步骤, 直接将 read buffer 拷贝到 socket buffer.
+
+IO主要分两块，文件系统IO和网络IO：
+NIO在文件系统方面，通过批量处理(Buffer)，操作直接委托给操作系统(Direct)，充分的利用操作系统的IO能力，提高访问性能，不过NIO还不支持文件系统的异步调用。
+网络IO方面，提供非阻塞操作，减少处理网络IO的线程数，增强可伸缩性(Scalability)。
+*****线程切换(Context Swith)是繁重的，多了会严重影响性能(可伸缩性, Scalability)，线程越多越糟糕，n核的机器参考的线程数是n或n+1。
+
+
+
+NIO和IO的区别：
+1、IO面向流，NIO面向缓冲区
+即IO是基于字节流和字符流进行操作的，而NIO是基于通道（Channel）和缓冲区（Buffer）进行操作，数据总是从通道读取到缓冲区中，或者从缓冲区写入到通道中。
+2、IO的流是阻塞的；NIO是非阻塞的，一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。 
+
+
+NIO的三个重要抽象：
+1、Buffer：读或写数据的暂存容器，与Channel匹配使用；提供批量的向Channel写入或者读取数据功能
+四个int属性需要理解：
+mark       标记的位置，default -1。
+position   游标当前位置
+limit      存活(可用)Byte最后一个的位置
+capacity   Buffer的最大容量
+很多Buffer的操作都与上面四个属性有关，比如flip()，rewind(), clear()等。最重要的一个Buffer实现是ByteBuffer，主要实现对Byte的存取操作，常用的还有CharBuffer。
+
+2、Channel：
+    Client与IO设备之间读写的交互通道，数据先放到Buffer里面，再经Channel写入设备，或者从Channel里面读取数据。常用的有FileChannel，ServerSocketChannel和SocketChannel。
+
+3、Selector：
+    针对非阻塞(No-Blocking)的Channel，提供事件通知的机制。很多教程强调Selector提供了多路复用(单个线程或少数线程负责多个Channel的事件通知)的机制，非阻塞式编程是基于事件的，Selector就是事件的通讯机制。非阻塞式才是关键，Event Bus构建非阻塞式编程的环境。
+
+
+三.BIO、NIO、AIO适用场景分析:
+BIO方式适用于连接数目比较小并且一次发送大量数据的场景，这种方式对服务器资源要求比较高，并发局限于应用中，JDK1.4以前的唯一选择，但程序直观简单易理解。
+NIO方式适用于连接数目多,每次只是发送少量的数据，服务器需要支持超大量的长时间连接。比如10000个连接以上，并且每个客户端并不会频繁地发送太多数据。
+
+对于BIO、NIO、AIO的区别和应用场景，知乎上有位同学是这样回答的：
+
+BIO：Apache，Tomcat。主要是并发量要求不高的场景.如果你有少量的连接使用非常高的带宽，一次发送大量的数据，也许典型的IO服务器实现可能非常契合。
+NIO：Nginx，Netty。主要是高并发量要求的场景,如果需要管理同时打开的成千上万个连接，这些连接，例如聊天服务器，实现NIO的服务器可能是一个优势。
+用形象的例子来理解一下概念，以银行取款为例：
+同步 ： 自己亲自出马持银行卡到银行取钱（使用同步IO时，Java自己处理IO读写）。
+异步 ： 委托一小弟拿银行卡到银行取钱，然后给你（使用异步IO时，Java将IO读写委托给OS处理，需要将数据缓冲区地址和大小传给OS(银行卡和密码)，OS需要支持异步IO操作API）。
+阻塞 ： ATM排队取款，你只能等待（使用阻塞IO时，Java调用会一直阻塞到读写完成才返回）。
+非阻塞 ： 柜台取款，取个号，然后坐在椅子上做其它事，等号广播会通知你办理，没到号你就不能去，
+你可以不断问大堂经理排到了没有，大堂经理如果说还没到你就不能去（使用非阻塞IO时，如果不能读写Java调用会马上返回，当IO事件分发器会通知可读写时再继续进行读写，不断循环直到读写完成）。
+
+
+Vert.x框架：
+一个事件驱动，异步无阻塞的网络框架，其参照物是node.js。基本上node.js能干的事情，Vert.x都能干。Vert.x利用Netty4的EventLoop来做单线程的事件循环，所以跑在Vert.x上的业务不能做CPU密集型的运算，这样会导致整个线程被阻塞。（web层框架，和springMVC类似，但使用操作是异步的，带来了更高的性能）
+特性：
+1、同时支持多种编程语言——目前已经支持了Java、Scala、JavaScript、Ruby、Python、Groovy、Clojure、Ceylon等。
+2、异步无锁编程——经典的多线程编程模型能满足很多Web开发场景，但随着移动互联网并发连接数的猛增，多线程并发控制模型性能难以扩展，同时要想控制好并发锁需要较高的技巧，目前Reactor异步编程模型开始跑马圈地，而Vert.x就是这种异步无锁编程的一个首选；
+3、对各种IO的丰富支持——目前Vert.x的异步模型已支持TCP、UDP、FileSystem、DNS、EventBus、Sockjs等；
+极好的分布式开发支持——Vert.x通过EventBus事件总线，可以轻松编写分布式解耦的程序，具有很好的扩展性；
+4、生态体系日趋成熟——Vert.x归入Eclipse基金会门下，异步驱动已经支持了Postgres、MySQL、MongoDB、Redis等常用组件，并且有若干Vert.x在生产环境中的应用案例。
+5. vert.x并不是一个Web容器
+vert.x并不是一个Web Server，它是一种异步编程框架，你可以将自己基于vert.x的应用程序放置到任何你想放置的Web容器中部署运行。
+
+
+Vert.x:
+每一个实例都有自己的线程池（及Vertx框架默认是多线程的），从而该Vertx对象会有多个Event loop（事件循环）线程来执行该Vertx部署的所有Verticle模块
+所有的Verticle是通过事件驱动执行的（异步执行，就一个Event loop线程可以执行所有基础Verticle，线程不会阻塞），这样就很好的解决了单线程阻塞问题；这样使用Vertx开发，就直接保证了代码的线程安全，并且默认使用多线程开发
+
+就每一个Event Loop线程可以执行所有Verticle模块，不会阻塞
+
+Vert.x框架的技术体系：
+1、核心模块：Vert.x核心模块包含一些基础的功能，如HTTP，TCP，文件系统访问，EventBus、WebSocket、延时与重复执行、缓存等其他基础的功能，你可以在你自己的应用程序中直接使用。可以通过vertx-core模块引用即可。
+2、Web模块：
+Vert.x Web是一个工具集，虽然核心模块提供了HTTP的支持，但是要开发复杂的Web应用，还需要路由、Session、请求数据读取、Rest支持等等还需要Web模块，这里提供了上述的这些功能的API，便于开发。
+
+除了对Web服务的开发以外，还提供了对Web客户端请求的支持，通过vertx-web-client即可方便的访问HTTP服务。有朋友可能会有疑惑，我明明可以使用JDK提供的URL来请求HTTP服务啊。使用Vert.x一定要注意，Vert.x是一个异步框架，请求HTTP服务是一个耗时操作，所有的耗时，都会阻塞EventBus，导致整体性能被拖垮，因此，对于请求Web服务，一定要使用Vert.x提供的vertx-web-client模块
+3、数据访问模块：
+Vert.x提供了对关系型数据库、NoSQL、消息中间件的支持，传统的客户端因为是阻塞的，会严重影响系统的性能，因此Vert.x提供了对以上客户端的异步支持。具体支持的数据访问如下：
+
+MongoDB client,JDBC client,SQL common,Redis client,MySQL/PostgreSQLclient
+4、Reactive响应式编程
+
+
+
+*******
+同步:发送一个请求,等待返回,然后再发送下一个请求 
+异步:发送一个请求,不等待返回,随时可以再发送下一个请求 
+同步可以避免出现死锁，读脏数据的发生，一般共享某一资源的时候用，如果每个人都有修改权限，同时修改一个文件，有可能使一个人读取另一个人已经删除的内容，就会出错，同步就会按顺序来修改。
+异步则是可以提高效率了，现在cpu都是双核，四核，异步处理的话可以同时做多项工作，当然必须保证是可以并发处理的。
+这些都是对的。
+同步和异步最大的区别就在于。一个需要等待，一个不需要等待。
+
+
+线程：能够同时运行的代码
+多线程：说明该进程的功能，需要多个线程同时运行，达到目的
+并行：在多核处理器中同时执行一段逻辑代码
+并发：针对于一个CPU来说，多线程运行，看起来像同时运行；
+线程安全：指在并发情况下，代码被多线程使用时，线程调度顺序不会被影响（如使用公共资源）
+同步：就是人为控制，让公共资源在多线程使用时，保证线程安全
+
+同步有两种方式实现：
+1、使用synchronized修饰方法或者代码，是的该段代码同步
+2、使用锁Lock
+
+
+
+
+总结来说，Lock和synchronized有以下几点不同：
+
+　
+1）Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现；
+
+　　
+2）synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；
+
+　　
+3）Lock可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；
+
+　　
+4）通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。
+
+　　
+5）Lock可以提高多个线程进行读操作的效率。
+
+　　
+在性能上来说，如果竞争资源不激烈，两者的性能是差不多的，而当竞争资源非常激烈时（即有大量线程同时竞争），此时Lock的性能要远远优于synchronized。所以说，在具体使用时要根据适当情况选择。
+
+。
+Lock的操作与synchronized相比，灵活性更高，而且Lock提供多种方式获取锁，有Lock、ReadWriteLock接口，以及实现这两个接口的ReentrantLock类、ReentrantReadWriteLock类。
+
+Lock的使用：
+1、创建Lock对象
+2、在需要同步的代码块前，通过Lock对象获得锁   lock.lock（）
+3、使用Lock时需要捕获异常，Lock发生异常时，不会主动释放锁（synchronized会），因此需要在finally中释放锁 lock.unlock（）
+
+
+线程类编写：
+1、继承Thread类
+2、实现Runnable接口
+3、实现Callable接口
+
+1、thread和Runnable一样：
+编写线程代码类，重写RUN方法，然后通过该类来实例化Thread对象，并执行该对象的start（）；
+
+2、Callable：
+重写Call方法，且只能通过线程池提交任务，来创建线程；Call方法能够抛出异常，run方法不能；
+
+线程池：
+相对于使用Thread实例化来说：
+1、简化代码
+2、可以对所有线程进行适当管理
+3、可以降低线程内存占有率
+
+
+创建线程池（ExecutorService）分类：
+1、可设置固定大小线程池
+Executors.newFixedThreadPool(4)   
+2、不固定大小线程池，根据目前任务的多少来增加
+Executors.newCachedThreadPool();
+3、只有一个线程的线程池
+Executors.newSingleThreadExecutor();
+
+ExecutorService线程池对象提供一下方法：
+1、提交任务，给线程池管理，创建线程
+executor.submit()
+参数为：
+Callable实现类 会有一个Future<String>（Future对象中数据内容（如Callable类call方法的返回值）的类型）类型返回值
+Runnabel实现类（即Thread继承类） 没有返回值
+
+Future对象：
+通过方法分析有四个作用：
+1、cancel，取消Callable任务的执行
+2、get   获得Callable任务的返回值
+3、isCanceled   判断是否取消了任务
+3、isDone    判断是否完成任务
+
+
+2、关闭线程池
+shutdown（）
+将线程池里的线程状态设置成SHUTDOWN状态, 然后中断所有没有正在执行任务的线程.
+shutdownNow （）
+将线程池里的线程状态设置成STOP状态, 然后停止所有正在执行或暂停任务的线程.
+
+
+
+
+PostgreSQL
+安装：密码 123456   端口：5432
+
+
+PostgreSQL 开发者把它拼读为 "post-gress-Q-L"。它也经常被简略念为 "postgres"
+1、它包括了可以说是目前世界上最丰富的数据类型的支持，其中有些数据类型可以说连商业数据库都不具备， 比如 IP 类型和几何类型等；其次，PostgreSQL 是全功能的自由软件数据库，很长时间以来，PostgreSQL 是唯一支持事务、子查询、多版本并行控制系统（MVCC）、数据完整性检查等特性的唯一的一种自由软件的数据库管理系统。
+2、PostgreSQL强壮的一个原因源于它的架构。和商业数据库一样，PostgreSQL可以用于C/S(客户/服务器)环境。这对于用户和开发人员有很多好处
+3、软件特征：函数、索引、触发器、并发控制、规则、数据类型、定义对象、继承、扩展

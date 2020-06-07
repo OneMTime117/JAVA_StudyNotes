@@ -1,0 +1,318 @@
+--增加一组数据 
+insert into student VALUES (4,'你好1','女',19);
+--可以选择性的填写数据，不填的为空 
+INSERT into student(name,sex ,age) VALUES ('你好4','女',19);
+--删除数据
+--删除一个表的数据(不能同时删除多个，且只删除数据，不会删除表和表的设计表) 
+DELETE FROM student;
+--删除表中满足条件的一组数据
+DELETE FROM student WHERE id=2;
+--修改数据
+--将某一列（字段）全部修改 
+UPDATE student SET NAME='袁欢';
+--将满足该条件（条件可以有多个）的所有组数据中的某一列（字段）或多个列全部修改  AND 且   OR 或
+UPDATE student SET NAME='谁',age=38 WHERE id =1;
+
+--查询数据
+--查询的数据值不产生重复的，数据该字段值只要出现相同，就删除之后的数据
+select distinct name from student 
+--查询整个表(所有列) 
+ SELECT * FROM student;
+--查询数据的某个或多个列
+SELECT name, age FROM student ;
+--查询满足条件（条件可以有多个）的所有组数据的某个或多个列  AND 且   OR 或
+SELECT name ,age FROM student where id=1 AND age=19;
+
+
+INSERT into student(name,sex,age) values ('子龙','男',32);
+INSERT into student(name,sex,age) values ('周仓','男',26);
+INSERT into student(name,sex,age) values ('程丽丽','女',21);
+INSERT into student(name,sex,age) values ('刘雨','女',24);
+
+select * FROM student
+
+DELETE FROM  student WHERE id=2;
+
+UPDATE student SET name='赵信' WHERE id=3;
+
+SELECT * FROM student where id =3 or id =4;
+SELECT * from student where (age >10 and age <30) or sex!='男';
+-- 查询范围 （between）
+select * FROM student where  age between 10 and 30; 
+-- 查询多个相同字段的条件(in)
+SELECT * FROM student where  age in(19,26);
+-- 查询字段不满足条件的
+SELECT * FROM student where  age NOT in(19,26);
+--  查询时，条件选择为为空时（is null）
+SELECT * from student where  age is NULL;
+SELECT * from student where age is not NULL;
+--  查询时，查询的结果可以加别名 ，更好的在结果中显示 （as）
+select NAME AS '姓名' , age as '年龄' from student where age =19
+
+-- 模糊查询  _一个字符  %多个字符（也可以为空）  [] 满足其中一个字符 
+-- 查询李某（可以姓名直接为李）
+SELECT * from student where name like '李_'; 
+-- 查询名字中带李的
+SELECT * from student where name like '%李%'; 
+-- 查询数据中带 _的    %\_%;
+SELECT * from student where name like '%\_%';
+多条件模糊查询时 （应相同字段like 都要声明字段）
+select * from student where name like '%李' or name like '%王'
+
+-- 排序查询  根据学号排序，默认升序 asc    降序 DESC
+select * from student ORDER BY  age ASC
+-- 排序可以有多个条件  当前一个条件排序出现相等时，执行下一个进行排序
+select * from student order by age asc ,id DESC;
+
+-- 聚合函数
+-- 数据库提供的常用方法
+-- 行数  count（*或字段） ，最小min（字段） ，最大max（），平均ave（） 求和 sum（）
+-- 
+-- 得到所有数据共多少行
+SELECT count(*) FROM student
+-- 得到age字段不为NULL的所有数据行数
+SELECT count(age) from student 
+-- 得到age字段的最大值
+select max(age) from student  
+
+select max(age) from student where age  BETWEEN 10 and 30;
+-- 得到满足age 10到30 的条件数据的age字段的最大值 （）
+SELECT * from student 
+
+SELECT  FIRST(age)     FROM student
+-- 时间
+select NOW()
+-- 时间差(单位为天)
+select DATEDIFF('2017-9-11 ','2011-3-3 ')
+ 
+-- 分组
+-- 按性别分组，并显示性别的人数
+SELECT sex ,count(sex) from student group by sex ;
+
+-- 分组后，保留人数大于3的数据
+select sex ,count(sex)  from student group by sex having count(sex)>1
+
+-- 年龄大于10岁的进行性别分组
+select sex ,count(sex) from student WHERE age >20 group by sex 
+
+-- 限定显示行数 
+-- 显示数据的前三行   limit  0,3 0为行的起始下标，3位显示的行数
+select * from student limit 0,3
+-- 显示 除ID为1的数据外，进行性别分组，并显示人数的数据的前六行
+select sex count(sex) from studnet where id !=1 group by sex having count(sex)>1 limit 1,6
+
+子查询
+通过查询之后的结果可以作为条件匹配、再次查询的数据列表，使用（）
+1、聚合函数在子查询调用时一定要取别名
+2、子查询代码作为上级查询数据（做表使用）时，要取别名
+
+连接模式： 
+1、连接查询   连接速度快（适合大数据连接），直接通过条件进行匹配查询
+select 字段1，字段2.。。from 表1（别名） INNER JOIN 表2（别名）on 匹配条件  INNER JOIN 。。。。。
+2、简单连接查询 连接数据慢，先进行笛卡尔积连接（多组数据互相连接一次），再通过匹配条件筛选
+select 字段1、字段2、。。。from 表1（别名）、表2（别名）where 别名（表1）.字段=别名（表2）.字段
+
+连接方式： 
+内连接 
+将表的数据通过他们的关联字段连接其他，在选择要显示的数据
+这种方法只会采集到关联字段能匹配的数据，其他数据省去
+（inner join 。。on）、(from  ....where )
+
+外连接
+左外  以左边的表为主，显示所有数据，右边表按字段匹配的数据记录（与左边不匹配的数据以null填充）
+elect * from 表1（别名） LEFT JOIN 表2（别名） ON 别名（表1）.字段=别名（表2）.字段
+右外  反之
+elect * from 表1（别名） RIGHT JOIN 表2（别名） ON 别名（表1）.字段=别名（表2）.字段
+全外  将所有数据全部显示，能匹配的组合一起，两者不能匹配的数据以null填充    （mysql没有）       
+
+
+查询一个表的内容时用子查询，查询多个表内容时用连接查询
+当需要连接表的字段当条件筛选，但有不显示时，可以再连接查询时进行条件筛选
+当条件筛选的字段需要显示时，在连接后进行条件筛选
+
+
+not in（）里面不能为null 不然其他不满足in 的条件也无法成立
+
+mysql 中查询得到的表不能直接用于删除，应加一个查询并加别名
+delete from select * from(（select 字段，。。  from student where 。。。。）as tab)
+
+int，year 类型的字段数据在作为条件和查询数据结果时，可以进行运算
+select id+1 ,name from student where age+5 >18
+
+创建一个存储过程 (运行后并不会对数据库执行sql语句)
+CREATE PROCEDURE demo_1()
+BEGIN 
+UPDATE cards SET blance =blance +100 where cardnumber='111111';
+END
+调用存储过程（对数据库进行sql语句）
+call demo_1()
+
+创建有参存储过程(参数分为输入参数和输出参数)
+输入参数（in  参数名  参数类型）
+CREATE PROCEDURE demo_2(in kh VARCHAR(20),in mm varchar(6),in je FLOAT )
+begin 
+insert into cards (cardnumber,cardpwd,balance) values (kh,mm,je);
+END
+
+call demo_2('1266666','123456',10000)
+
+输出参数（out 参数名  参数类型）
+create procedure demo_3 (out id int)
+begin 
+set id = 188274;
+end 
+
+CALL demo_3 (@unm);
+SELECT @num
+
+@ 参数名 用于自己定义一个回话变量，来存储得到的数据
+declare 变量名 变量类型  在函数中定义局部变量，只能作用于该函数(begin -end)
+@@ 调用系统中的全局变量  如 @@identity  指调用上一条sql语句中自增的值
+
+CREATE PROCEDURE demo_4(in kh VARCHAR(20),in mm varchar(6),in je FLOAT,out id int)
+BEGIN 
+insert into cards (cardnumber,cardpwd,balance) values (kh,mm,je);
+set id =@@identity;
+END
+创建一个变量，来保存函数的输出参数中的数据
+call demo_4('19922','1234','2000',@num);
+查询变量中的数据值
+SELECT @num
+
+create PROCEDURE demo_5(in js int,in oldid VARCHAR(20),in newid VARCHAR(20))
+BEGIN 
+UPDATE cards set balance=balance-js where cid=oldid;
+update cards set balance=balance+js where cid=newid;
+END
+
+CALL demo_5(200,'1','2')
+
+create procedure demo_6(in zzkh varchar(20),in skkh VARCHAR(20),in je int)
+BEGIN
+-- 定义变量(declare 只能一个个定义)
+declare zzid int;
+DECLARE skid int;
+-- 如果事务发生异常，回滚到这里
+declare exit handler for sqlexception rollback;
+-- 开始事务
+start TRANSACTION;
+-- 转账（对客户余额进行修改）
+update  cards set balance =balance -je where cardNumber=zzkh;
+update  cards set balance =balance +je where cardNumber=skkh;
+
+-- 通过账号名获得两个账号的id
+-- 查询满足条件的cid数据，并将它写入 zzid中
+select cid into zzid from cards where cardnumber=zzkh;
+select cid into skid from cards where cardnumber=skkh;
+
+-- 添加一天转账记录（转账人zid ，收款bzid，金额je，时间now（））
+insert into orders(zid ,bzid,money,orderTime) 
+values (zzid ,skid ,je,now());
+
+-- 提交事务
+COMMIT;
+END
+
+call demo_6('111111','222222',1)
+
+
+创建一个函数（存储过程）
+create PROCEDURE demo_7()
+begin 
+
+创建一个事务（多条sql语句，中间语句先进行测试，若全部成立，则提交事务，中间出现错误，则回滚到事务之前
+原子性，一个事务中的全部操作，要么全部完成，要么全不完成，
+一致性，事务在执行前后，不会破坏数据库的完整
+隔离性，每个事务对相同数据进行处理时，不能同时进行，保证事务直接不会有影响
+持久性，事务处理结束后，结果会永久保存，不会因为之后出现故障，导致数据回滚）
+DECLARE exit HANDLER for SQLEXCEPTION ROLLBACK ;
+START TRANSACTION;
+.....
+COMMIT;
+END
+
+**********************************mysql语句 删除前10行
+DELETE from parkrecord LIMIT 10 
+
+*********************************mysql语句 删除最后一行
+DELETE from parkrecord  order by id desc  LIMIT 1
+
+*********************************mysql语句 修改自增的初始值
+初始值为1000 ： ALTER   TABLE   tablename   AUTO_INCREMENT   =1000
+
+*************************************删除表的三种方式
+--delete from 表名
+
+
+--1>只是删除表中某些数据，表结构还在.。
+
+
+--2>Delete 可以带where子句来删除一部分数据.数据可根据日志恢复
+
+
+--3>自增长不恢复到初始值。
+
+
+?
+
+--truncate table 表名
+
+
+--1>truncate语句不能跟where条件，无法根据条件来删除，只能全部删除数据。
+
+
+--2>自增长恢复到初始值。
+
+
+--3>使用truncate删除表中所有数据要比delete效率高的多，因为truncate操作采用按最小方式来记录日志.
+
+--4>truncate删除数据，不触发delete触发器。
+
+
+
+--drop table 表名
+
+
+--1>删除表本身，即表中数据和表结构（列、约束、视图、键）全部删除。
+
+********************************变量
+declare用来定义局部变量
+
+@用来定义会话变量
+
+declare变量的作用范围同编程里面类似，在这里一般是在对应的begin和end之间。在end之后这个变量就没有作用了，不能使用了。这个同编程一样。
+
+另外有种变量叫做会话变量(session variable)，也叫做用户定义的变量(user defined variable)。这种变量要在变量名称前面加上“@”符号，叫做会话变量，代表整个会话过程他都是有作用的，这个有点类似于全局变量一样。这种变量用途比较广，因为只要在一个会话内(就是某个应用的一个连接过程中)，这个变量可以在被调用的存储过程或者代码之间共享数据。
+
+字段名不能打空格
+
+
+--------------------------------------->mysql连接的初始化数据库
+mysql创建连接后，会有四个初始化数据库
+test数据库：空的数据库，用于测试用
+information_schema数据库：这个数据库保存了mysql服务器所有数据库的信息。比如数据库的名、数据库的表、访问权限、数据库表的数据类型，数据库索引的信息等等。就是关于这个数据库的点点滴滴信息都存储在这个数据库中。
+mysql数据库：这个数据库中是mysql数据库中的所有的信息表。
+performance_schema数据库:
+MySQL 5.5新增一个存储引擎：命名PERFORMANCE_SCHEMA  ,主要用于收集数据库服务器性能参数。MySQL用户是不能创建存储引擎为PERFORMANCE_SCHEMA的表
+performance_schema提供以下功能：
+ 1.提供进程等待的详细信息，包括锁、互斥变量、文件信息；
+ 2.保存历史的事件汇总信息，为提供MySQL服务器性能做出详细的判断；
+ 3.对于新增和删除监控事件点都非常容易，并可以随意改变mysql服务器的监控周期，例如（CYCLE、MICROSECOND）
+
+
+一、SQL中的语法
+   1、drop table 表名称                         eg: drop table  dbo.Sys_Test
+   2、truncate table 表名称                     eg: truncate  table dbo.Sys_Test                  
+   3、delete from 表名称 where 列名称 = 值      eg: delete from dbo.Sys_Test where test='test'
+二、drop，truncate，delete区别
+    1、drop (删除表)：删除内容和定义，释放空间。简单来说就是把整个表去掉.以后要新增数据是不可能的,除非新增一个表。
+       drop语句将删除表的结构被依赖的约束（constrain),触发器（trigger)索引（index);依赖于该表的存储过程/函数将被保留，但其状态会变为：invalid。
+    2、truncate (清空表中的数据)：删除内容、释放空间但不删除定义(保留表的数据结构)。与drop不同的是,只是清空表数据而已。
+       注意:truncate 不能删除行数据,要删就要把表清空。
+    3、delete (删除表中的数据)：delete 语句用于删除表中的行。delete语句执行删除的过程是每次从表中删除一行，并且同时将该行的删除操作作为事务记录在日志中保存
+       以便进行进行回滚操作。
+       truncate与不带where的delete ：只删除数据，而不删除表的结构（定义）
+    4、truncate table 删除表中的所有行，但表结构及其列、约束、索引等保持不变。新行标识所用的计数值重置为该列的种子。如果想保留标识计数值，请改用delete。
+       如果要删除表定义及其数据，请使用 drop table 语句。  
+    5、对于由foreign key约束引用的表，不能使用truncate table ，而应使用不带where子句的delete语句。由于truncate table 记录在日志中，所以它不能激活触发器。
+    6、执行速度，一般来说: drop> truncate > delete。

@@ -1,0 +1,166 @@
+SSH框架：struts2、spring、hibernate
+SSH框架整合步骤：
+1、创建一个maven项目（选择web项目或者java项目），由于是框架整合，为web项目
+2、添加该maven-web项目的web.xml配置文件（通过项目右键---javaEE tools自动生成）
+3.1、首先导入spring框架的相关依赖，spring context，它会自动关联下载其他需要的依赖包（aop、beans、core、logging、expression），由于是web项目，还需要导入spring web，用来管理struts2框架
+spring依赖包和其他框架依赖包有联用，因此spring的所有相关依赖包版本要一致，因此可以将spring插件版本作为一个变量，以后修改时直接修改变量就可以一次性修改
+  <properties>
+      <springfram.version>4.3.9.RELEASE</springfram.version>
+  </properties>
+在依赖配置中<version> 4.3.9.RELEASE</version>修改为<version>${springfram.version}</version>
+3.2、导入hibernate框架的相关依赖，hibernate core、dbcp2（数据源）、spring-orm
+在单独使用hibernate时，只需要hibernate core包，但在框架整合时，数据源是用于创建session工厂的，之前是通过hibernate来读取配置文件创建，现在需要单独拿出来交给spring管理数据源，因此用dbcp2依赖包
+spring-orm是用来整合orm框架的，使spring来管理hibernate（该版本要与spring版本一致）
+3.3、导入struts2框架依赖包，sturts2 core 、sturts2-spring，struts2-spring用于struts2与spring的整合
+3.4、导入Web项目的依赖包，servlet-api、jsp-api；也可以通过在项目中导入tomact服务器运行库，来使该项目使用这两个包
+3.5、导入其他包：mysql数据库依赖包
+
+4、配置spring框架：
+4.1、在resources目录下，通过spring tools 来自动生成配置文件 applicationContext.xml
+4.2、在web.xml中的配置spring监听器；在启动Web 容器时，自动装配Spring applicationContext.xml 的配置信息（当获取spring容器中的组件时，需要先通过spring配置创建applicationContext对象***使用自动装配时，也是，因此这样就减少了创建该对象的过程）
+  <listener>
+  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+该包在：spring-web依赖包----web.context----contextLoaderListener类
+然后在设置该监听器的配置
+  <context-param>
+  <param-name>contextConfigLocation</param-name> name为已经添加的监听器类名
+  <param-value>classpath:applicationContext.xml</param-value> value为该监听器读取的配置文件
+  </context-param>
+4.3、为保证后面传递参数时，出现中文乱码，可以在这里添加一个spring框架提供的过滤器，来设置所有传递数据的编码格式
+<filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+4.4、在applicationContext中配置dbcp数据源，让其受spring管理（这些依赖包中的类，不能通过注解来添加到bean容器中）
+<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/hibernatedemo">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value=""></property>
+	</bean>
+添加jdbc连接四要素
+
+4.5、在applicationContext中配置sessionFactory，让其受spring管理
+<bean id="sessionFactory" 	class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+                                <property name="dataSource" ref="dataSource"></property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.MySQL5InnoDBDialect
+				</prop>
+			</props>
+其中配置的sessionFactory引用的数据源为配置好的·dbcp数据源，并设置hibernate使用时的方言属性；当然还可以设置hibernate的其他属性
+
+4.6、在applicationContext中配置hibernate事务管理类，让其受spring管理
+<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+	<property name="sessionFactory" ref="sessionFactory" />
+</bean>
+并将配置好的sessionFactory作为其事务管理器的管理对象
+然后配置spring，打开事务管理模块（事务AOP切面注解），并以上面的事务管理器作为其模块驱动（需要先打开tx命名空间）
+<tx:annotation-driven transaction-manager="transactionManager" />
+
+5、配置struts2框架：
+5.1、在web.xml中配置struts2拦截器
+<filter>
+<filter-name>struts2</filter-name>
+<filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+</filter>
+<filter-mapping>
+	<filter-name>struts2</filter-name>
+	<url-pattern>/*</url-pattern>
+</filter-mapping>
+
+5.2、在resources目录中创建一个struts.xml配置文件，并添加struts配置文档声明
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+6、hibernate框架配置：
+6.1、通过hibernate开发工具，Jbosstools来创建spring中配置好的数据源对应的实体和实体映射文件
+6.2、将创建好的实体映射文件放在resources目录下（可以新建一个mappers文件夹管理），之后在spring的applicationContext配置文件的sessionFactory配置中，添加映射属性节点
+<property name="mappingLocations" value="classpath:mappers/*.hbm.xml"></property>
+将mappers文件下的所有实体映射文件配置到sessionFactory中
+
+**********************此时，最基本的SSH框架整合就完成，之后以登入注册为例，来说明SSH框架的联合使用
+
+1、编写Dao层接口AccountDao，定义一个登入的抽象方法，确定该方法的参数类型和返回值
+2、编写BaseDao，并将该类通过@Repository注解，添加到spring容器中
+定义一个session工厂属性，并编写通过session工厂获的session对象的方法
+//	定义一个sessionFartory
+	@Autowired    通过spring注解注入spring容器中配置好的hibernate的sessionFactory
+	private SessionFactory sessionFactory;
+	
+	protected Session getSession(){
+//  通过sessionFactory获的当前的session
+		return sessionFactory.getCurrentSession();				
+	}
+********一般不用opensession方法获的session，因为需要自己关闭session资源；而getCurrenntSession是先查找是否存在已创建的session对象，有就获的它，没有就重新创建一个session，它会交给spring管理，当spring的事务管理器提交事务时，自动关闭资源；并且getCrurrennetSession使用，需要有事务环境，因此在事务创建应在其使用前。
+
+3、编写DAO层的实现类AccountDaoImpl，并继承BaseDao，该类通过@Repository注解，添加到spring容器中
+重写接口的登入方法，并通过调用继承的BaseDao的getSession方法，获的session对象
+	public Account loggin(Account account) {
+		// TODO Auto-generated method stub
+//		调用继承了的BaseDao中的getSession方法，获的Session对象 （**********session的创建，只能写在方法中，否则该类无法放入spring容器）
+		Session session=getSession();
+//		编写查询的HQL语句
+		String hql="from Account where account=? and password=?";
+		Query createQuery = session.createQuery(hql);
+		createQuery.setString(0, account.getAccount());
+		createQuery.setString(1, account.getPassword());
+		
+		List<Account> list = createQuery.list();
+		if (list.size()>0) {
+			return list.get(0);
+		}else {
+			return null;
+		}
+	
+	}
+4、编写service层接口AccountService，并写一个登入服务的抽象方法；通过@Component注解，来将改action给spring管理
+5、编写service层的实现类AccountServiceImpl，调用Dao层的数据处理方法；
+//	定义Dao的接口对象，通过spring依赖注入
+	@Autowired
+	private AccountDao dao;
+	
+//	重写其中的方法，并给action层调用
+	public Account loggin(Account account) {
+		// TODO Auto-generated method stub
+		return dao.loggin(account);
+	}
+6、编写servlet层的Action类，创建需要的属性对象
+	@Autowired  通过spring依赖注入获的service层的AcountServiceImpl实例化对象，调用登入业务方法
+	private AccountService service;
+                account属性用于接收jsp页面数据、msg用于传递给jsp页面数据（它们都需要创建get、set方法，通过struts2框架对该action的配置，自动完成数据的传递）      
+	private Account account;
+                private String msg;
+                通过struts2对servlet-api的解耦方式获得jsp页面的session对象（需要继承sessionAware，重写其set方法，用该属性接收接servlet-api传来的session对象）
+	private Map<String, Object> session;
+	
+7、在创建的struts.xml中配置改Action
+    <struts>
+    <package name="home" extends="struts-default"> 
+    <action name="home" class="action" > 由于该action被spring管理，可以直接用action类名（首字母小写）
+          <result name="login">/login.jsp</result>
+          <result name="index">/index.jsp</result>
+    </action>
+8、创建对应的jsp页面，来与action进行数据交换、数据处理
+9、将spring的事务管理器注解到service层（service的实现类）中（使用@Transactional）
+因为service层才是调用与数据处理有关代码的顶层；当service执行方法时，开启事务，之后再调用Dao层执行hql语句，结束servlet层的方法时，关闭事务
+若在DAO层创建spring的事务管理器，servlet层若需要执行多个数据操作时，事务管理器需要多次对每个Dao层的方法开启、关闭事务，大大增加的能耗，与事务的本质（处理多表数据、多次操作）不合理

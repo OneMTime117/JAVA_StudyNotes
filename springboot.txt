@@ -1,0 +1,284 @@
+1、springboot配置文件使用
+2、springboot日志：
+
+springboot 默认使用slf4j作为日志接口包，logback作为实现包（并也能使用jul、log4j2、log4j）
+日志框架的配置文件是写实现层的配置文件
+springboot提供对log4j、jul框架对slf4的转化，使得springboot所有框架统一使用slf4j抽象层，然后实现不同的实现包
+#当使用这些转化包时，应删除对应的日志框架；因此当需要使用其他框架时，只需要将spring中的转化包删除掉
+通过slf4j实现不同实现包，以log4j为例（一般不用该操作）：
+删除掉log4j转化为slf4的转化包，并添加log4j框架包、slf4j-log4j的转化包；最后添加log4j的配置文件（springboot默认只配置了logback）
+#官方提供spring-boot-starter-log4j2（slf4j+log4j2）来替换spring-boot-starter-logging（默认slf4j+logback）
+
+可以导入lombok依赖，通过注解来简化日志的使用
+
+3、springboot_web开发：
+springboot通过模块选择为我们提供框架依赖，并在spring-boot jar中自动配置好了所有框架的配置
+
+因此springboot框架原理的关键是：
+1、什么是自动配置
+2、对应模块springboot自动配置了什么
+3、修改哪些配置模块
+4、可以扩展那些设置
+
+thymeleaf：
+java模板引擎，将java处理好的数据，通过模板引擎生成文本输出，展示到静态模板页面上
+java模板引擎和jsp的区别
+jsp是前台代码和后台java代码的混合，需要两者共同开发，需要先转换为serlet类，然后编译；
+而java模板引擎是可以将前后端分离，通过前台给与页面模板和后台的数据模型结合，完成页面的展示；
+
+springboot-springMVC的自动配置：
+1、自动配置了viewResolver（视图解析器：根据方法返回值来得到视图对象（页面view）、视图对象的渲染方式（重定向、转发））
+2、静态资源文件夹路径
+3、静态首页访问、favicon.ico文件访问
+4、类型转换器converter、格式转换器formatter
+5、HttpMessageConverter：http请求或响应数据转换器（对象转换为json）
+6、MessageCodesResolver定义错误代码的生成规则
+7、ConfigurableWebBindingIntializer:web数据绑定初始化
+
+1、springboot的组件配置修改（只能对已有组件修改，如视图控制器）：
+springboot在自动配置组件时，会先看容器中是否有用户的组件配置（@bean、@component）
+有则使用用户的组件配置；当组件有些配置可以有多个组合时，则将用户、默认组件组合起来；
+写一个组件类（继承该组件的接口，或者创建一个该接口实例），然后再配置类中通过方法添加该组件
+
+2、springboot组件扩展配置（除了添加已有的，还可以添加没有的组件，如拦截器）：
+编写一个配置类（@configuration）继承对应默认组件的配置抽象类，比如扩展springMVC组件配置：
+继承WebMvcConfigurerAdapter(springMVC的配置扩展类)
+然后实现抽象类中的方法，对应扩展默认配置类中的配置
+#当对该配置类添加@EnablewebMvc时，所有的springmvc配置都会失效，只会根据用户的配置类配置（一般不使用）
+
+springboot错误页配置：
+错误页发生流程：
+当出现错误------定义请求重新访问/error路径（通过ErrorPageCustomizer类）
+------处理/error请求，返回错误页面或错误JSON数据（BasicErrorController）
+------如果是返回错误页面，根据DefaultErrorViewResolver(错误页面解析器，去errror/404（不同的错误状态码）文件夹下找，从static、templates文件夹中)
+
+1、定制错误页面 （浏览器访问）
+2、定制错误信息（非电脑浏览器访问）
+自定义异常（也可不写，直接获取系统提供的异常）------请求访问抛出异常-------调用对应自定义异常处理器（1、直接返回json数据2、转发到/error进行错误控制器处理）------继承defaultErrorAtrributes类（自定义错误页面上显示的错误信息）
+
+springboot配置嵌入式Servlet容器（Tomcat）：
+1、springboot修改嵌入式Serlvet容器配置
+           1、通过修改springboot主配置文件的server前缀的属性
+           2、添加一个server配置类（@configuration），进行servlet三大组件（servlet、filter、listenter）的配置、server和tomcat属性配置对应类实现类返回方法（@bean）
+##springboot配置的springmvc前端控制器，默认拦截“/”路径，即拦截所有请求，但不拦截JSP，而“/*”包括jsp
+
+2、springboot可以修改嵌入式Servlet容器：
+删除掉Tomcat的嵌入式包，并引入其他的容器springboot嵌入包
+springboot提供tomcat、Jetty、Undertow三个服务器（servlet容器）的嵌入
+
+3、springboot对嵌入式servlet容器自动配置原理：
+     1、通过EmbeddedServletContainerAutoConfiguration确定（看存在哪个嵌入式容器依赖）需要使用的容器工厂对象（EmbeddedServletContainerFactory），并注入到容器中
+     2、创建容器工厂对象时，执行后置处理器（EmbeddedServletContainerCustomizerBeanPostProcessor），调用
+       所有的容器定制器（EmbeddedServletContainerCustomizer、ServerProperties）的定制方法，将配置好容器工厂对象生成容器对象的属性
+
+4、springboot启动嵌入式servlet容器原理：
+     springboot执行run方法----启动IOC容器（初始化：创建容器中的所有组件）；web项目则创建AnnotationConfigEmbeddedWebApplicationContext（IOC容器）
+    webIOC容器会创建嵌入式Servlet容器------创建servlet容器工厂----创建servlet容器并启动------然后将IOC容器中剩下没有使用的组件放入Servlet容器
+
+5、嵌入式serlvet容器：
+      优点：简单，使用方便，应用可以直接打为jar包进行部署  
+      缺点：不支持JSP，定制优化复杂
+
+6、使用外部serlvet容器：
+    1、创建war包的项目，并添加web目录文件夹（不需要web.xml）
+    2、修改pom文件中，嵌入式Servlet容器依赖的作用域（provided）
+    3、添加SpringBootServletInitializer类（作用是代替web.xml），用于外部容器启动主程序
+
+7、外部servlet容器启动原理：
+   启动服务器前，会创建当前war包中的ServletContainerInitializer类实例（对应springboot war项目中的SpringBootServletInitializer）
+   然后执行SpringBootServletInitializer的sources方法，即加载springboot的主类，最后启动servlet容器；
+
+springBoot 对自定义servelt组件配置：
+1、在主配置类中添加@ServletComponentScan（//自动扫描servlet组件类（使用了web注解的类），通过spring容器注入添加到servlet容器中，随着项目启动被加载）
+2、自定义servlet组件，并添加web3.0注解（@webselvelt、@weblistener、@webfilter）
+#springboot1.4.0以下；servlet组件无法直接使用@Autowrite自动注入；需要使用servletContext获取spring项目的webApplicationContext；
+然后使该类可以使用@AutoWrite注解
+WebApplicationContextUtils.getRequiredWebApplicationContext(event.getServletContext())
+.autowireCapableBeanFactory.autowireBean(this);
+
+  
+
+springBoot JDBC:
+1、使用springboot JDBC模板对数据库操作
+JdbcTemplate是Spring框架自带的对JDBC操作的封装
+2、springboot JDBC使用：
+     1、导入spring-boot-starter-jdbc依赖包(springboot 2.1.5默认导入使用HikariCP 连接池)
+     2、导入需要使用的数据库驱动
+     3、在springboot主配置文件中配置数据库数据源datasource四要素
+     4、通过JDBCTemplate对象来进行JDBC操作
+3、springboot自定义导入使用其他连接池（springboot默认提供了 tomcat-JDBC、HikariCP、dbcp、dbcp2的连接池配置）
+     目前常用连接池有HikariCP（速度最快）、druid（阿里云提供应用和sql监控）
+     因此以druid为例，springboot整合其他连接池过程：
+            1、导入druid依赖包，在配置数据源四要素时，添加type属性值：com.alibaba.druid.pool.DruidDataSource
+            2、配置数据源及其其他组件（根据使用JDBC的类添加 jpa、JdbcTemplate、mybatis）
+            3、配置Druid的监控：1、配置一个管理后台的Servlet  2、配置一个web监控的filter
+4、spring data，统一数据访问API，用于简化所有数据库操作，有多种组件
+spring data   JPA用于简化关系型数据库操作
+JPA（Java Persistence（持久层） API ）本身是一种统一规范（接口），有多种实现层
+spring data JPA就是对JPA 进行的进一步封装的抽象层，底层还是通过Hibernate来实现JPA规范
+spring data JPA使用:
+1、添加spring-boot-starter-JPA依赖，其包含对于JDBC的依赖
+2、添加数据库驱动，并配置springboot-jdbc默认连接池的数据源
+3、使用JPA提供的注解：
+          @Entity 标记实体类，指定为实体类（和数据库表映射的类）	
+          @Table 标记实体类，指定该类对应数据库表，不写默认类名对应表名
+          @Id   标记实体类属性成员，定义该成员变量对应表的主键
+          @Column	标记实体类属性成员，定义该成员变量对应表的字段 
+
+
+springboot 2.1.5版本 jdbc配置常见问题：
+1、该版本mysql驱动默认导入8.0.16 版本，而mysql5.x版本使用com.mysql.jdbc.Driver包    6.x即以上使用com.mysql.cj.jdbc.Driver驱动包
+2、JDBC连接数据库时，数据库服务器可能有多个时区，因此要确定连接时使用的时区为什么 通过在url后面添加   serverTimezone=GMT
+3、该版本默认使用HikariCP连接池
+4、该版本oracle数据库11g 驱动使用ojdbc8，驱动类名为oracle.jdbc.driver.OracleDriver
+5、在使用单数据源默认配置时，直接为spring.datasource.url；使用默认连接池进行多数据源配置时:
+spring1.5为Tomcat-jdbc连接池，配置为spring.datasource.*****.url
+spring2.x为HikariCP连接池，配置为spring.datasource.******.jdbc-url
+
+springboot JdbcTemplate对象使用（JdbcTemplate每当执行一个方法时，就创建conn、statement；方法执行完后关闭）：
+1、增删改操作：execute(sql)    无返回值          update（sql）  有返回值，影响行数
+2、查询操作：
+	查询一条数据中的一个字段   queryForObject（sql，String.class）指定该字段的数据类型，只能使用基本数据类型，无法使用引用数据类型（JdbcTemplate不是orm框架，不直接提供对象映射）
+	查询一条数据Map<String, Object> map = JdbcTemplate.queryForMap（sql）
+	查询多条数据List<Map<String, Object> > list=JdbcTemplate.queryForList（sql）
+3、JdbcTmeplate手动实体映射：
+	1、使用BeanPropertyRowMapper  List<T> query(sql ,new BeanPropertyRowMapper<T>(T.class)
+	  List<User> query =JdbcTemplate.query(sql, new BeanPropertyRowMapper<User>(User.class));
+	2、自己实例化一个RowMapper对象，让集合中的值放入user对象中，并返回（一般不用，这个需要自己手动匹配）
+需要对sql语句中的？占位符传参时，有两种方法：
+1、在方法参数最后面，按顺序添加参数    update（sql，2，“是的”）
+2、在方法参数最后面，添加一个Object类型数组，里面按顺序添加参数  update（sql，args）
+
+
+springboot JDBC事务管理
+一般事务管理注解使用在service层，并只注解增删改服务操作
+1、在springboot配置类中添加@EnableTransactionManagement 开启事务管理（操作发生异常后，数据回滚）
+2、在service层添加对应数据源的事务管理器@Transactional（value=“”）
+#还可以添加其他属性，来修改事务管理机制
+
+springboot 多数据源配置
+springboot -mybatis整合：
+1、导入mybatis-spring-boot-starter依赖（还需要spring-JDBC）
+2、在主配置文件中，添加多数据源四要素
+3、创建数据源配置类 添加datasource、datasourceTransctionManger、sqlsessionfactory、sqlsessionTemplate 四个组件
+4、添加@mapperscan注解，@EnableTransactionManagement注解
+5、定义实体类（mapper类中的sql会直接映射对应实体类，无须注解）
+6、定义mapper接口类（当使用@mapperscan注解后，不需要对该类添加@mapper），添加sql操作方法、sql注解
+###也可以使用xml来配置sql，通过xml名匹配对应的mapper类，找到对应的方法
+###当使用多数据源配置时，则只能使用mapperscan注解，来指定对应mapper接口使用的哪个数据源的sql操作对象（sqlSessionTemplate）
+@MapperScan(basePackages = "com.ltsk.whcg.base.mapper", sqlSessionTemplateRef = "baseSqlSessionTemplate")
+sqlsessionTemplate作用：这个类负责管理MyBatis的SqlSession,调用MyBatis的SQL方法，访问数据库执行
+
+@mapper的生效条件：@mapper默认只能扫描到启动类包下的所有文件，可以通过添加@MapperScan（）注解来添加其他扫描路径，从而使用@mapper注解。
+因此可以看出@MapperScan（）即@MappperScan（value=“”）和@MapperScan（basePackages=“”）是有区别的；前者是指定@mapper注解扫描路径包（@mapper注解只能在该路径下生效，默认是启动类包下）；后者是直接对于路径下的所有文件添加@mapper注解，并可以生效
+
+
+mybatis-sql常用注解：
+1、@Select、@insert、@update、@Delete 增删改查写sql
+2、@Results、@Result用于手动映射表字段和实体类属性（一般用于表字段与实体类属性名不相同，无法自动映射）
+3、@Option 这个注解提供额外选项sql操作配置
+4、@Param 用于mapper接口方法参数传递到注解sql的站位符（#{}或者${}）
+       当不使用@param时，只能使用#{}，并只能传递一个参数；也可以为JavaBean，根据其属性名匹配占位符中的多个参数名
+       当使用@param时，可以使用#{}和${}，用于多个参数传递（一般使用这种）
+#{}注入的是字符串，即在sql拼接中有' '，在预编译时放入sql中，只能用于字段值注入；
+${}注入时是直接将value拼接到sql中，这样就可能发生sql注入,一般只用于表名字段名的注入
+
+在注解中编写动态SQL时：在使用<script></script>包含，表示sql中使用了脚本语言（逻辑标签）
+
+mapper接口方法返回值分类：
+1、String类型   查询一个字段
+2、javabean类型   查询一组数据
+3、List<javabean>类型  查询多组数据
+4、Map<String, object>类型  查询一组数据，将所有字段数据放入map中
+5、Map<Integer,javabean>   并添加@mapkey（“id”）   查询多组数据，按照查询id将多个数据映射为对象放入map    
+
+
+注解放在启动类和自定义配置类的区别： 
+对于所有注解本质上是没有区别的，但对于一些扫描类注解（如@MapperScan、@ComponentScan），它们的value属性默认值和当前类所在包有关，因此会出现分别在启动类和自定义配置类注解时，默认值有区别
+
+@EnableTransactionManagement是否需要在每个数据源配置类上注解： 
+该注解放在主配置类或者自定义配置类中，都能全局生效(是针对于所有数据源的事务注解启动)
+
+对于单数据源，springboot自动配置了事务管理器，并打开了@EnableTransactionManagement，因此不需要自己添加该注解
+
+springboot运行流程：
+启动：
+       1、new springApplication(sources).run(args)  创建一个springApplication实例，根据主配置文件（sources）初始化
+       	private void initialize(Object[] sources) {
+		//添加主配置文件属性
+		if (sources != null && sources.length > 0) {
+			this.sources.addAll(Arrays.asList(sources));
+		}
+		//判断是否为web应用
+		this.webEnvironment = deduceWebEnvironment();
+		//从类路径下找到META-INF/spring.factories配置的所有ApplicationContextInitializer
+		setInitializers((Collection) getSpringFactoriesInstances(
+				ApplicationContextInitializer.class));
+		//从类路径下找到META-INF/spring.factories配置的所有ApplicationListener
+		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+		//从多个配置类中找到主配置类（即有main方法的配置类）
+		this.mainApplicationClass = deduceMainApplicationClass();
+	}
+
+运行：
+        2、执行springApplication的run()方法
+	public ConfigurableApplicationContext run(String... args) {
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+		ConfigurableApplicationContext context = null;
+		FailureAnalyzers analyzers = null;
+		configureHeadlessProperty();
+
+		//从类路径下META-INF/spring.factories配置的所有ApplicationRunListener
+		SpringApplicationRunListeners listeners = getRunListeners(args);
+		//调用所有ApplicationRunListener的starting()方法
+		listeners.starting();
+		try {
+			//封装命令行参数（args）
+			ApplicationArguments applicationArguments = new DefaultApplicationArguments(
+					args);
+			//创建运行环境
+			ConfigurableEnvironment environment = prepareEnvironment(listeners,
+					applicationArguments);
+			打印运行环境命令参数
+			Banner printedBanner = printBanner(environment);
+
+			//创建web或者jar的springIOC容器
+			context = createApplicationContext();
+
+			analyzers = new FailureAnalyzers(context);
+			//准备上下文环境，将environment导入到IOC容器，并执行appInitializers()方法，用于回调所有保存的applicationContextIntiializer的intitalizer()方法、springApplicationRunListener的contextPrepared()方法
+			prepareContext(context, environment, listeners, applicationArguments,
+					printedBanner);
+			//刷新容器，即初始化整个IOC容器，进行bean的扫描注入
+			refreshContext(context);
+			//从IOC容器中获取所有的ApplicationRunner和CommandLineRunner，进行回调
+			afterRefresh(context, applicationArguments);
+			//所有的SpringApplictionRunListener回调finished方法
+			listeners.finished(context, null);
+			stopWatch.stop();
+			if (this.logStartupInfo) {
+				new StartupInfoLogger(this.mainApplicationClass)
+						.logStarted(getApplicationLog(), stopWatch);
+			}
+			//整个springboot启动完成，返回配置好的IOC容器
+			return context;
+		}
+		catch (Throwable ex) {
+			handleRunFailure(context, listeners, analyzers, ex);
+			throw new IllegalStateException(ex);
+		}
+	}
+
+springboot事件监听机制的使用  :
+1、配置在META/spring.factories
+ApplicationContextInitializer  
+SpringApplicationRunListener      	
+2、配置到ioc容器中
+ApplicationRuner
+CommandLineRuner
+它们可以对于springboot的启动运行进行监听，从而添加一些服务
+
+springboot自定义Starter（场景启动器，用于快速配置大量依赖）
+自定义Starter可以快速导入需要的所有依赖，用于多开发者快速导包（确保依赖一致）
+

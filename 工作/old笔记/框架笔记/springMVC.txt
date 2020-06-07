@@ -1,0 +1,221 @@
+。springMVC是一个serlvet层框架，用于代替MVC开发模式中的serlvet；类似于struts2框架，但其开发效率和性能远高于struts2框架，其配置基本为0
+
+springMVC截获服务器请求、处理过程：
+1、客户端发出的请求被DispatcherServlet（前端控制器）截获
+2、DispatcherServlet询问handlemapping（处理请求映射）由那个控制器处理请求
+3、DispatcherServlet再将请求交给对应的controller（控制器）处理
+4、controller处理完后，返回模型及逻辑视图名（ModelAndView）（model数据和对应的jsp页面）
+5、DispatcherServlet通过视图解析器来处理返回的View（逻辑视图名）找到对应的视图（jsp页面）
+6、然后将需要的model数据放入其中，执行该视图，呈现结果响应用户
+
+springMVC框架搭建：
+1、创建一个maven-web项目，通过javaEE tools 创建web.xml
+2、添加springMVC依赖包，springMVC框架的创建，是在spring框架的基础上实现的，因此要导入spring框架的依赖，和spring框架编写web的依赖：
+spring context依赖包（获的spring框架相关依赖）、spring web依赖包、spring web MVC依赖包
+3、在web.xml中添加springMVC框架中的前端控制器DispatcherServlet，用于截获请求
+  <servlet> 配置一个servlet
+  <servlet-name>springMVC</servlet-name>  定义一个name
+  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class> 从依赖包中引入前端控制器DespatcherServlet（该serlvet在spring webMVC依赖包的web.servlet包中）
+  </servlet>
+  <servlet-mapping> 配置该serlvet的映射，即该serlvet拦截条件
+  <servlet-name>springMVC</servlet-name>
+  <url-pattern>/</url-pattern>   拦截条件：/ 表示拦截所有请求（一般使用/，也可以使用.html）
+  </servlet-mapping>
+4、对springMVC框架进行配置，在resources目录下创建一个srping的配置文件（名字随便取），然后进行配置：
+首先打开contex、mvc模块的命名空间
+打开spring框架的自动检测功能，通过注解来扫描所有类，放入容器中
+<context:component-scan base-package="com.xx.web"></context:component-scan>
+打开springMVC的controller注解，让容器能识别该注解
+<mvc:annotation-driven></mvc:annotation-driven>
+<!-- 打开springMVC框架的静态资源访问 -->
+<mvc:resources location="/css/" mapping="/css/**"></mvc:resources>
+*****************由于springMVC的前端控制器会拦截所有请求，当jsp引入css、js、img时，就会被拦截，并由于没有对应的controller执行方法，该请求就不会被处理
+此时就需要打开springMVC框架的静态资源访问，即对于请求中含有指定目录、指定的执行文件，不去进行拦截
+***********sturts也是一样，其前端过滤器会拦截所有请求，此时需要对struts配置文件进行设置：
+<constant name="struts.action.excludePattern" value="/services/.*"></constant>   如不拦截services目录下的所有文件
+
+
+5、将springMVC配置文件插入到web.xml中，使服务器启动时，springMVC框架容器就完成初始化
+在serpingMVC前端控制器配置时，添加该属性；这样在springMVC拦截器生效时，springMVC容器完成初始化
+********放在  <servlet-class>节点下面
+  <init-param>
+		<param-name>contextConfigLocation</param-name>     属性名一定要为contextConfigLocation
+		<param-value>classpath:MVCconfig.xml</param-value>  值为classpath:springMVC配置文件名
+  </init-param>
+6、配置springMVC的视图解析器，在springMVC配置文件中，添加组件
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  添加视图解析器，在springweb MVC依赖包中的servlet.view-------InternalResourceViewResolver
+     <property name="prefix" value="/WEB-INF/views"></property>  注入设置该组件的前缀和后缀属性，用于拼接controller控制器返回的字符串，作为视图名（视图在webapp根目录下的路径）
+     <property name="suffix" value=".jsp"></property>
+</bean>
+7、在对应的web层类上，注解@Controller，将其作为一个控制器放入springMVC容器；并在对应的方法中注释其访问映射字符串（springMVC会根据url来匹配其映射字符串，执行对应控制器中的方法）
+	@RequestMapping("/hehe")    对应url：http://localhost:8080/springMVCDemo/hehe   可以不加/,系统默认添加；字符串为空白（默认为“/”），则默认为url访问根目录，时，执行该方法
+	public String login(){
+		return "index";
+	}
+
+
+
+**************springMVC的处理请求，是通过前端控制器映射到相应控制器中，执行url中对应的方法，返回值提交个视图解析器，解析出对应的jsp页面
+当将jsp放到WEB-INF目录下时，用户不能通过请求的url来直接访问jsp，这样就大大增加了系统安全性；而是通过springMVC框架处理url，之后解析出对应的jsp页面
+*************因此springMVC推荐将动态页面放入到WEB-INF目录中，增加安全性（struts2框架也可以实现，只需要在result节点中编写完整的jsp路径，且要区分大小写）
+
+
+springMVC框架的@RequestMapping注解运用：
+通过对@RequestMapping的属性赋值,来区分不同情况下，执行对应的controller的方法
+1、RequestMapping默认只写一个属性 value；并且该属性的值为string类型数组，因此可以有多个值
+当只需要一个匹配值时，value="hehe"；当只有该属性存在时，可以省略为@RequestMapping（“hehe”）
+当需要多个匹配值时，vlue={“/”,“”,"hehe"}
+****并且requestMapping还可以注解controller类，来增加匹配路径的区分度，将不同的模块的controller区分开，同时开发时不存在其方法名相同，导致程序BUG，类似于struts2框架的namespace
+如：当类注解为@RequestMapping（“/uers”）  ;url就需要在后面添加/uers/hehe
+
+2、method属性，用于通过不同的提交方式来区分同名方法
+@RequestMapping（value=“hehe”，method=RequestMethod.GET） 当url为hehe，且请求提交方式为GET时，执行该方法
+@RequestMapping（value=“hehe”，method=RequestMethod.POST）当url为hehe，且请求提交方式为POST时，执行该方法
+
+3、params属性，用于通过提交的参数列表不同来区分同名方法
+@RequestMapping（value=“hehe”，params={“id”}当url为hehe，请求传递过来一个id参数时，执行该方法
+且此时方法中应接收该参数 public String Login（int id）
+
+4、headers属性，用于通过请求头来区分是否执行对应方法（用于增加项目安全性，请求头为一个键值对，且值时加密的；当发出的请求包含还请求头时，就执行对应方法；反之不执行，说明请求不安全，不来自于本网站）
+
+springMVC框架的数据绑定（将请求中的数据传递到contorller中）：
+1、属性值数据传递：可以是url中的数据、表单提交的数据、上传的文件
+无论通过get、还是post提交的属性值，都可以在contorller类的方法中，通过@RequestParam注解来接收
+public String login(@RequestParam String account,@RequestParam String password)
+其参数名与表单中的数据name相同；与url中？后的属性名相同
+
+2、对象数据传递：
+springMVC是通过@ModelAttribute来注解参数对象，让前端传递过来的参数自动填充到该对象中
+public String login(@ModelAttribute Account account)    *****当参数类型为实体对象类型时，系统会自动默认添加@ModelAttribute，因此该注解可以省略
+和struts2框架不同，前端传递参数时，不需要添加对象前缀：
+即struts2对象数据传递时，name=account.account
+而springMVC为：name=account，但一定要有对应的实体对象，以及该实体对象有对应的属性
+
+3、获取url模板中的变量值（通过url变量来传递参数）
+这种传递参数的方式为RESTful（一种软件系统架构风格）处理url的方法；这种方法能够让url传递参数时，不能明显的被其他人知道url传递的参数名和参数值
+1、即不写参数名，而是将参数值写在url中，并用/分开，这样会使他人不知道该值是为路径还是参数值，并隐藏了参数名
+url：http://localhost:8080/springMVCDemo//login/yuanhaun/2134
+2、对应的在spirngMVC控制器的方法中通过@RequestMapping中的value来匹配对应url
+@RequestMapping（value=“/login/{account}/{password}”） 变量名和login字段可以随意互换，大大增加参数传递的隐藏性
+3、在对应的方法中，通过@PathVariable注解来获的改url中的变量值
+public String tologin（@PathVariable String account，@PathVariable String password） 其参数名要与url的变量名一致
+
+4、获取请求中的cookies（*cookies一般用于保存用户信息，在一段时间后自动删除，它存放在本地中；比如用户登入时，系统会自动优先访问本地cookies，是否保存了用户登入信息，有就会直接登入，不需要再次输入账号密码）
+@CookieValue   cookies中的属性名（默认有一个JSESSIONID）
+
+5、获取请求中请求头的键值对数据
+@RequestHeader string  key名
+
+6、
+
+
+springMVC将参数传递给页面：
+一、model对象方式：
+1、通过在controller方法参数中创建一个Model对象，然后将数据添加到Model中
+public String login(@ModelAttribute Account account ,Model model )
+model.addAttribute("msg", "账号密码错误");
+2、在jsp页面，通过四个作用域获取Model中的数据（Model对象数据，会映射到页面的四个作用域中，每个都能获取到Model中的数据）
+${msg}
+
+二、通过将视图和数据封装到ModelAndView对象中，改变方法的返回值类型为ModelAndView，数据就会通过springMVC框架传递到HttpServletRequest对象
+然后在方法中创建ModelAndView对象，将数据、和视图字符串添加到该对象中
+	ModelAndView mv=new ModelAndView();
+	if (account.getAccount().equals("hehe")&&account.getPassword().equals("123")) {	
+			mv.setViewName("index");
+		}else{
+			mv.addObject("msg",  "账号密码错误");
+			mv.setViewName("login");	
+		}
+	return mv;
+	}
+
+三、通过servlet-api来获的jsp四个作用域对象，来保存数据
+1、首先需要导入servlet-api依赖包
+2、在方法中创建HttpSession对象参数，从而获的session对象，并和serlvet操作类似将数据保存到该对象中：session.setAttribute（“msg”，“账号密码错误”）
+除了session外，还可以获的HttpServletRequest对象、HttpserlvetResponse对象
+并且通过request对象还可以通过getSerlvetContext方法来获的application（无法直接获的servletContexet，即application）
+
+
+springMVC传递json数据：
+一：将参数从controller传递到jsp页面中
+1、在controller中编写传递对象数据的方法，返回类型为实体对象类型
+2、在该方法中注释对应的@RequestMapping注解，并添加修改返回类型的注解@ResponseBody（springMVC框架中控制器执行方法，springMVC解析器默认只能识别返回值为String和ModelAndView两种类型参数），它会将返回的实体对象调用转换器，序列化成json对象
+3、导入springMVC的对象转换为json的转换器依赖包：Jackson DataBind、Jackson Core（只用在maven中添加Jackson DataBind的依赖，自动关联下载Jackson Core依赖包）
+4、在jsp页面中，添加jquery插件包，使用ajax的get方法，通过url获的对应控制器执行方法的返回数据（已经转换成了json对象）
+
+二：将jsp页面脚本中json数据传递到controller中：
+1、与上面同理，添加json数据转换依赖包，前端安装jquery插件
+2、将编写好的json数据放到ajxj提供的post方法中，并设置传递的参数类型为type：JSON、ajax的编码格式为contentType：“application/json；charstutf-8”
+3、在controller中对应的方法，并添加参数（参数类型可以是Map、list、实体来接收），但需要对参数进行注释@RequestBody
+****当controller的方法需要同时接收和传递json数据时，需要同时注释@ResponseBody和@RequestBody
+****前端传递过来的json数据只有一组时，可以使用@RequestParam；多组时，就只能用@RequestBody，否则就会出现数据丢失
+
+
+springMVC文件上传和下载：
+1、导入文件下载上传所需要的依赖包，commons-fileupload、conmmons-io（且前者的使用依赖于后者，因此只需要导入commons-fileupload依赖，maven会自动下载其他依赖包）
+2、在spirngMVC配置文件中，添加文件上传的bean（文件上传解析器），用于设置文件传输时的编码格式、上传大小等属性（和sturts中设置type=stream的result节点属性类似）
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 可以设置一些属性</bean>
+bean的id名一定为multipartResolver；否则springMVC框架就无法调用该组件，完成文件传输     ；该组件在spring-web依赖包的multipart.commoms中
+
+------------------------------->文件上传时：
+1、编写文件上传的表单，并在form标签中添加属性：envtype=“multipart/form-data”（添加该属性，表单一样能够提交传递参数）
+2、在表单提交对应的controller的方法中，添加对应的参数来接收：   MultipartFile 文件在表单中的name
+3、在方法中编写保存缓存文件的代码
+	@RequestMapping(value="/file")
+	public  void upFile( MultipartFile myfile, HttpServletRequest request) {
+//		通过request对象获的application对象，再获的文件目录绝对路径（该目录为保存上传文件的目录）
+		String realPath = request.getServletContext().getRealPath("/uploads");
+//		获的上传文件的原始文件名
+		String filename=myfile.getOriginalFilename();
+//		创建一个文件对象，用于接收上传的文件数据（通过原文件名、保存的目录路径来拼接出其文件的绝对路径）
+		File uploadfile=new File(realPath+"//"+filename);
+		
+//		springMVC框架提供一个非常简单的方法transferTo()，直接将上传文件拷贝到自己创建的文件对象中
+		try {
+			myfile.transferTo(uploadfile);
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+	}
+}
+当多个文件上传时，有两种方式：
+1、对每个input的file标签name取不同name；在controller方法中对应创建多个参数接收；然后创建多个文件对象来copy，调用   文件name.transferTo(对应文件对象)方法
+2、对每个inpit的ifle标签name取相同name；在controller方法中对应创建一个MultipartFile[]数组对象；然后foreach该数组(由于可能出现不上传文件，因此需要先判断数组的长度是否大于0)，取出每个元素来创建文件对象进行copy
+********一般都使用第二种方式，因为第一种方式有个弊端，必须上传代码中固定个数的文件，否则代码执行时，会出现空指针异常（而实际情况中常常是由用户来选择上传的文件个数）
+
+----------------------------------->文件下载：
+1、创建一个页面，提供前端下载的超链接
+2、对应超链接的url，在controller中写一个方法：
+@RequestMapping("/down")
+	public ResponseEntity<byte[]> down( HttpServletRequest request) throws IOException{
+		String realPath = request.getServletContext().getRealPath("/uploads/springMVC.txt");
+		File file=new File(realPath);
+		
+                        HttpHeaders headers = new HttpHeaders();  
+	        //下载显示的文件名，解决中文名称乱码问题  
+	        String downloadFielName = new String(file.getName().getBytes("UTF-8"),"iso-8859-1");
+	        //通知浏览器以attachment（下载方式）打开图片
+	        headers.setContentDispositionFormData("attachment", downloadFielName); 
+	        //application/octet-stream ： 二进制流数据（最常见的文件下载）。
+	        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+		return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(file), headers, HttpStatus.CREATED);
+	
+	}
+通过springMVC框架提供 ResponseEntity<byte[]> 对象来将文件对象传递到页面下载，并可以设置相应的下载方式
+其对象可以传递三个信息  请求体（信息实体：如文件等）、请求头（设置该请求的属性）和状态码
+
+
+
+springMVC和struts的区别：
+1、springMVC时方法级别的拦截，一个方法对应一个request（请求）；struts时类级别拦截，一个action类对应一个request，因此每个请求都要编写一个action
+2、在拦截器实现机制上，struts2使用自己的interceptor（拦截）机制，需要进行大量sturts.xml的编写；而springMVC直接通过AOP来实现
+3、spirngMVC拦截请求是通过servlet（控制器）；struts是通过filter（过滤器）
+4、springMVC是通过注解来匹配url；struts是通过struts.xml来匹配
+5、springMVC的request对象创建是单例模式（若被创建过，就直接调用）；struts每个action都需要创建一次request对象，这样大大增加了内存占用
+6、springMVC使用基本为全注解，相对于struts2框架大大减少了配置文件的编写，并使框架处理请求的流程更加清晰（直接在contorller层中就能体现代码；struts2则需要结合struts.xml来解读代码）

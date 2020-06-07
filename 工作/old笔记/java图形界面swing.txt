@@ -1,0 +1,258 @@
+菜单栏控件
+JMenuBar  设置菜单栏
+JMenu 菜单（有下级菜单）   JMenuItem 菜单项目（没有下一级菜单）
+JpopupMenu 弹出菜单（用于右键出来的菜单）
+
+窗口关闭属性
+defaultCloseOperation  默认关闭时关闭程序（点击右上角关闭键） 
+DO_Nothing  什么都不做
+HIDE        隐藏
+DISPOSE     关闭窗口
+EXIT        关闭程序
+
+---------------------->在窗口关闭时询问是否关闭
+----1、在自定义按键确定关闭窗口时：
+对按键添加动作事件
+		JOptionPane.showMessageDialog(null, "请确定退出");
+//			带多个按钮的对话框 每个按钮都有自己的返回值    对话框位置，对话框提示内容，对话框标题
+				int choose =JOptionPane.showConfirmDialog(null, "是否退出", "系统提示", 
+//						对话框按钮类型 （是和否）  消息类型（内容左边的图标类型）         
+						JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+			
+//			判断按钮的返回值来选择相应操作
+				if (choose==0) {
+					System.exit(0);
+				}
+2、在点击窗口右上角关闭键时:
+对窗口添加窗口关闭时事件，并且在将窗口关闭属性中改为 DO_NOthing_ON_Close(什么都不做，由程序代码控制)
+
+
+表格控件  JTable
+先设置菜单栏整块区域 JScrollpane （可滚动的子窗口）（约定表格的空间，否则无法显示表头）
+添加对表格控制的控件
+对控件添加动作事件
+
+------------------>创建表格数据
+1、定义表头（此时表头只会随表格数据显示而出现）
+				String heads[] ={"编号","姓名","性别","血型","爱好","简介"};
+				
+//				2、定义表模式，表格的组成
+//				将表头放在表模式的第一行
+				DefaultTableModel mode1 =new DefaultTableModel(heads, 0);
+				
+//				3、将数据放在表模式中
+//						单组添加到表模式中
+				mode1.addRow(heads);  
+//				4、将表模式交个表格控件
+				table.setModel(mode1);
+
+------------->界面转换
+//                   关闭当前界面，进入下个界面
+//                    1、实例化你要显示的界面(自定义一个窗口)
+                	MainForm mf =new MainForm(a);
+
+//                	2、设置其可见度（窗口创建默认为不可见）
+//                	创建窗口的代码方法是封装的，且没有get的方法
+//                	因此需要在窗口程序中添加get的方法
+                	mf.getFrame().setVisible(true);
+                	
+//                	3、关闭当前窗口
+                	frame.dispose();
+                	
+//                	将该窗口中的数据，传递到下个界面
+//                	在下个界面代码中加入带数据参数的构造方法
+//                	在切换界面时，声明该窗口，用带参数的方法
+//                	之后在该方法中运用其数据
+将得到的数据，来加入到界面的标题中
+   	public MainForm(Account account) {
+		initialize();
+//		将得到的数据在该界面显示
+//		将数据中的用户名写在该窗口标题中
+	    frame.setTitle("欢迎"+account.getUsername());
+	}
+
+
+
+
+
+---------------->将控件数据保存到数据库	
+//				提交按钮的点击事件
+//				获得界面中控件的数据：
+//				
+			
+////			在用户名不存在时，可以不进行操作
+//			if(check()){
+////				代码不向下执行
+//				return;
+//			}
+//			
+					
+//              获得单选按钮的值
+////			默认获得男 
+//			String sex ="男";
+////			if 女被选中，则赋值sex为 女
+//			if (rbutwoman.isSelected()) {
+//				sex="女";
+//			}
+//	
+//		获得姓名文本框
+			String name=textname.getText();	
+				
+//        三元运算符？ 条件表达式 ? 值1：值2  true 为值1，反之
+			String sex =rbutman.isSelected()?"男" :"女";
+					
+//		获得下拉框的值 (变量名不能和控件名一样)
+			String bloodType =(String) bloodtype.getSelectedItem();
+			
+//			获得多选框的值(创建变量hobby保存)
+			String hobby ="";
+			
+			if(ckbsleep.isSelected()){
+				hobby+=ckbsleep.getText()+",";
+			}
+			if(ckbeat.isSelected()){
+				hobby+=ckbeat.getText()+",";
+			}
+			if(ckbbit.isSelected()){
+				hobby+=ckbbit.getText()+",";
+			}
+//			获得文本域的内容
+			String info =text.getText();
+			
+//			调用将数据保存数据库的方法
+		    RegisterDao red =new RegisterDao();
+		    red.saveBase(name, sex, bloodType, hobby, info);
+			
+		    JOptionPane.showMessageDialog(frame, "提交成功");
+			}
+--------------------------->将数据库数据填写到控件中
+
+              txt.settext(e)  e应该转换为string类型 	
+
+
+
+--------------->判断用户名不能为空的方法
+//	在方法外面写一个方法
+	public boolean check(){
+
+		String name=textname.getText();
+//		用户名不能为空，且不能为空格  trim（） 去除两端空格
+		if (name.trim().equals("")) {
+			JOptionPane.showMessageDialog(frame, "用户名不能为空");
+			return true;
+		}
+              return false;
+	}
+				
+--------------------->窗口创建时让窗口在屏幕中央
+	public registerform() {
+		initialize();
+		
+//		构造窗体时的代码
+//		同编写代码让窗口创建时，在屏幕中间
+//		窗体的位置 相对于为null
+		frame.setLocationRelativeTo(null);
+		
+	}
+
+----------------------->失去光标后判断文本框内容，将按钮禁用
+       public void focusLost(FocusEvent e) {
+//				失去焦点事件(光标从文本框移开就判断)
+				if(check()) {
+//					将提交按钮禁用
+				    submitBut.setEnabled(false);
+				}else {
+//					 将提交按钮启用
+					submitBut.setEnabled(true);
+				}
+			}
+
+---------------------------->鼠标点击表格，获得改行数据，并显示在控件中
+        为表格 添加一个鼠标点击事件
+                                获得改行数据的行的下标
+				int rows=table.getSelectedRow();
+				Account account =new Account();
+//				获得该行编号
+//				int aid =(int) table.getValueAt(rows, 0);
+				
+//				获得该行用户名
+				String username= table.getValueAt(rows, 1).toString();
+//				获得该行密码
+				String password =table.getValueAt( rows , 2).toString();
+				
+//				将获得的数据显示在控件中
+				txtname.setText(username);
+                txtpassword.setText(password);
+
+-------------------------->让表格从一开始就显示表头
+      在窗口的构造方法中实例化表格的表头数据，之后在显示表格数据的控件中添加显示表格数据的控件，此时还是要先定义表头，相当于此时的表头已经被固定的表头覆盖
+	public MainForm() {
+		initialize();
+//		在窗口定义表格，这样可以将表头直接显示在表格中（固定）
+		
+//		1、定义表头
+		String Hands[]={"编号","姓名","密码"};
+		
+//		2、实例化表模式
+		DefaultTableModel model =new DefaultTableModel(Hands, 0);
+		
+//		3、将表模式交个表格
+		table.setModel(model);	
+	}
+
+------------------------->在表格中添加JpopupMenu 弹出菜单控件（用于右键出来的菜单）
+                    需要在代码中修改POPUP插入的位置（在图形界面中不好选定插入表格）
+
+
+-------------------------->创建需要在代码中填写的文本框（不可被用户在界面编辑）两种：
+                         1、通过创建一个标签，在代码中修改其标题(可以实现没有文本框，就像字写在界面上)
+                                   lblID.setText(e)
+                         2、通过对文本框属性修改，使文本框不能再界面上编辑，之后在代码中填写其文本内容
+                         （但这样会有一个文本框，因此需要修改文本框属性，文本框背景颜色、文本框框线）
+                                   txtID.setText(e)
+                                   修改文本框属性editable(可编辑的) 该为false
+                                   修改文本框属性 文本框背景颜色：menu(界面背景颜色)
+                                   在文本框创建的代码中添加
+                                   //		修改文本框颜色，尺寸
+		txtname.setBorder (BorderFactory.createLineBorder(SystemColor.menu,5))
+
+
+
+
+事件：
+actionPerformed  动作事件   
+对控件进行操作时，控件的点击
+
+focusLost   失去光标事件
+当文本框光标移开时，发生事件
+
+MouseAdapter  鼠标点击事件
+若控件的动作事件被占用，则可以设置鼠标点击事件，来完成其他操作
+动作事件未被占用时，设置鼠标点击事件没用
+
+itemstatechanged 列表项目发生改变事件
+若下拉框得选项发生变化，则触发事件
+ 
+windowclosing    窗体关闭事件(设置窗口的右上角关闭键)
+windowActivated   窗口弹出时事件
+***
+对控件添加事件时，代码只会识别该控件前的控件类名（JTextField文本框类型除外）
+因此应将需要添加操作其他控件的控件移到最下面进行操作
+
+必须先判断结果集是否有数据（即使不可能为空）
+if (rse.next()) {
+rse.getstring("name")
+}
+				
+从sql语句中得到的datetime类型，秒后面会有.0,因此需要将其去掉
+//				通过string字符串截取的方法（substring） 只截取前面的
+
+
+获得该行编号*******要先将Object转为string ，
+		    int mid= Integer.parseInt(table.getValueAt(rows, 0).toString()) ;
+
+**********************************mysql语句 删除前10行
+DELETE from parkrecord LIMIT 10 
+
+*********************************mysql语句 修改自增的初始值
+初始值为1000 ： ALTER   TABLE   tablename   AUTO_INCREMENT   =1000

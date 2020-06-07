@@ -1,0 +1,137 @@
+JAVA8中  ：
+lambda表达式：匿名方法
+基础语法：
+（）-> 要返回的值（表达式）
+    public int add(int x, int y) {
+        return x + y;
+    }
+通过lambda表达式为：    (int x, int y) -> x + y;
+
+lambda表达式有三部分组成：参数列表，箭头（->），以及一个表达式或语句块。
+1、如果只有一个参数且可以被Java推断出类型，那么参数列表的括号也可以省略
+2、有多行代码时，java自动检测出需要返回的值（一般和参数列表相关）；当然也可以通过显式指明返回值
+3、有多行代码或者显式指明返回值时，需要对代码块用{}扩起来
+*******当lambda表达式写回调函数时，参数列表则为该回调函数的回调值；参数的类型时一定的，只需要定义该形参名
+如server.requestHandler(request -> {
+reqeust有关的代码块
+})
+实际可写为：server.requestHandler(new Handler<HttpServerRequest>() {
+request有关代码块
+}）
+
+
+
+JAVA8中允许接口中定义静态方法：
+因此在Vert.x框架中，获的Vertx接口实例时，是通过Vertx接口的静态方法实例化的
+通过Vertx接口的实例化对象，带创建Vertx 的API中的HttpServer
+
+：：语法糖，是JDK8的新特性，用于在一个方法的回调函数中使用其回调值，为一个对象的方法的参数
+如：server.requestHandler(router::accept);
+实际为：
+server.requestHandler(new  Handler<HttpServerRequest>(){
+public void handle(HttpServerRequest event){
+          router.accept(event);
+}
+})
+
+修改maven项目jdk版本（javase1.8）：
+找到maven插件的settings文件，中的<profiles><profiles/>这对标签：
+添加JDK版本配置文本：
+         <profile>  
+   
+<id>jdk-1.8</id>  
+   		
+<activation>  
+   			
+<activeByDefault>true</activeByDefault>  
+   		    
+<jdk>1.8</jdk>  
+   		
+</activation>  
+   		
+<properties>  
+   			
+<maven.compiler.source>1.8</maven.compiler.source>
+   			
+<maven.compiler.target>1.8</maven.compiler.target> 
+   			
+<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>  
+   		
+</properties>
+</profile>
+
+
+TCP和HTTP：
+TCP：传输控制协议，对应网络连接的传输层，定义的是数据传输和连接方式的规范；TCP为服务器和客户端提供数据传输接口；通过两者的“三次握手”，来构建服务器和客户端的TCP连接
+三次握手：客户端请求连接--->服务器确认连接--->两者建立连接
+之后就两者就可以互相传递数据，直到有一方断开连接，因此TCP是一种长连接（有状态连接）
+
+HTTP：超文本传送协议，对应网络连接的应用层，定义的是传输数据的内容的规范；是建立在TCP上的一种应用；当发出一个Http请求时，HTTP会通过TCP来建立一个数据连接通道，当请求数据传递完后，HTTP会立即断开TCP连接，所以HTTP的连接是一种短连接（无状态连接），即客服端每次发送请求时，都会建立一次TCP连接
+1、HTTP连接使用的是“请求--响应”方式，在请求时需要先建立连接，而且需要客户端向服务器发出请求后，服务器端才能回复数据。
+2、当然HTTP1.1中可以允许在一次TCP连接中，处理多个请求，从而实现持续连接；但长时间没有数据传输时，连接还是会断开
+
+Socket：scoket是对TCP/IP协议的封装，自己本身不是协议，而是一个API，让我们更好的处理TCP/IP协议的网络通信
+1、使用socket接口来创建连接时，可以指定传输层协议，可支持TCP、UDP,当使用TCP协议时，socket连接本质上就是TCP连接
+2、因此在使用socket连接时，不仅可以保持长连接，而且不需要像HTTP连接那样，客户端发送一次请求后才能将数据传回给客户端；因此服务器只有有新数据，就能直接传递给客户端
+
+TCP/IP：是网络实现基本通信的基本协议，而且它实际是一个协议组，不仅仅只有TCP、IP
+
+java中实现网络功能的四大类：
+InetAddress:用于标识网络上的硬件资源，主要是IP地址
+URL：统一资源定位符，通过URL可以直接读取或写入网络上的数据
+Sockets：使用TCP协议实现的网络通信Socket相关的类
+Datagram:使用UDP协议，将数据保存在用户数据报中，通过网络进行通信。
+
+java中基于TCP协议的类：
+客户端的Socket和服务器端的ServerSocket类
+Socket通信的步骤：
+                 ① 创建ServerSocket和Socket
+                 ② 打开连接到Socket的输入/输出流
+                 ③ 按照协议对Socket进行读/写操作
+                 ④ 关闭输入输出流、关闭Socket
+
+服务器端：
+                 ① 创建ServerSocket对象，绑定监听端口
+                 ② 通过accept()方法监听客户端请求
+                 ③ 连接建立后，通过输入流读取客户端发送的请求信息
+                 ④ 通过输出流向客户端发送响应信息
+                 ⑤ 关闭相关资源
+客户端：
+                 ① 创建Socket对象，指明需要连接的服务器的地址和端口号
+                 ② 连接建立后，通过输出流想服务器端发送请求信息
+                 ③ 通过输入流获取服务器响应的信息
+                 ④ 关闭响应资源
+
+websocket：和Http一样是应用层协议，都建立在TCP之上；
+但它是双向通信协议（可以互相发送或接受信息），而HTTP是单向通信（请求-响应）；
+WebSocket需要进行握手连接,在进行握手时，是通过HTTP来传输的，建立连接后就不需要HTTP
+连接过程：
+1. 浏览器、服务器建立TCP连接，三次握手。这是通信的基础，传输控制层，若失败后续都不执行。
+2. TCP连接成功后，浏览器通过HTTP协议向服务器传送WebSocket支持的版本号等信息。（开始前的HTTP握手）
+3. 服务器收到客户端的握手请求后，同样采用HTTP协议回馈数据。
+4. 当收到了连接成功的消息后，通过TCP通道进行传输通信。
+
+UDP：用户数据报协议；和TCP连接一样，是传输层协议；但其传输数据，不需要进行握手，没有有确认、窗口、重传、拥塞控制机制，因此传输数据非常快，但是由于灭有这些可靠机制
+，在网络不好的环境下，会容易丢包，不稳定；常用用于即时通信，如：语音、视频等；每一条TCP连接只能是点到点的;而UDP支持一对一，一对多，多对一和多对多的交互通信
+MQTT：消息队列遥测传输，为应用层协议；使用TCP/IP提供网络连接
+基于订阅/发布模式的轻量级通讯协议，可以在低开销、低带宽的环境下，提供实时可靠的消息服务，在物联网、小型设备、移动应用等方面有较广泛的应用。
+
+Vert.x框架：
+1、Vertx能干嘛：
+（1）Web开发，Vert.x封装了Web开发常用的组件，支持路由、Session管理、模板等，可以非常方便的进行Web开发。并且提供了对SSL的支持。
+
+
+（2）TCP/UDP开发，Vert.x底层基于Netty，提供了丰富的IO类库，支持多种网络应用开发。
+
+
+（3）提供对WebSocket的支持，可以做网络聊天室，动态推送等。
+
+
+（4）Event Bus（事件总线）是Vert.x的神经系统，通过EventBus可以实现分布式消息，远程方法调用等等。通过Event Bus可以非常编辑的开发微服务应用。
+
+
+（5）支持主流的数据和消息的访问 redis mongodb rabbitmq kafka 等
+
+（6）分布式锁，分布式计数器，分布式map的支持
+2、Vertx的特点：
+它是一个异步非阻塞式框架

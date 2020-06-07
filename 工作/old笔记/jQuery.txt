@@ -1,0 +1,240 @@
+
+JQuery
+jQuery 是一个 JavaScript 库。
+jQuery 极大地简化了 JavaScript 编程。
+
+jQuery是一个JavaScript函数库。
+jQuery是一个轻量级的"写的少，做的多"的JavaScript库。
+jQuery库包含以下功能：
+HTML 元素选取
+HTML 元素操作
+CSS 操作
+HTML 事件函数
+JavaScript 特效和动画
+HTML DOM 遍历和修改
+Utilities （实用工具）
+AJAX
+
+除此之外，Jquery还提供了大量的插件
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+	<!--加载jQuery.js插件（就是将一串js代码封装）-->
+	<script src="js/jquery.js"></script>
+	<!--编写js代码，此时就可以调用JQuery中封装后的方法、属性-->
+	<script>
+		//$()方法，是在页面创建时进行运行，因此$()中的内容可以直接在页面中运行
+		//js中的onlaod事件 是在页面加载后触发
+
+        //jQuery 的代码（入口函数） 是在DOM加载完（会建立标签）后再执行
+        $(document).ready(function(){
+        // 执行代码
+        可实现在body前编写绑定事件的代码(js可以将onlaod事件看做成入口函数,从而达到这个效果)
+         });
+        
+        //HTML代码的加载过程
+ 		解析HTML结构--- 加载外部脚本和样式表文件 -----  解析并执行脚本代码----
+        构造HTML DOM模型---- 加载图片等外部文件----  页面加载完毕(还可执行脚本代码)
+		
+
+
+//		HTML 元素选取:
+		//jquery调用节点的方式与js不同，直接通过和css一样的选择器调用
+        //id  #   classname .   tagname  直接标签名
+        //所以获取节点为  $("#id")  、$(".classname") 、$("p")
+
+       *** 通过变量名获取节点时，jquery不能直接调用变量获得节点对象，需要用$(变量名（不需要打引号）)  即$(a)
+       *** 对窗口对象绑定事件时，也需要通过$（），调用window对象
+       因为jQuery已经对节点的使用的方法属性进行了包装，要使用节点时，一定要通过$()方法进行调用，因此即使将获得的节点保存到变量，或节点本身就属于HTML的默认对象时，也需要通过该方法将变量以参数形式传递给jquery封装好的节点方法中，从而进行jquery节点方法属性的调用
+
+
+        //获取当前HTML节点  $(this) (一般用于each循环中，获得当前循环节点)
+        //获取所有节点 $（"*"）
+        //选择该div标签中classname为p1的标签   $("div.p1")
+        //选择第一个p标签 $("p:first")
+		//选择第一个ul标签的第一个li子标签  $("ul li:first")
+		//选择每个ul标签的第一个子标签  $("ul li :first-child")
+		//选择所有a标签中value属性值为22的标签  $("a[value='22']")
+		//选择属性值为33的所有标签  $(":33")  (会自动匹配哪些标签的属性的值以为这个)
+		//选择下标为偶数的所有该标签 $("tr.even")  （下标从0开始）
+		//选择下标为奇数的所有该标签 $("tr.odd")
+		
+//		HTML 元素操作：
+        //获得节点内容，三种方法
+//      1、text()  返回节点的文本内容      text("文本") 设置文本内容
+//      2、html()  返回节点的内容（包括其中的HTML标签语句） 同理
+//      3、val()   返回表单字段的值
+        //这些方法还自带一个回调函数  text（function（i，origText）{
+//      	代码调用参数i（第几个节点（下标0开始）），调用该节点的前一个文本
+        }）
+
+        //获取节点的属性值（没有该属性时，返回undefined）
+//      $("#a").attr("属性名")
+
+        //设置属性 
+        $("#a").attr("属性名","属性值")
+
+//      jQuery 创建节点并设置文本内容
+        $("<p></p>").text("文本");
+
+//      为节点添加文本或元素
+        append() - 在被选元素的结尾插入内容
+        prepend() - 在被选元素的开头插入内容
+        after() - 在被选元素之后插入元素
+        before() - 在被选元素之前插入元素
+
+//      删除节点
+        remove() - 删除被选元素（及其子元素）
+        empty() - 从被选元素中删除子元素
+
+
+//      CSS 操作：
+//      给节点添加或删除class选择器
+        addClass() - 向被选元素添加一个或多个类
+        removeClass() - 从被选元素删除一个或多个类
+        toggleClass() - 对被选元素进行添加/删除类的切换操作(执行一次就添加/第二次删除..循环)
+
+//      直接设置节点的css属性
+        $("p").css("样式类型","样式的值")  设置单个样式
+        $("p").css("样式类型":"样式的值","样式类型":"样式的值") 设置多个样式
+        
+        获得scc属性的单个样式值
+        var a =$("p").css("样式类型");
+
+
+//      HTML 事件函数：
+        jQuery事件绑定和js类似,获取节点然后设置事件类型,和事件代码
+         但jQuery写法更简单,事件名省略了on
+        $("p").click(function(){ 事件代码   })
+        Js: document.getElementsByTagName("button").onClick=function(){
+			alert("hah");
+		}
+        jQuery和js一样,由于绑定事件代码是在,标签没有生成之前,所以应将代码写在body后面
+         或者在JQuery的入口函数中绑定事件
+         
+//      HTML DOM 遍历和修改：
+        通过获得的节点数组对象,对数组进行遍历
+        jQuery相比于js多了一个each()遍历的方法
+        $("p").each(function(i,n){
+        	$(this)   获得当前节点
+        })
+         i,n两个参数可有可无，可以快速获得当前循环对象小标和当前循环的对象        
+
+
+        节点的关系节点
+        parent()   该节点的父节点
+        children()  该节点下一级的所有子元素
+        find()    该节点下级(子节点的子节点..)所有后代
+        siblings()  该节点的所有同级节点(不包含本身)
+        next()      该节点的下一个同级节点
+        nextAll()   该节点后面的所有同级节点
+        
+        节点的过滤
+        first(), last() 和 eq()  第一个该节点 最后一个  eq(0) 节点数组对象中下标为0的节点 
+        其写法: $("div p").first()   第一个div元素中的第一个p元素
+        
+        
+//  JavaScript 特效和动画：
+          实现元素的显示和隐藏
+             hide() 和 show()  节点的隐藏和显示
+             toggle()    节点的隐藏和显示的切换
+          实现元素的淡入淡出效果
+             fadeIn()      淡入  
+有两个参数，前一个为时长（slow、fast、毫秒）后一个为执行完动画效果后，运行的函数
+             fadeOut()     淡出
+             fadeToggle()  切换（与当前状态相反）
+             fadeTo()      改变此时元素的不透明度（0-1）（数值越大，越不透明）
+有三个参数，第二个为要变化的不透明度
+          ..........(还有很多)
+
+//   Utilities(实用工具)
+      jquery中的方法，相比于js有很多改进和优化
+    
+//   AJAX 
+AJAX = Asynchronous JavaScript and XML（异步的 JavaScript 和 XML）（XML和HTML类似，）
+AJAX 不是新的编程语言，而是一种使用现有标准的新方法。
+AJAX 最大的优点是在不重新加载整个页面的情况下，可以与服务器交换数据并更新部分网页内容
+AJAX 不需要任何浏览器插件，但需要用户允许JavaScript在浏览器上执行
+
+AJAX 是一种用于创建快速动态网页的技术。
+通过在后台与服务器进行少量数据交换，AJAX 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。
+传统的网页（不使用 AJAX）如果需要更新内容，必需重载整个网页面
+
+AJAX技术方法是通过现有的Internet标准，联合使用XMLHttpRequest 对象 (异步的与服务器交换数据)、JavaScript/DOM (信息显示/交互)、CSS (给数据定义样式)、XML (作为转换数据的格式)
+
+XMLHttpRequest对象 提供两个方法：
+xmlhttp.open("GET","ajax_info.txt",true); 用于配置请求对象，三个参数
+method：请求的类型；GET 或 POST
+url：文件在服务器上的位置
+async：true（异步）或 false（同步） 需要用AJAX技术必须要true
+
+xmlhttp.send(); 用于提交请求，当使用POST的方式提交时，会有一个参数，用于选择表单中你需要传递的数据 如： "username=112&password=1231"
+且需要使用setRequestHeader（），添加HTTP头，xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded")
+当使用get的方式提交时，没有参数，需要提交的数据直接附加在url中
+
+当xmlhttpRequest请求响应时，可以通过:
+responseText	获得字符串形式的响应数据。
+responseXML	获得 XML 形式的响应数据。
+
+JQuery 的AJAX提供三个方法：
+1、load() 方法从服务器加载数据，并把返回的数据放入被选元素中
+$(节点).load(url,data,callback)
+必需的 URL 参数规定您希望加载的 URL。(若只有URL这自动加载文件数据，到该节点文本中)
+可选的 data 参数规定与请求一同发送的查询字符串键/值对集合。
+可选的 callback 参数是 load() 方法完成后所执行的函数名称。
+
+2、get() 方法通过 HTTP GET 请求从服务器上请求数据
+$.get(URL,callback)
+必需的 URL 参数规定您希望请求的 URL。
+可选的 callback 参数是请求成功后所执行的函数名
+
+3、post（）方法通过 HTTP POST 请求向服务器提交数据，并通过回调函数获得response对象中的数据
+$.post(URL,data,callback);
+必需的 URL 参数规定您希望请求的 URL。
+可选的 data 参数规定连同请求发送的数据。
+可选的 callback 参数是请求成功后所执行的函数名。
+
+AJAX在JS中的运用：
+AJAX是通过标签调转到js代码中在，在通过XMLHttpRequest对象与服务器数据进行交互
+并且数据以JOSN格式进行传递
+******************超链接触发JS代码的方法（在不用事件的情况下）：
+href="Javascript:void(0);"
+******************也可以使用点击事件触发JS代码
+onlick="page()";
+
+1、先在js中调转到servlet类，servlet调用service的方法，获得需要的数据
+$.post("servlet类名"，{以JSON格式传递的数据 }，function（data）{
+处理返回数据的代码，数据变量名为data的回调函数
+
+})
+
+2、将数据转换为jons格式，并以io流传输到页面js中
+实例化json对象，并将数据实例化到对象中
+JSONObject jsonobject =JSONObject.fromObject(java数据)；
+
+通过IO流响应到页面(以响应对象的IO流实例化PrintWriter)
+PrintWriter printwriter =response.getWriter();
+
+将jons格式数据转换为字符串格式，写入到IO流中
+因为字符IO流输入对象是以响应对象的形式实例化的，因此response对象就会自动保存写入IO流的数据
+
+printwriter.writer(jsonObject.toString())
+关闭IO流
+printwriter.close();
+响应对象在得到数据后，会通过JQuery的post方法自动响应到该servlet所对象的jsp页面
+
+在jsp页面的js代码中接收数据：
+1、先删除原数据
+先删除该节点中的数据
+data.remove()
+2、将response对象中的数据提取出来（该方法由JQuery提供）
+获得response对象中的数据，并将其转换为JSON格式
+var jsonData=jQuery.parseJSON(data);
+3、通过each（）循环遍历json数据格式中的list集合
+
+
+
