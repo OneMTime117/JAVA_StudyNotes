@@ -34,6 +34,7 @@ springMVC的底层原理和框架功能
 3、创建一个分布式项目集群（dubbo+zookeeper）
 4、创建一个常用的ssm框架项目
 5、搭建FTP服务器
+6、搭建一个完美项目的 依赖starts
 
 
 工作问题：
