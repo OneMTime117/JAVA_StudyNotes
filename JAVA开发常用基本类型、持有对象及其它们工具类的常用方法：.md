@@ -523,6 +523,32 @@ String a = res.getString !=null：res.getString:"未知"；
 String a = Object.toString(res.getString(),"未知")；
 ```
 
+### 11、java比较器工具类Comparator：
+
+1、Comparator类提供了多个comparing()方法，以Function（函数式接口）具体实现类为对象，从而实现提取某个类型对象中的一个基本数据类型进行compareTo方法比较（8种基本数据类和String都提供了该方法）的自定义Comparator；**然后可以作用Arrays/Collections的sort方法参数，进行数组、集合容器中的对象排序、或者treeSet、treeMap的构造方法参数，实现它们的排序**
+
+```java
+Comparator<Account> comparing = Comparator.comparing(new Function<Account,String>(){
+    public String apply(Account a){
+        return t.getAccount();
+    }
+});
+
+//可以使用lambda表达式的方法引用进行简化
+Comparator<Account> comparing2 = Comparator.comparing(Account::getAccount);
+```
+
+2、直接实例化Comparator接口，实现compareTo方法，来创建指定对象的比较器
+
+```java
+Comparator<Account> comparator = new Comparator<Account>() {
+	@Override
+	public int compare(Account a1, Account a2) {
+		return a1.getAccount().compareTo(a2.getAccount());
+	}
+};
+```
+
 ## 6、Apache commons库常用方法：
 
 Apache commons，Java开发通用库，进一步扩展JDK的功能，封装了符合时下开发需求的工具或处理方法，常用几个包如下：
