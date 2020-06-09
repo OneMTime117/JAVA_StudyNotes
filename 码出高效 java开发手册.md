@@ -430,10 +430,10 @@ TSL（Transport Layer Security 传输层安全协议）：从大协议栈的角�
 | -------------------- | --------- | -------------------------------------- |
 | 定义关键字           | abstract  | interface                              |
 | 子类继承或实现关键字 | extends   | implements                             |
-| 具体方法             | 可以存在  | java8前不能，之后提供default关键字实现 |
+| 具体方法             | 可以存在  | JAVA8前不能，之后提供default关键字实现 |
 | 方法访问权限         | 无限制    | 默认为public abstract                  |
 | 属性访问权限         | 无限制    | 默认为public static final              |
-| 静态方法/静态代码块  | 可以存在  | 不能存在                               |
+| 静态方法/静态代码块  | 可以存在  | JAVA8前不能存在，之后支持静态方法      |
 | 同类型扩展           | 单继承    | 多继承                                 |
 | 扩展关键字           | extends A | extends A,B                            |
 
