@@ -170,15 +170,8 @@ env 默认设置有三种开发环境：测试、预发、生产；然后可以�
 		<!-- 添加zookeeper客戶端工具,curator依赖 -->
 		<dependency>
 			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-framework</artifactId>
-			<version>4.0.1</version>
-		</dependency>
-
-		<!-- 添加zookeeper客戶端工具,curator依赖 -->
-		<dependency>
-			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-recipes</artifactId>
-			<version>2.8.0</version>
+			<version>4.0.1</version>
 		</dependency>
 ```
 
