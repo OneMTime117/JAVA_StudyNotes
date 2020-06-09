@@ -191,7 +191,7 @@ springboot默认自动配置一个TasScheduleBuilder对象，用于创建ThreadP
 #配置邮件任务：该项目的邮件客户端信息（使用qq邮箱作为发件服务器）
 spring.mail.username=756116832@qq.com
 #并不是直接使用密码，而是使用第三方登录授权码
-spring.mail.password=sdhxdhyzugqdbcgf
+spring.mail.password=*********************
 #配置qq邮箱SMTP服务器（发送邮件服务器）地址javascript
 spring.mail.host=smtp.qq.com
 
