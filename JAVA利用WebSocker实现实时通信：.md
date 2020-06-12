@@ -8,6 +8,12 @@
 
 ​	2、添加供内部tomcat使用的websocket配置类	
 
+当在websocket类中使用mapper、service注入时，不能通过@Autowired进行注解注入；原因：
+
+spring默认管理的都是单例:如mapper类、service类，因此websocket在项目启动时，会初始化创建一个Websocket，并进行依赖注入；当客户端进行websocket连接时，由于websocket是多对象创建（每一个客户端对应一个websocket对象），因此再次创建时，spring就不会进行依赖注入；此时必须通过手动方式进行依赖注入：
+
+springboot中，由于进行了自动配置，因此提供了获取spring容器的ApplicationContext对象方式，即使用配置类：
+
 ````java
 //当使用外部Selvet容器（tomcat）时，则不需要进行配置
 //springboot会自动将所有webSocket服务（被@Component、@ServerEndpoint修饰的类交给外部容器管理
@@ -68,7 +74,7 @@ public class WebSocketServer {
 		Runnable task = new Runnable() {
 			public void run() {
 				for (WebSocketServer webSocketServer : webSocketSet) {
-					try {
+					try {                       
 						webSocketServer.session.getBasicRemote().sendText("当前时间："+System.currentTimeMillis());
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -161,11 +167,43 @@ Welcome<br/>
 </html>
 ````
 
+- 问题：
+
+1、当在websocket类中使用mapper、service注入时，不能通过@Autowired进行注解注入；原因：
+
+spring默认容器管理的都是单例模式:如mapper类、service类，因此websocket在项目启动时，只会初始化创建一个Websocket，并进行依赖注入；当客户端进行websocket连接时，由于websocket是多对象创建（每一个客户端对应一个websocket对象），因此再次创建，此时spring就不会再进行依赖注入；所有必须通过手动方式进行依赖注入：
+
+springboot中，由于进行了自动配置，因此并不是通过application.xml 文件来创建spring容器上下文，而是使用配置类，来获取spring容器的ApplicationContext对象：
+
+```java
+@Component
+public class SpringApplicationContextFactory implements ApplicationContextAware{
+
+	private static ApplicationContext applicationContext;
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext=applicationContext;
+	}
+	
+	public static ApplicationContext getApplicationContext(){
+		return applicationContext;
+	}
+}
+```
+
+2、使用websocket进行连接参数传递
+
+​	websocket通讯时，使用ws协议接口，可以直接通过url来进行传参，和http协议一样，既可以将参数放在url最后面，通过键值对获取；又可以使用url路径占位传参：
+
+前者使用session.getPathParameters()直接获取url？后面所有的键值对
+
+后者在方法参数列表中使用@PathParam获取url路径站位参数（springMVC提供）
+
 ## 2、java原生使用websocket
 
 相比于springboot，java原生使用websocket时，直接使用Tomcat服务器中提供的websocket-api.jar依赖包
 
 并不需要配置websocketConfig配置类。
 
-## 3、基于vert.x框架实现websocket的消息推送
+## 3、基于Netty框架实现websocket的消息推送
 
