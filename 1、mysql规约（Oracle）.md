@@ -472,7 +472,7 @@ SELECT IF(ISNULL(SUM(age)),0,SUM(age))  FROM test
 
 #### 5、合并查询结果：
 
- SELECT  column1，column2 FROM table1  UNION  SELECT    SELECT  column1，column2 FROM table2
+ SELECT  column1，column2 FROM table1  UNION  SELECT  column1，column2 FROM table2
 
 UNION会过滤一组数据完全相同的；而UNION ALL 不会
 
