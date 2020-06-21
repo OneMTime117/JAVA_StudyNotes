@@ -4,15 +4,9 @@
 
 ## **1、springboot整合webSocket,搭建推送服务**
 
-​    1、建立war包的springboot项目（用于使用外部tomcat），导入spring-boot-starter-websocket依赖
+1、建立war包的springboot项目（用于使用外部tomcat），导入spring-boot-starter-websocket依赖
 
-​	2、添加供内部tomcat使用的websocket配置类	
-
-当在websocket类中使用mapper、service注入时，不能通过@Autowired进行注解注入；原因：
-
-spring默认管理的都是单例:如mapper类、service类，因此websocket在项目启动时，会初始化创建一个Websocket，并进行依赖注入；当客户端进行websocket连接时，由于websocket是多对象创建（每一个客户端对应一个websocket对象），因此再次创建时，spring就不会进行依赖注入；此时必须通过手动方式进行依赖注入：
-
-springboot中，由于进行了自动配置，因此提供了获取spring容器的ApplicationContext对象方式，即使用配置类：
+2、添加供内部tomcat使用的websocket配置类	
 
 ````java
 //当使用外部Selvet容器（tomcat）时，则不需要进行配置
@@ -27,7 +21,7 @@ public class WebSocketConfig {
 }
 ````
 
-​	3、编写websocket服务类
+3、编写websocket服务类
 
 ````java
 @Slf4j
@@ -95,7 +89,7 @@ public class WebSocketServer {
 }
 ````
 
-​		4、websocket客户端（前端测试代码）
+4、websocket客户端（前端测试代码）
 
 ````js
 <!DOCTYPE html>
@@ -198,6 +192,26 @@ public class SpringApplicationContextFactory implements ApplicationContextAware{
 前者使用session.getPathParameters()直接获取url？后面所有的键值对
 
 后者在方法参数列表中使用@PathParam获取url路径站位参数（springMVC提供）
+
+3、spring使用内部Tomcat，需要编写配置类的原因：
+
+配置类的作用是将spring容器中的webSocket对象服务接口暴露给内置的Tomcat（Servlet容器），即类似于将controller层的 http接口暴露给Tomcat，这个过程需要ServerEndpointExporter（服务端口暴露对象）来实现；
+
+而外部Tomcat提供的Server runtime库中，就包含tomcat-websocket.jar，提供了该对象，不需要spring进行额外处理
+
+4、当springboot整合websocket创建配置类后，会导致springbootTest执行失败，会报错（serverEndpoint Bean无法被创建，从而使得不能获取javax.websocket.server.ServerContainer  websocket容器），原因：
+
+serverEndpoint 组件需要在Tomcat运行的基础上创建（即需要有Tomcat运行环境）
+
+解决方式：通过@SpringBootTest注解的webEnvironment属性设置，来实现Test启动时，自动运行内部Tomcat
+
+webEnvironment=WebEnvironment.RANDOM_PORT：启动Tomcat，设置随机端口（这样会导致内部Tomcat运行，增加开销，但能进行接口测试，**通过TestRestTemplate，来模拟客户端操作**）
+
+DEFINED_PORT：启动内部Tomcat，使用默认端口
+
+WebEnvironment.MOCK：只是模拟tomcat环境，并不会启动Tomcat（默认值），可以配置@AutoConfigureMockMvc和@AutoConfigureWebTestClient，进行接口模拟测试，有效减少运行Tomcat的开销
+
+WebEnvironment.NONE: 不提供web环境
 
 ## 2、java原生使用websocket
 
