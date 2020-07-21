@@ -1755,7 +1755,7 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
   </bean>
   ```
 
-  sqlsession创建的内部过程：可以根据不同的构造方法，来设置sqlSession的特征（事务等级、执行器类型），**但不能设置事务是否自动提交，因为mybatis-spring永远是将事务提交交给spring事务管理器执行，不能自己设置自动提交，或者手动提交**
+  sqlsession创建的内部过程：可以根据不同的构造方法，来设置sqlSession的特征（事务等级、执行器类型），**但不能设置事务是否自动提交，因为mybatis-spring是将事务提交交给事务管理器执行，不能自己设置自动提交，或者手动提交**
 
   ```java
   	public SqlSessionTemplate setSqlSessionTemplate( SqlSessionFactory sqlSessionFactory) throws Exception {
@@ -1849,7 +1849,7 @@ sqlsession中所有的CRUD操作，都是通过Executor执行器来完成的,myb
   ```
 
 - ReuseExecutor执行器，额外实现预编译sql语句的重用
-- BatchExecutor执行器，额外实现update的批量操作（实际就是提供一个批处理刷新的方法）
+- BatchExecutor执行器，额外实现update的批量操作（实际就是提供一个批处理刷新的方法，并让修改方法不会直接执行）
 
 - BaseExecutor提供了Query方法，而实现mybatis的一级缓存，实际执行sql还是使用子实现类的doQuery方法
 
