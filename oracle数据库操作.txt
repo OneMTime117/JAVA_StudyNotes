@@ -1,0 +1,6 @@
+1、表空间对应datafile文件磁盘地址转移：
+连接数据库，查询所有表空间对应数据文件地址： select tablespace_name,file_name from dba_data_files
+对指定表空间数据文件进行复制
+关闭数据，然后重启进入mount模式，修改表空间对应的数据文件地址 alter database rename file 'C:\JAVA\ORACLE\APP\ORACLE\ORADATA\XE\SYSTEM.DBF' to 'C:\Users\OneMTime\Desktop\SYSTEM.DBF'
+然后进行介质恢复（重新加载指定表空间的数据文件）：recover database
+打开数据库：alter database open
