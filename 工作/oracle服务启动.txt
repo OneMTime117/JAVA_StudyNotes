@@ -3,7 +3,7 @@
 2、重启oracle服务：
 	cmd-sqlplus-sys as sysdba  (以sysdba身份登入数据库)
                 startup nomount只是启动了实例而没有启动数据库
-	startup mount 启动数据库实例，加载数据库，之后可以通过startup open 打开数据库
+	startup mount 启动数据库实例，加载数据库，之后可以通过alter database open打开数据库
 	startup是最全的，实例，数据库加载，数据库打开都完成
 3、关闭oracle服务
 	shutdown normal  正常关闭数据库（等待所有事务、进程结束）
