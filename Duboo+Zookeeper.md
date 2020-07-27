@@ -70,7 +70,7 @@ Dubbo中存在以下几个角色：Registry（注册中心）、Consumer（服�
 
 ​	Dubbo初始化时，服务提供者将服务发布到注册中心，而服务消费者询问注册中心，获取自己所有使用的PRC服务对应的提供者。之后消费者需要使用PRC调用时，则根据负载均衡进行RPC调用；当服务提供者进行变更时，注册中心会异步通知服务消费者该服务提供者的相关变更。同时所有的服务消费者的远程过程调用都会被监控中心异步监控
 
-![](C:\Users\OneMTime\Desktop\Typora图片\architecture.png)
+![](C:\Users\OneMTime\Desktop\Typora图片\DubboRPC调用模型.png)
 
 - **Dubbo协议：**
 
@@ -313,7 +313,7 @@ dubbo.provider.timeout=5000   //全局设置提供者对该服务提供调用的
 
 在进行RPC是，消费者仅仅是调用提供者去执行该服务，然后获取结果数据。有时需要对该服务调用前后做处理，即让消费者对应服务进行进一步封装，如执行ThreadLocal缓存、验证参数、在调用失败时返回模拟数据等。Dubbo提供本地存根的方式，来实现该过程：
 
-![](C:\Users\OneMTime\Desktop\Typora图片\stub.jpg)
+![](C:\Users\OneMTime\Desktop\Typora图片\Dubbo本地存根原理图.jpg)
 
 对指定消费者服务配置本地存根，然后调用该本地存根服务。此时会自动创建该服务的代理，用于远程调用该服务的实现。从而在本地存根服务内部，实现rpc的同时，添加额外的处理代码
 
@@ -493,7 +493,7 @@ Server Stub：服务端存根，用于接收客户端发送的消息，解析然
 
 - RPC调用过程:
 
-![](C:\Users\OneMTime\Desktop\Typora图片\v2-1ae91aa17808a65ac34b419355cf9b40_720w.jpg)
+![](C:\Users\OneMTime\Desktop\Typora图片\RPC调用模型.jpg)
 
 1、客户端以本地调用方式调用服务（调用服务接口方法）
 
@@ -531,7 +531,7 @@ Netty就是基于NIO的多路复用模型，来实现的网络I/O传输。大多
 
 ### 3、Dubbo框架设计原理：
 
-![](C:\Users\OneMTime\Desktop\Typora图片\dubbo-framework.jpg)
+![](C:\Users\OneMTime\Desktop\Typora图片\dubbo工作原理图.jpg)
 
 整个Dubbo，由浅到深可分为三个部分，业务、RPC组件和远程调用底层实现
 
@@ -593,7 +593,7 @@ Netty就是基于NIO的多路复用模型，来实现的网络I/O传输。大多
 
 ### 7、服务调用过程：
 
-![](C:\Users\OneMTime\Desktop\Typora图片\dubbo-extension.jpg)
+![](C:\Users\OneMTime\Desktop\Typora图片\dubbo服务调用接口流程.jpg)
 
 1、通过ReferenceBean的getObject方法获取服务代理对象，由于服务多个提供者，因此就有多个invoker模型，进行选择调用
 
@@ -604,3 +604,4 @@ Netty就是基于NIO的多路复用模型，来实现的网络I/O传输。大多
 4、同时invoker的执行也会满足dubbo集群负载均衡策略，invoker模型进行选择性调用
 
 5、在根据网络传输协议进行远程调用时，通过invoker模型中的暴露协议，底层使用netty进行数据传输
+

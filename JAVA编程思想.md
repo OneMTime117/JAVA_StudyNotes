@@ -395,7 +395,19 @@ Set接口和Collection接口方法完全一样
 
 ​	Map接口常用方法（Map 集合没有继承 Collection 接口，其提供的是 key 到 value 的映射）：
 
-![](C:\Users\OneMTime\Desktop\Typora图片\20180811142536465.png)
+| 方法                          | 功能描述                                                     |
+| ----------------------------- | ------------------------------------------------------------ |
+| put（K key，V value）         | 向集合添加指定key-value数据                                  |
+| size（）                      | 获取集合中的元素个数                                         |
+| clear()                       | 清除集合中所有的元素                                         |
+| remover（Object key）         | 删除指定元素                                                 |
+| isEmpty（）                   | 是否为空集合，是则返回true                                   |
+| containsKey（Object key）     | 查询集合是否包含该key，有则返回true                          |
+| containsValue（Object value） | 查询集合是否包含该value，有则返回false                       |
+| get（Object key）             | 通过key对象返回对应value值，没有则返回null                   |
+| keySet（）                    | 获取所有key对象的Set集合                                     |
+| values（）                    | 获取所有value对象的Collection集合                            |
+| entrySet（）                  | 获取所有key-value数据视图的Set集合（提供iterator迭代器进行遍历） |
 
 9、Stack是一个元素先进后出的容器，继承了LIST接口，常用额外方法有：
 
@@ -410,8 +422,6 @@ s.pop(); 出栈
 **List拥有一个增强版迭代器（listIterator），它还可以调用set（）、add（）方法，在当前遍历位置替换、插入元素**
 
 **在普通迭代器执行时，通过iterator 的remove方法,将当前对象从容器中移除，并且可以对当前遍历的对象进行操作，从而影响容器中对象的值**
-
-
 
 11、foreach循环，内部是使用了iterator进行遍历；当在foreach循环中使用add、remove方法时，会出现错误
 原因：foreach循环时，会创建对象的iterator对象，此时会保存当前对象的modCount值（容器修改次数），每次进行next方法时，都会监测对象的modCount和iterator的expectedModCount是否一样，不一样就会报错。
@@ -453,7 +463,7 @@ itreator不用知道容器具体类型，且速度快，且可以遍历删除rem
 1、由于这些集合的创建是在JAVA1.0/1.1中，当时没有系统的集合框架，在方法使用和效率上都没有优化
 2、在java5后有了单独处理多线程的集合（在concurrent工具包中），在安全同步上优化更好
 
-![](C:\Users\OneMTime\Desktop\Typora图片\1564622952584.png)
+![](C:\Users\OneMTime\Desktop\Typora图片\JDK8集合API架构图.png)
 
 16、对于数组和持有对象（LIst、map、set）添加元素时：
 
@@ -749,11 +759,9 @@ public class FruitGenerator implements Generator<String> {
 public <T> T genericMethod(Class<T> tClass)throws InstantiationException ,
   IllegalAccessException{
         T instance = tClass.newInstance();
-        return instance;
+        return insance;
 }
 ```
-
-
 
 泛型只能指定引用数据类型，不能使用基本数据类型（使用包装类代替）
 
@@ -2329,7 +2337,7 @@ ConcurrentSkipListMap在进行插入（put）、删除（remove）方法时，�
 
 它通过多层链表实现，并且每一层都是有序的。它以增加空间复杂度的代价换取了随机查询效率的提供。
 
-![](C:\Users\OneMTime\Desktop\Typora图片\5689815-f59623d1eda86d26.webp)
+![](C:\Users\OneMTime\Desktop\Typora图片\JDK8HashMap跳表结构图.jpg)
 
 **跳表和红黑树的区别：**
 
@@ -2357,7 +2365,7 @@ Segment个数默认16，可以根据ConcurrentHashMap构造函数来设置，取
 
 通过数组来保存哈希值，每一个哈希值对应一条链表，用于存储对应该哈希值的所有Node<K,V>对象，该对象保存了键值对。
 
-![](C:\Users\OneMTime\Desktop\Typora图片\o4YBAFriiuyAPRN5AAD1konjQJo041.png)
+![](C:\Users\OneMTime\Desktop\Typora图片\HashMap数组+链表数据结构图.png)
 
 **JAVA8，HashMap修改原因：**
 
@@ -2411,5 +2419,5 @@ ReentrantReadWriteLock含有两个锁：readLock、writeLock
 
 ​				2、该方式无法提供公平性，即无法满足等待时间最长的线程优先获取锁
 
-![](C:\Users\OneMTime\Desktop\Typora图片\20160511165712473.png)
+![](C:\Users\OneMTime\Desktop\Typora图片\JDK并发包API总结.png)
 

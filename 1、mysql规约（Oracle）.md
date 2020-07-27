@@ -26,7 +26,7 @@ mysql分为三大类数据类型：数值类型、时间/日期类型、字符�
 
 ​	1、整数数值类型：分为有符号和无符号，即是否有负数（默认为有符号，取值范围减半）
 
-![由此可知1566201801526](C:\Users\OneMTime\Desktop\Typora图片\1566201801526.png)
+![由此可知1566201801526](C:\Users\OneMTime\Desktop\Typora图片\mysql整数类型.png)
 
 由此可知整数数值类型的大小是固定的，设置的其长度并不是限制数据的大小，而是用于设置数值显示宽度（显示宽度会在数据位数小于该值时，在左侧使用0填充；但是需要设置该字段填充0选项，并且只适用于无符号数值字段）
 
@@ -40,7 +40,7 @@ mysql分为三大类数据类型：数值类型、时间/日期类型、字符�
 
 ​	2、浮点数&定点数数据类型
 
-![1566204814441](C:\Users\OneMTime\Desktop\Typora图片\1566204814441.png)
+![1566204814441](C:\Users\OneMTime\Desktop\Typora图片\mysql小数类型.png)
 
 当浮点数有效位数在7位以内时，可以使用float；当浮点数有效位数在16位以内时，可以使用double；因此长度也需要小于等于7或16，小数点小于等于长度
 **由于float、double都存在固定有效位的精度，因此禁止使用浮点数**
@@ -83,7 +83,7 @@ gbk编码中一个字符占2个字节，所以L = 65533 / 2 = 32766
 
 ​	5、文本字符串类型
 
-![1566269730401](C:\Users\OneMTime\Desktop\Typora图片\1566269730401.png)
+![1566269730401](C:\Users\OneMTime\Desktop\Typora图片\mysql文本字符串类型.png)
 
 text类型基本和varchar类型相同，但它不能指定最大长度，而是默认使用固定的最大长度。因此一般能用varchar时，不用text。
 
@@ -97,7 +97,7 @@ binary、varbinary 对应char、varchar，只是它们是以二进制的形式�
 
 BLOB二进制大对象，和text类型类似，指可变的二进制存储，但不能指定最大长度字节数，而是使用固定的最大长度；一般使用于二进制大小无法确定。
 
-![1566270966243](C:\Users\OneMTime\Desktop\Typora图片\1566270966243.png)
+![1566270966243](C:\Users\OneMTime\Desktop\Typora图片\mysql二进制类型.png)
 
 binary、varbinary设计是为了代替char、varchar对字符串进行二进制的存储，但实际中没有这种需求，并且二进制无法体现数据的可视性。
 
