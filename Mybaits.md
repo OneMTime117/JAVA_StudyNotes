@@ -1653,6 +1653,8 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 
 - 指定CRUD标签中的属性： @Options  一致提供了CRUD所有标签的属性
 
+- 实现oracle数据库的自增主键：@SelectKey
+
 - 使用自动映射的同时，额外进行自定义映射 ：@Results   属性value为Result数组
 
   **@Results会自动打开局部自动映射**
