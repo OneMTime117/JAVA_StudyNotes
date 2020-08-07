@@ -1,4 +1,4 @@
-# Spring
+Spring
 
 ## 1、spring概念
 
@@ -910,34 +910,6 @@ public static void main(String[] args) {
 
 **ignoreResourceNotFound，一般使用默认值，降低异常发生时的排除难度，但还需要搭配PropertySourcesPlaceholderConfigurer一起使用，才能够正确的抛出异常**
 
-### IOC容器的资源加载：
-
-- spring提供了Resource接口，重新定义了java中各种资源加载的API，功能更加强大，且使用方便；其实现类包括：
-
-| 类名                   | 作用                                                         |
-| ---------------------- | ------------------------------------------------------------ |
-| UrlResource            | 对java.net.URL进行了包装，通过不同前缀，来进行不同类型的资源访问 |
-| ClassPathResource      | 从当前类路径中获取资源                                       |
-| FileSystemResource     | 从文件系统中获取资源                                         |
-| ServletContextResource | 从web应用根目录中获取资源                                    |
-| InputStreamResource    | 通过一个输入流来创建资源对象                                 |
-| ByteArrayResource      | 通过一个字节数组来创建资源对象                               |
-
-- ReourceLoader接口资源加载器
-
-  ApplicationContext就实现了这个接口，根据不同了实现类，加载特定的Resource资源
-
-- UrlResource，前缀和访问资源类型的匹配策略：
-
-  | 前缀           | 访问资源类型          |
-  | -------------- | --------------------- |
-  | classpath：    | 类路径                |
-  | file：         | 文件系统              |
-  | https：/http： | URL                   |
-  | 无             | 根据ReourceLoader决定 |
-
-- ResourceLoaderAware接口用于获取ApplicationContext中的ReourceLoader,然后重新设置ReourceLoader
-
 ### IOC容器源码解析
 
 - 初始化spring环境（IOC容器）
@@ -1072,7 +1044,9 @@ public static void main(String[] args) {
 
 
 
+@Component、@Conguration和@Bean的区别
 
+好像配置信息注解，放在@Component类上，也可以生效
 
 bean的后置处理器 BeanPostProcessor：定义初始化方法前后的执行代码
 
@@ -1080,13 +1054,291 @@ springIOC容器的Aware
 
 ApplicationContextAPI的使用
 
+IoC容器，事件，资源，i18n，验证，数据绑定，类型转换，SpEL，AOP
+
+## spring核心组件：
+
+### 资源加载：
+
+- spring提供了Resource接口，重新定义了java中各种资源加载的API，功能更加强大，且使用方便；其实现类包括：
+
+  | 类名                   | 作用                                                         |
+  | ---------------------- | ------------------------------------------------------------ |
+  | UrlResource            | 对java.net.URL进行了包装，通过不同前缀，来进行不同类型的资源访问 |
+  | ClassPathResource      | 从当前类路径中获取资源                                       |
+  | FileSystemResource     | 从文件系统中获取资源                                         |
+  | ServletContextResource | 从web应用根目录中获取资源                                    |
+  | InputStreamResource    | 通过一个输入流来创建资源对象                                 |
+  | ByteArrayResource      | 通过一个字节数组来创建资源对象                               |
+
+- UrlResource，前缀和访问资源类型的匹配策略：
+
+  | 前缀           | 访问资源类型          |
+  | -------------- | --------------------- |
+  | classpath：    | 类路径                |
+  | file：         | 文件系统              |
+  | https：/http： | URL                   |
+  | 无             | 根据ReourceLoader决定 |
+
+- ReourceLoader接口资源加载器
+
+  ApplicationContext就实现了这个接口，根据不同了Reource实现类，加载特定的Resource资源
+
+- spring提供ResourceLoaderAware接口，用于获取ApplicationContext中的ReourceLoader,然后重新设置ReourceLoader
+
+### 
+
 ## 3、AOP
 
+### AOP概念
 
+- AOP的定义：
 
+  ​		面向切面编程，提供了另一种编写程序结构的方式，是对面向对象编程（OOP）的补充
 
+- AOP的作用：
 
+  ​		AOP可以对业务逻辑的各个部分进行隔离，使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，提升开发效率；因此也就能实现，在不改变原来业务代码的基础上，添加新功能，并且可以通过配置随时删除
 
+- AOP的实际应用：
+
+  ​		安全控制、事务处理、异常处理、日志打印、性能统计等
+
+- AOP在spring中的实现应用：
+  1. 提供声明式的企业服务，如spring的声明式事务管理
+  2. 为用户提供切面编程开发手段，即spring aop
+
+### AOP底层原理
+
+- AOP底层原理技术：动态代理
+
+- 两种动态代理：JDK动态代理、CGLIB动态代理
+
+  - JDK动态代理：创建接口实现类的代理对象，从而增强实现类的方法
+
+    代码实现过程如下：
+
+    通过JDK提供的java.lang.reflect.Proxy对象，来创建singerL类的代理对象，参数需要singerL的类加载器、singerL类的接口和java.lang.reflect.InvocationHandler接口的实现类，在实现InvocationHandler接口中，编写方法增强代码;在执行Method.invoke方法时，还需要singerL实例对象
+
+    ```java
+    		//动态代理
+    		Singer singerProxy1 = (Singer)Proxy.newProxyInstance(singerL.getClass().getClassLoader(),
+    				new InvocationHandler() {
+    					@Override
+    					public Object invoke(Object proxy, Method method, Object[] args){
+    						System.out.println("进行动态代理1");
+    						Object invoke = method.invoke(singerL, args);
+    						System.out.println("进行动态代理2");
+                            //invoke为singerL实现类的当前方法的返回值；当return null时，代理类执行返回值就为null
+    						return invoke;
+    					}
+    				});
+    		singerProxy1.sing();
+    ```
+
+    InvocationHandler接口的invoke方法参数：proxy 生成的代理对象；method 目标类方法对象； agrs 目标类方法参数
+
+    method.invoke(singerL, args) 直接执行目标类对象方法
+
+  - CGLIB动态代理：创建当前类子类的代理对象，从而增强当前类的方法
+
+    代码实现过程如下：
+
+    - 首先需要导入额外依赖包：cglib（在spring-core中已经包含了该工具包）
+
+    创建一个enhancer对象，用于设置动态代理的目标类、方法拦截器；最后在生成以目标类作为父类继承的子类代理类
+
+    ```java
+    		Enhancer enhancer = new Enhancer();
+    		enhancer.setSuperclass(SingerL.class);
+    		enhancer.setCallback(new MethodInterceptor() {
+    			@Override
+    			public Object intercept(Object Proxy, Method method, Object[] arg, MethodProxy methodProxy) throws Throwable {
+    				System.out.println("进行动态代理1");
+    				Object invokeSuper = methodProxy.invokeSuper(Proxy, args);
+    				System.out.println("进行动态代理2");
+    				return invokeSuper;
+    			}
+    		});
+    		
+    		SingerL singerLProxy = (SingerL)enhancer.create();
+    		singerLProxy.sing();
+    ```
+
+    MethodInterceptor接口的intercept方法参数：Proxy 生成代理对象、method 目标类的方法对象、arg 方法参数、methodProxy 代理类的方法对象
+
+     methodProxy.invokeSuper(Proxy, args) ：使用代理对象来执行其父类方法（即目标类的方法）
+
+- spring动态代理方式的选择：
+
+  spring默认使用JDK动态代理，由于JDK动态代理需要基于目标类的接口来实现，因此要确保目标类有对应的接口；当没有接口时，spring则使用CGlib动态代理的方式实现
+
+- springAOP在使用动态代理实现切面编程中，是基于IOC容器的依赖注入，实现动态代理类的创建和使用的；**因此在使用AOP时，需要保证被增强类和增强类都被IOC容器管理**
+
+### AOP术语
+
+- 连接点：程序运行中，被AOP代理执行的所有方法，即可以被增强的方法
+
+- 切入点：表示实际被真正增强的方法
+
+-  增强/通知：用于方法增强的代码；通知可以分为多种类型：前置通知、后置通知、环绕通知、异常通知、最终通知
+
+  | 通知类型 | 代码执行时间点                                               |
+  | -------- | ------------------------------------------------------------ |
+  | 前置通知 | 在原方法执行前                                               |
+  | 后置通知 | 在原方法执行后                                               |
+  | 环绕通知 | 在原方法执行前后                                             |
+  | 异常通知 | 当原方法出现异常时                                           |
+  | 最终通知 | 类似于JAVA异常中的finally，无论方法是否发生异常，都会在最后被执行 |
+
+- 切面：将通知配置到切入点上的过程
+
+### AOP的使用
+
+#### AOP相关依赖
+
+- springIOC容器和AOP是虽然是两个不同的模块，但是springAOP的使用依赖于IOC容器，因此需要spring核心容器的相关依赖：spring-beans、spring-core、spring-context、spring-expression
+
+- 同时springAOP容器使用还需要：
+
+  spring-aop（spring-context会将其依赖导入）：提供spring对AOP的实现
+
+  spring-aspects（会依赖导入aspectjweaver包）：提供spring对AspectsJ框架配置驱动的整合；aspectjweaver则就是支持aop相关注解和切入点表达式
+
+#### AOP切入点表达式
+
+作用：用于定义需要对哪个类的哪个方法进行增强
+
+execution（[权限修饰符]    [返回类型]    [全类名].[方法名] ([参数列表])）  
+
+可以通过*   表示匹配任意值，例子：
+
+```java
+execution(public void yh.com.User.setUser(String id))   
+```
+
+#### springAOP的声明方式：
+
+##### springAOP提供三种声明方式：
+
+1. xml
+2. java注解
+3. AOP api
+
+- 对于XML和java注解，spring是利用AspectJ框架中配置引擎来完成的，但是在实现上并不依赖于AspectJ编译器，而是使用动态代理完成；而AOP api 是提供了spring在实现AOP的一系列接口，从而以代码编程的方式来完成，一般不推荐使用
+
+##### AspectJ和springAOP的区别：
+
+- AspectJ是一个AOP框架，它扩展了java语言，定义了AOP语法。它的底层实现是需要使用一个专门的编译器，解读AOP语法，然后在目标类中进行切面代码的织入，生成class文件；称之为静态织入
+  - 缺点：需要专门的编译器ajc；新增增强代码时，需要重新编译被增强目标类
+  - 优点：从class文件上，就进行了AOP的实现，性能更好；支持多个所有级别的切入点，AOP能力更加强大
+- springAOP利用动态代理，来在运行期实现目标类的增强；在ioc容器初始化Bean时，创建动态代理类进行依赖注入；因此称之为动态织入
+  - 缺点：依赖于springIOC容器，由于是动态代理实现方法增强，因此性能不如AspectJ；只支持方法级别的切入点
+  - 优点：纯java代码实现，无需额外编译，使用更加简单
+
+#### 基于AspectJ注解的AOP
+
+- 在配置类中添加@EnableAspectJAutoProxy
+
+  - @EnableAspectJAutoProx：启用@AspectJ的所有注解
+
+- 编写一个增强类，用于提供切面编程的逻辑代码，并添加@Aspect、@Component
+
+  - @Aspect：声明该类为一个切面类，提供切面编程的逻辑代码
+  - @Component：springAOP注解的作用，是基于ICO容器Bean进行管理的，因此@Aspect注解需要被IOC容器管理，才能够生效
+
+- 使用**通知注解** 注解在增强类的方法上，并配置切入点
+
+  | 通知注解        | 对应通知类型 |
+  | --------------- | ------------ |
+  | @Before         | 前置通知     |
+  | @AfterReturning | 后置通知     |
+  | @Around         | 环绕通知     |
+  | @AfterThrowing  | 异常通知     |
+  | @After          | 最终通知     |
+
+```java
+@Component
+@Aspect
+public class SingerProxy {
+	
+	@Before("execution(public String com.yh.aop.SingerL.sing()) ")
+	public void before() {
+		System.out.println("sing前");
+	};
+    
+    @AfterReturning("execution(public String com.yh.aop.SingerL.sing()) ")
+	public void afterReturning() {
+		System.out.println("sing后");
+	};
+}
+```
+
+- 通过@Pointcut可以实现**公共切入点的声明**，实现切入点声明代码的复用，直接使用@Pointcut注解的**方法签名**作为**通知注解的value属性值**
+
+```java
+@Component
+@Aspect
+public class SingerProxy {
+    
+    @Pointcut("execution(public String com.yh.aop.SingerL.sing())")
+    public void sing(){};
+	
+	@Before("sing()")   
+	public void before() {
+		System.out.println("sing前");
+	};
+    
+    @AfterReturning("sing()")
+	public void afterReturning() {
+		System.out.println("sing后");
+	};
+}
+```
+
+- 通过@Order可以设置增强类在IOC容器中注册的优先级，从而也就定义了目标动态代理类中相同切入点，增强代码的优先级
+
+  原则：优先级越高，增强代码越靠近目标源代码，原理为**动态代理的迭代**
+
+  - 原代码
+
+  ```java
+  	public String sing() {
+  		System.out.println("singerL实现类");
+  		return "sing";
+  	}
+  ```
+
+  - 最高优先级的增强类方法，进行切入点的动态代理
+
+  ```java
+  	public String sing() {
+          system.out.println("sing前A")
+  		System.out.println("singerL实现类");
+          system.out.println("sing后A")
+  		return "sing";
+  	}
+  ```
+
+  - 最高优先级的增强类方法，进行切入点的动态代理
+
+  ```java
+  	public String sing() {
+          system.out.println("sing前B")
+          system.out.println("sing前A")
+  		System.out.println("singerL实现类");
+          system.out.println("sing后A")
+          system.out.println("sing前B")
+  		return "sing";
+  	}
+  sys
+  ```
+
+  因此可以得知：**优先级越高，Before越后执行，after越先执行**
+
+  **在同一个增强类中，相同切入点，会根据方法名来定义其优先级，无法使用@Order进行控制**
+
+## 4、springMVC
 
 ## 4、jdbcTemplate
 
