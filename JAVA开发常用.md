@@ -488,7 +488,7 @@ for (Entry<K, V> entry : entrySet) {
 2、Arrays.equals(a1,a2)   比较两个基本类型数组是否相同（大小、顺序）
 3、Arrays.deepEquals(a1,a2) 比较两个包装类数组是否相同
 3、Arrays.sort(a,string)    使数组元素按照某种方式排序
-4、Arrays.binarySearch(a,value) 通过二分法来寻找指定值在数组中的index，但是要求数组元素是已经排序的（由于内部使用的二分法，因此一定是排好序的）
+4、Arrays.binarySearch(a,value) 通过二分法来寻找指定值在数组中的index，但是要求数组元素是已经排序的（由于内部使用的二分法，因此一定是排好序的；不存在时，返回-1）
 5、Arrays.fill(a,value)  将一个值插入到数组所有位置,当然也可以设定起止点来插入一段相同值（一般用于快速创建测试数据）
 
 6、Arrays.toString(a) 打印数组
