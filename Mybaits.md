@@ -1784,10 +1784,12 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 
   @Mapper注解作用域和`<context:component-scan/>` 有关；对于springboot，默认< context:component-scan/>的扫描路径为 主启动类同包下，因此需要额外注意；
 
+  @MapperScanner会对所有包下的接口类进行动态代理，无论是否正常的mapper接口；不是则执行该代理类方法时，会出现无法找到statement，即没有sql元数据信息 
+
   **MapperFactoryBean可以使用 sqlSessionFactory，或sqlSessionTemplate构造参数，来获取mapper接口的动态代理类proxyMapper；两者都指定时，优先使用sqlSessionTemplate（注意，使用sqlSessionFactory进行映射器注入时，会导致创建多个sqlSessionTemplate，不推荐使用）**
 
   MapperFactoryBean创建proxyMapper内部过程:
-  
+
   ```java
   @Bean
   public UserMapper userMapper(SqlSessionFactory sqlSessionFactory) throws Exception {
