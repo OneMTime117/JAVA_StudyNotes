@@ -502,6 +502,8 @@ for (Entry<K, V> entry : entrySet) {
 4、swap（list，int，int）交换指定索引数据的位置（即交换索引值）
 5、fill（list，object）使用object替换list中所有的值
 
+6、Map<String, Integer> singletonMap = Collections.singletonMap("id",1)  ，创建一个只有一个元素的map，且不能改变，减少map对象的内存占用
+
 **sort方法默认使用持有对象中，对应元素类型实现Comparable接口，而实现的compareTo（）方法（使用自然排序方法，降序，自然排序时，需要持有对象中不能存在null）；也可以直接传入对应元素泛型的Comparable接口的实现类，并且重写compareTo（）方法**
 
 ### 10、java操作对象的工具类Objects：
