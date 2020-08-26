@@ -504,6 +504,8 @@ for (Entry<K, V> entry : entrySet) {
 
 6、Map<String, Integer> singletonMap = Collections.singletonMap("id",1)  ，创建一个只有一个元素的map，且不能改变，减少map对象的内存占用
 
+7、reverse(list)， 反转排序
+
 **sort方法默认使用持有对象中，对应元素类型实现Comparable接口，而实现的compareTo（）方法（使用自然排序方法，降序，自然排序时，需要持有对象中不能存在null）；也可以直接传入对应元素泛型的Comparable接口的实现类，并且重写compareTo（）方法**
 
 ### 10、java操作对象的工具类Objects：
@@ -859,7 +861,7 @@ MapUtils工具类：
 
 **其他类、方法只是对JDK集合对象的优化，一般应用不需要（但可以优化我们不合理代码，带来的性能损失）**
 
-### 4、commons-beanutils
+### 4、commons-beanUtils
 
 用于操作JAVA bean的工具包，常用工具有：
 
@@ -886,6 +888,14 @@ PropertyUtils.setProperty(test, "name", "yh");//修改对象对应属性名的�
 PropertyUtils.copyProperties(test2, test);//将test属性复制给test2（需要属性有get、set方法）
 PropertyUtils.describe(test2);//描述test2对象
 ````
+
+4、copyProperties，对javaBean属性进行浅Copy
+
+```java
+User userOrigin = new User("YH","123");
+User userCopy =new User();
+BeanUtils.copyProperties(userCopy, userOrigin);
+```
 
 ### 5、commons-codec
 
