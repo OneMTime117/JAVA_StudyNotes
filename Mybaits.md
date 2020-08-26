@@ -912,7 +912,7 @@ mybatis结果集映射，有两种选择：使用java.util.HashMap进行接收�
 
 - **id、idArg标签的底层优化过程：**
 
-  ​		mybatis进行正常的结果集映射时，会将结果集中字段完全相同的数据合并为一条数据，映射为一个对象；因此当不指定id时，mybatis就需要对比所有字段，合并字段完成相同的数据（对比执行次数为M（结果集条数）*N（结果集字段数）；而指定id后，mybatis只需要对比id字段，来合并数据（对比执行次数为M（结果集条数）））。因此id的指定，在mybatis底层映射中，有很大的优化作用
+  ​	**mybatis在进行结果集的嵌套映射时，会默认将完全相同的数据合并**；因此当不指定id时，mybatis就需要对比所有字段，合并字段完全相同的数据（对比执行次数为M（结果集条数）*N（结果集字段数）；而指定id后，mybatis只需要对比id字段，来合并数据（对比执行次数为M（结果集条数）））。因此id的指定，在mybatis底层映射中，有很大的优化作用
 
 - **id和result标签属性：**
 
@@ -1515,7 +1515,9 @@ mybatis提供两级缓存：
 
 ## 10、sqlSession对象的深入理解：
 
-sqlSession:用于获取数据库连接，执行sql，其线程不安全，因此要保证每个线程都有自己的sqlSession实例。因此推荐其作用域在请求作用域或方法作用域中，对于一个http请求，进行数据库操作后，直接关闭sqlSession：
+sqlSession：用于获取数据库连接，执行sql，**其线程不安全，每一个sqlSession对应一个Connection，但一个Connection可能对应多个sqlSession，当sqlSession关闭时，其对应的Connection资源也会关闭，因此一般进行一对一的使用；**
+
+要保证每个线程都有自己的sqlSession实例。因此推荐其作用域在请求作用域或方法作用域中，对于一个http请求，进行数据库操作后，直接关闭sqlSession：
 
 ```java
 //使用JDK7的try-with-resources
@@ -1804,6 +1806,13 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 **综上所述：**
 
 mybatis-spring包，帮助mybatis代码无缝整合到spring中，它将允许 MyBatis 参与到 Spring 的事务管理之中，创建映射器 mapper 和 `SqlSession` 并注入到 bean 中，以及将 Mybatis 的异常转换为 Spring 的 `DataAccessException`
+
+### SqlSessionTemplate是怎样实现线程安全和绑定spring事务管理器：
+
+SqlSessionTemplate内部实际上每个线程都会创建了多个sqlSession，也就对应了多个数据库连接；
+
+- 当spring容器中没有声明事务管理器时，则默认所有sqlSession操作，都会自动提交；在线程完成工作后（比如一个web请求处理完），就会自动关闭当前sqlSession；
+- 当spring容器中声明事务管理器时，则所有的sqlSession的创建、操作和关闭，都交给事务管理器来完成，默认进行手动提交
 
 ## 13、mybatis的底层架构：
 
