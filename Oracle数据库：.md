@@ -1591,11 +1591,15 @@ CREATE TRIGGER ContestDB_trigger
 
 常用属性有：
 
-第一行是 unbounded preceding，1 preceding（前一行）
+第一行是 unbounded preceding，
+
+前一行：1 preceding
 
 当前行是 current row，
 
-最后一行是 unbounded following, 1following（后一行）
+最后一行是 unbounded following,
+
+ 后一行：1following
 
 **窗口子句不能单独出现，必须有order by子句时才能出现；当没有窗口子句，但有order by 时，默认为当组中的第一行到当前行，因此需要使用全组数据时，要么省略order by，要么在order by基础上指定窗口**
 
