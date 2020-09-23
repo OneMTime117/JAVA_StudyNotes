@@ -3414,6 +3414,7 @@ String result = restTemplate.getForObject(
 
 - RestTempate方法的返回值有两种，javaBean和ResponseEntity，根据方法参数中的responseType来确定它们的泛型
 - springMVC提供HttpEntity对象，来定义请求中的HTTP方法，URL，标头和正文，并且使用消息转化器将javaBean转化为对应ContentType类型数据
+- springMVC提供MultiValueMap，来定义表单提交数据，并被消息转化器处理
 
 ##### RestTemplate常用场景：
 
