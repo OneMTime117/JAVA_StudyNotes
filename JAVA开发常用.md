@@ -553,6 +553,16 @@ Comparator<Account> comparator = new Comparator<Account>() {
 };
 ```
 
+### 12、java工具类Properties
+
+该工具类用于操作Properties文件，继承了Hashtable类，线程安全，并提供类似于集合的方法，来操作Properties文件数据，但需要额外的加载、保存过程：
+
+1、load ，读取字符输入流，来获取Properties文件中的数据
+
+2、setProperty、getProperty，用于操作Properties对象中的键值对
+
+3、store ，将当前Properties对象写入字符输出流中，实现对Properties文件的修改，注意该方法默认会在开头写入当前操作时间的注释，并且提供comments来写入当前操作的注释（null则不写额外注释）；同时对于=、：特殊字符，会自动添加转义处理
+
 ## 6、Apache commons库常用方法：
 
 Apache commons，Java开发通用库，进一步扩展JDK的功能，封装了符合时下开发需求的工具或处理方法，常用几个包如下：
