@@ -395,7 +395,7 @@ IOC容器中所有的Bean默认是单例的
 | application               | 作用域在当前web应用中，整个web应用启动后，只会创建一个Bean的实例对象 |
 | websocket                 | 作用域在当前Websocket连接中，即每个Websocket连接都会创建一个新实例 |
 
-request、session、application和websocket作用域并不能在spring常规IOC容器中定义，否则会抛出IllegalStateException异常，未知bean作用域；它们只用于springMVC中的IOC容器
+request、session、application和websocket作用域并不能在spring常规IOC容器中定义，否则会抛出IllegalStateException异常，未知bean作用域；它们只用于web项目中的IOC容器
 
 - singleton和protoype作用域的使用场景和注意事项：
 
@@ -572,7 +572,7 @@ IOC容器提供自动装配的方式，进行Bean的属性依赖注入，即自�
 | internalConfigurationAnnotationProcessor | 处理用于注册Bean的注解（**@Component、@ComponentScan、@Bean**。。） |
 | internalAutowiredAnnotationProcessor     | 处理**@Autowired注解**                                       |
 | internalCommonAnnotationProcessor        | 处理带有**JSR-250规范注解**                                  |
-| internalEventListenerProcessor           |                                                              |
+| internalEventListenerProcessor           | 事件监听处理器                                               |
 | internalEventListenerFactory             | 事件监听工厂                                                 |
 
 ##### @Component注解扫描开启
@@ -609,7 +609,7 @@ IOC容器提供自动装配的方式，进行Bean的属性依赖注入，即自�
     <context:property-placeholder location="classpath:jdbc.properties">
 ```
 
-同时IOC容器中，会自动创建一个PropertySourcesPlaceholderConfigurer类型Bean，用于@Value外部属性注入, 此时不允许对于peroperties文件不存在该值
+同时IOC容器中，会自动创建一个PropertySourcesPlaceholderConfigurer类型Bean，用于@Value外部属性注入, **当所有properties文件不存在@Value指定值时，会报错；出现多个时，会按照文件加载顺序，选取优先值**
 
 ### java注解方式的容器配置：
 
@@ -1004,9 +1004,11 @@ public static void main(String[] args) {
 
 ### IOC容器的常用回调接口（仅spring）：
 
+**IOC容器的所有回调接口在实现时，都需要添加@Component注解，从而被IOC容器管理，spring才能进行其方法的回调**
+
 #### Aware接口
 
-向bean提供容器的基础信息
+定义向bean提供容器的基础信息
 
 ##### BeanClassLoaderAware
 
@@ -2521,6 +2523,16 @@ springMVC提供一个静态，通过一个selvet请求，快速获取当前WebAp
 RequestContextUtils.findWebApplicationContext(request);
 ```
 
+在Bean中，可以直接使用如下方式，获取IOC容器上下文：
+
+```java
+	@Autowired
+	WebApplicationContext webApplicationContext;
+
+	@Autowired
+	ApplicationContext ApplicationContext;
+```
+
 ##### dispatcherServlet属性：
 
 dipatcherServlet初始化参数：（用于在web.xml中配置dipatcherServlet使用）
@@ -3467,6 +3479,68 @@ String result = restTemplate.getForObject(
 
 #### WebClient：
 
+​		spring5.0提供的WebClient，来支持HTTP请求的反应式编程、非阻塞的客户端，并有效支持同步、异步和流方案，相对于RestTemplate，支持如下内容：
+
+- 非阻塞式I/O，性能更好
+- lambda表达式风格编程
+- 支持异步请求调用
+- 支持反应式流，通过**Reactor**实现
+
+### WebSocket：
+
+​		webSocket协议提供了一个标准API，通过单个TCP连接在客户端和服务器之间创建全双工双向网络通信通道，相对于HTTP轮询技术，更好的减少了网络资源的浪费，性能更高
+
+​		spring框架提供WebSocket API，用于编写webSocket消息的客户端和服务器端应用程序，通过导入spring-websocket包来实现：
+
+#### spring-webSocket：
+
+​		通过WebSocketHandler和HandshakeInterceptor，来完成整个WebSocket服务器编写：
+
+- WebScoketHandlert：
+
+WebScoketHandlert有两个实现类，对应webSocket通信时的消息类型：
+
+TextWebSocketHandler：文本类型、BinaryWebSocketHandler；二进制数据类型
+
+```java
+public class MyWebSocketHandler extends TextWebSocketHandler{
+	
+    //连接建立后，执行方法
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		super.afterConnectionEstablished(session);
+	}
+    
+	//客户端发送消息时，执行方法
+	@Override
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		
+	}
+	
+	//连接关闭时，执行方法
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		super.afterConnectionClosed(session, status);
+	}
+	
+	//websocket发生错误时，执行方法
+	@Override
+	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+		super.handleTransportError(session, exception);
+	}
+}
+```
+
+- 
+
+xxxx测试失败
+
+#### webSocket-api：
+
+​		在Tomcat运行环境中，默认提供了对webSocket的支持，因此在springBoot中，我们可以通过内置Tomcat、或者直接使用外部Tomcat，来实现webSocket：
+
+**参考笔记：JAVA利用WebSocker实现实时通信**
+
 ## 5、spring数据访问模块
 
 spring数据访问模块由如下几个包构成：spring-jdbc、spring-tx、spring-orm、spring-oxm
@@ -4100,6 +4174,32 @@ spring对数据方法对象（DAO）提供了一个统一的异常抽象层，�
 ​		注意：对于mybatis，并不属于JPA框架，因此不需要spring ORM；由于目前并没使用到这些ORM框架，因此不进行深入了解
 
 ## 5、spring测试
+
+spring测试，相对于普通单元测试，提供了基于IOC容器的单元测试和多种模拟对象来提供测试运行环境，提高单元测试速度，通过**spring-test**包来实现
+
+### springTest容器上下文管理
+
+springTest会对spring的ApplicationConext、WebApplicationContext实例进行缓存，即对spring容器父、子上下文进行缓存和管理，有效避免每次测试时，重复对spring容器中的Bean进行实例化
+
+#### 使用注解配置spring容器上下文：
+
+- @ContextConfiguration注解，用于配置在测试类上，定义如何加载和配置spring容器，提供两种方法：locations（指定XML文件）、classes（指定注解配置类）
+
+- @WebApplicationConfiguration注解，用于配置在测试类上，在@ContextConfiguration注解的基础上，定义当前spring容器需要加载WebApplicationContext，即基于web项目的spring容器；同时定义Web项目的资源加载路径：
+
+  默认为"src/main/webapp"，一般情况下不需要进行重新指定
+
+- @ContextHierarchy注解，用于配置在测试类上，定义ApplicationContext实例的层次结构；实际使用场景就是分别定义ApplicationConext、WebApplicationContext的配置
+
+- @DirtiesContext，定义在方法或类上，控制清除spring容器上下文的缓存；通过classMode进行缓存清除时间点：测试类执行前后，测试方法执行前后；使用场景为：有些测试方法中，可能存在对ApplicationContext进行修改操作，从而隐式导致之后的测试被影响（如修改某个Bean单例状态），因此就需要重新创建容器
+
+
+
+springTest事务管理
+
+springTest测试监听
+
+springTest快速SQL执行
 
 ## 6、spring集成
 
