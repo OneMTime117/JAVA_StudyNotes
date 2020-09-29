@@ -10,12 +10,12 @@
 
 ````java
 //当使用外部Selvet容器（tomcat）时，则不需要进行配置
-//springboot会自动将所有webSocket服务（被@Component、@ServerEndpoint修饰的类交给外部容器管理
+//springboot会自动将所有webSocket服务（@ServerEndpoint修饰的类）交给外部容器处理（Tomcat）
 @Configuration 
 public class WebSocketConfig {
 	@Bean
 	public ServerEndpointExporter getServerEndpointExporter() {
-		//管理webSocket服务的组件
+		//管理webSocket服务的组件，交给springboot内置Tomcat
 		return new ServerEndpointExporter();
 	}	
 }
@@ -25,7 +25,6 @@ public class WebSocketConfig {
 
 ````java
 @Slf4j
-@Component//被spring管理（@Component虽然是单例模式，但还是会创建多个对象）
 @ServerEndpoint("/websocket")//服务端口名（类似于http的url）
 public class WebSocketServer {
 
@@ -165,7 +164,7 @@ Welcome<br/>
 
 1、当在websocket类中使用mapper、service注入时，不能通过@Autowired进行注解注入；原因：
 
-spring默认容器管理的都是单例模式:如mapper类、service类，因此websocket在项目启动时，只会初始化创建一个Websocket，并进行依赖注入；当客户端进行websocket连接时，由于websocket是多对象创建（每一个客户端对应一个websocket对象），因此再次创建，此时spring就不会再进行依赖注入；所有必须通过手动方式进行依赖注入：
+websocket会直接通过@ServerEndpoint注解，将其实例交给Tomcat，即使添加@Component注解，其实例化也不会交给IOC容器管理，因此也就无法实现spring的自动装配，必须通过手动方式进行依赖注入：
 
 springboot中，由于进行了自动配置，因此并不是通过application.xml 文件来创建spring容器上下文，而是使用配置类，来获取spring容器的ApplicationContext对象：
 
