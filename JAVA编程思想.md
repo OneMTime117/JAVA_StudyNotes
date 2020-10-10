@@ -427,7 +427,7 @@ s.pop(); 出栈
 原因：foreach循环时，会创建对象的iterator对象，此时会保存当前对象的modCount值（容器修改次数），每次进行next方法时，都会监测对象的modCount和iterator的expectedModCount是否一样，不一样就会报错。
 而foreach循环中进行add、remove时就会改变对象的modCount值，此时就会报错ConcurrentModificationException
 
-同样的list接口中的sublist也有这个问题，sublist生成的容器是原容器的视图，当我们操作原容器元素时，子容器也会发生改变；但当操作子容器时，原容器也会改变，但子容器的属性要确保modCount值和原容器一直，因此当进行视图元素个数的改变时，会报错ConcurrentModificationException
+同样的list接口中的sublist也有这个问题，sublist生成的容器是原容器的视图，当我们操作原容器元素时，子容器也会发生改变，但子容器中的modCount值不会变；当操作子容器时，原容器也会改变，并且原容器的modCount值也会变；由于子容器的属性要确保modCount值和原容器一致，因此当原容器元素个数改变时，两者的modCount值就会不同，此时再进行视图对象的任何操作，都会报错ConcurrentModificationException
 
 12、Map的遍历方式：
 
