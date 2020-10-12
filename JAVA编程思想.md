@@ -2374,7 +2374,7 @@ Segment个数默认16，可以根据ConcurrentHashMap构造函数来设置，取
 
 **LinkedHashMap继承了HashMap，因此结构也随之修改，但还是和以前一样，多创建了一个双向链表按插入顺序保存所有键值对，保证遍历时容器数据的排序。**
 
-**并发Map容器的key、value都不能为null，防止在并发环境下，无法对key、value进行是否存在的检查，此时无法判断key、value是不存在还是本身就为null**
+**并发Map容器的key、value都不能为null，防止在并发环境下，无法判断key、value是不存在还是本身就为null；而在单线程环境下，可以通过contains方法来进行判断，而多线程下无法保证contains与get操作的原子性，而需要在外部使用同步锁，则大大减低效率，因此直接将并发Map容器设计为KV不允许为null**
 
 **ConcurrentSkipListSet不能存入null：因为需要对值进行排序（实现跳表结构）**
 
