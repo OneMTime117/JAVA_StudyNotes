@@ -1384,7 +1384,7 @@ private static final Logger logger = LoggerFactory.getLogger(XX.class);
 
 - 在生产环境中，应该禁止debug级别日志的输出
 
-  由于logger会继承root的输出源，因此一般需要添加additivity="true"，放在日志重复输出
+  由于logger会继承root的输出源，因此一般需要添加additivity="true"，防止日志重复输出
 
 - error日志信息输出时，应该携带异常信息，帮助分析异常原因
 
@@ -1449,7 +1449,7 @@ private static final Logger logger = LoggerFactory.getLogger(XX.class);
 
 ​	数据结构是指逻辑意义上的数据组织方式和相应的处理方式
 
-- 逻辑意义：数据结构的抽象表达方式非常丰富，但实际的物理存储相对单一；比如二叉数，数据的物理存储也并不是通过树形方式完成的；因此数据结构是建立在逻辑意义上的
+- 逻辑意义：数据结构的抽象表达方式非常丰富，但实际的物理存储相对单一；比如二叉树，数据的物理存储也并不是通过树形方式完成的；因此数据结构是建立在逻辑意义上的
 - 数据组织方式： 在逻辑意义上，数据的组织方式有很多种，如数、图、队列和哈希等；同时树又可以分为二叉树、三叉数、B+树等；图可以分为有向图、无向图；队列可以分为FIFO、FILO；哈希可以根据不同的算法定义哈希值
 - 数据处理方式：在特定的数据组织方式上，需要以特定的算法来实现数据的增、删、改、查和遍历，而不同的数据处理方式，也往往存在非常大的性能差异
 
@@ -1466,7 +1466,7 @@ private static final Logger logger = LoggerFactory.getLogger(XX.class);
 
 ​	数据结构的复杂度分为空间复杂度和时间复杂度，而时间复杂度时考量当前数据结构数据处理性能的重要指标，反应了程序执行时间随当前数据量增长而增长的量级；这个量级指标通常使用大写O和一个函数描述；从好到坏，常用算法复杂度排序如下：常数级O（1）、对数级O（log n）、线性级O（n）、线性对数级O（nlogn）、平方级O（n^2）、立方级（n^3）、指数级O（2^n），对于logn 即为以2为底的对数，n为256时，其值为8
 
-​	以猜数字为例，在0-100中随机猜一个数，没有猜中就会提示你猜的数是大了，还是小了，直到你猜中；按照随机理论，最少猜一次，最多猜100次，但实际中，我们会通过二分法进行猜测，而二分法的时间复杂度就为logn
+​	以猜数字为例，在0-100中随机猜一个数，没有猜中就会提示你猜的数是大了，还是小了，直到你猜中；按照随机理论，最少猜一次，最多猜100次，但实际中，我们会通过二分法进行猜测，而二分法的时间复杂度就为O（log n）
 
 ### 6.2、java集合
 
@@ -1485,17 +1485,19 @@ private static final Logger logger = LoggerFactory.getLogger(XX.class);
 
 #### 6.2.2、Queue集合
 
-​	Queue是一种先进先出的线性数据结构，数据只允许从队列的一端进行获取；另一段进行插入；Buffer（数据缓冲区）使用；对于BlockingQueue(阻塞队列)，常用于高并发编程场景中，通过其FIFO特性和阻塞操作特点，作为Buffer（数据缓存区）使用
+​	Queue是一种先进先出的线性数据结构，数据只允许从队列的一端进行获取，另一端进行插入；对于BlockingQueue(阻塞队列)，常用于高并发编程场景中，通过其FIFO特性和阻塞操作特点，作为Buffer（数据缓存区）使用
 
 ​	Queue和BlockingQueue的区别：BlockingQueue在队列为空，进行获取操作时，会使线程阻塞；当队列已满，进行插入操作时，也会使用线程阻塞；而Queue则会直接返回null或插入失败
 
 #### 6.2.3、Map集合
 
-​	Map集合是以Key-Value键值作为存储元素的哈希结构。Key按照某种哈希算法计算得到唯一，即Hash值，每一个hash值在hash表中得到对应一个链表，用于存储key-value键值元素。Map类提供三种Collection视图，keySet方法获的所有key集合、Values方法获取所有Value集合，entrySet方法获的所有可迭代的键值对集合。hashMap默认是线程不安全的，在高并发场景则使用concurrentHashMap
+​	Map集合是以Key-Value键值作为存储元素的哈希结构。Key按照某种哈希算法计算得到唯一，即Hash值，每一个hash值在hash表中得到对应一个链表，用于存储key-value键值元素。
+
+​	Map类提供三种Collection视图，keySet方法获的所有key集合、Values方法获取所有Value集合，entrySet方法获的所有可迭代的键值对集合。hashMap默认是线程不安全的，在高并发场景则使用concurrentHashMap
 
 #### 6.2.4、Set集合
 
-​	Set是不允许重复元素的集合，有三种实现类：HashSet、TreeSet、LinkedHashSet。其底层结构是通过Map集合来实现，Value为一个固定的静态对象，key为其存储元素
+​	Set是不允许重复元素的集合，有三种实现类：HashSet、TreeSet、LinkedHashSet。其底层结构是通过Map集合来实现，Value为一个固定的静态Object对象，key为其存储元素
 
 ### 6.3、集合初始化
 
@@ -1537,11 +1539,14 @@ private static final Logger logger = LoggerFactory.getLogger(XX.class);
 
 **综上所述，在进行集合初始化时，需要设置合理容量大小，从而有效避免扩容带来的性能损耗**
 
-hash表是一个连续的数组，记录所有的链表地址
+- hash表是一个连续的数组，记录所有的链表地址
 
-hash值是通过hash算法计算得到key的hashCode
 
-hash冲突是不同key可能会根据hash算法计算得到相同hashCode，从而使它们对应的hash表索引值相同；这种情况下，相同索引值数据会在对应链表中顺序储存
+- hash值是通过hash算法计算得到key的hashCode
+
+
+- hash冲突是不同key可能会根据hash算法计算得到相同hashCode，从而使它们对应的hash表索引值相同、或者是不同hashCode通过索引计算得到索引值相同；这种情况下，相同索引值数据会在对应链表中顺序储存
+
 
 ### 6.4、数组
 
@@ -1768,13 +1773,319 @@ Set<Map.Entry<K,V>> entrySet();//返回Map类对象中key-value对的Set视图
   - 左节点在右节点之前遍历，即从最左叶子节点所在子树开始遍历
   - 前序顺序为根节点、左节点、右节点；中序遍历为：左节点、根节点、右节点；后序遍历为：左节点、右节点、根节点；**一般使用中序遍历，从而满足正常排序**
 
-由于二叉树作为一种数据结构，需要不断的进行数据的增加或删除，为了满足平衡二叉树、二叉查找树的结构特定，就需要通过一些算法来实现，在Java底层算法中，就常用红黑树来稳定二叉树的特性：
+由于二叉查找树作为一种数据结构，需要不断的进行数据的增加或删除，当不限制左右树的高度差时，就会导致其时间复杂度变为O（n），因此一般情况下二叉查找树、平衡二叉树特性需要联合使用，此时就需要通过一些算法来实现二叉树的平衡性：
 
 - AVL树
 
-  AVL树是一种平衡二叉查找树，大大提高了数据排序和查找的效率；**通过左旋、右旋的方式，使平衡二叉树保持其特性**
+  AVL树是一种平衡二叉查找树，大大提高了数据排序和查找的效率，保证最坏时间复杂度为O（log n）；**通过左旋、右旋的方式，使平衡二叉树保持其特性**
 
   - 右旋：选择左子树中的一个节点，以它作为根节点，其父节点作为新的右节点，旧的右节点作为新的右节点的左节点，也被称之为顺时针旋转![](C:\Users\OneMTime\Desktop\Typora图片\平衡二叉查找树右旋.png)
 
-  -  左旋：旋转右子树中的一个节点，以它作为根节点，其父节点作为新的左节点，旧的左节点作为新的左节点的右节点，也被称之为逆时针旋转![](C:\Users\OneMTime\Desktop\Typora图片\平衡二叉查找树左旋.png)
+  -  左旋：选择右子树中的一个节点，以它作为根节点，其父节点作为新的左节点，旧的左节点作为新的左节点的右节点，也被称之为逆时针旋转![](C:\Users\OneMTime\Desktop\Typora图片\平衡二叉查找树左旋.png)
 
+- 红黑树
+
+  ​	红黑树于1972年发明，当时称为对称二叉B树，1978年优化命名为红黑树，**特点是每个节点上增加了一个属性，表示节点颜色，颜色可以为红色或黑色**
+
+  ​	**红黑树和AVL的比较：**
+
+  ​		它们都是在进行插入和删除元素时，通过左旋和右旋来保持自身的平衡性，从而提供树结构的时间复杂度，获取较高的查找性能。但与AVL树相比，红黑树在平衡性上，没有追求左右子树高度差不超过1的约束，而是保证**根节点到叶子节点的最长路径不超过最短路径的2倍**的大致平衡，并通过着色来更加高效的完成自平衡，在二叉查找树基础上，引入了额外约束条件：
+
+  - 节点只能为红色和黑色
+  - 根节点只能为黑色
+  - 所有NIL节点都为黑色；NIL节点：即叶子节点下的两个虚节点
+  - 一条路径上不能出现相邻的红色节点
+  - 任何子树内，根节点到叶子节点的路径上包含相同数目的黑色节点（包括NIL节点）
+
+通过这些约束，**保证了红黑树在新增、删除、查找的最坏时间复杂度为O（log n），并且每一次平衡时，最多只需要进行三次旋转来完成**；而对于AVL树，**由于它非常高的平衡性，因此平衡至多需要logn次，但同时由于AVL树的决定平衡，相同节点树下，平均查找次数要少于红黑树**
+
+综上所述，红黑树和AVL树具有相同的最坏时间复杂度O（log n），但是红黑树维护平衡的成本更低，最多只需进行三次旋转，因此红黑树适合频繁插入和删除场景，AVL树适合低频修改，大量查询场景
+
+#### 6.8.2、TreeMap
+
+​		TreeMap是JAVA中通过Key的排序结果进行内部数据存储的Map类集合，用于对Key有排序要求的场景。
+
+**TreeMap的Key去重：**
+
+​	TreeMap在插入KV时，必须保证key实现了Comparable或在实例化TreeMap时，提供额外比较器Comparator，也因此不允许Key为null。但不同于HashMap，TreeMap不一定要覆写key的hashCode和equals方法，来进行key去重，因为：
+
+​		HashMap是使用key的hashCode和equals方法去重，而TreeMap会优先使用比较器Comparator，当没有指定额外比较器时就会调用key所实现comparable接口的compareTo方法，当两者都没有时，则会抛出异常
+
+**TreeMap的元素排序：**
+
+​		TreeMap是基于红黑树来实现数据存储，从而实现最坏时间复杂度为O（log n）的增删改查操作，因此TreeMap源码底层，就是实现了红黑树操作
+
+##### TreeMap源码解析：
+
+- TreeMap实现红黑树的基本属性：
+
+```java
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable{
+    //排序使用的比较器
+     private final Comparator<? super K> comparator;
+     //红黑树根节点
+     private transient Entry<K,V> root;
+     
+     //红黑树颜色字面量
+     private static final boolean RED   = false;
+     private static final boolean BLACK = true;
+     
+     //内部类，红黑树节点载体类
+	 static final class Entry<K,V> implements Map.Entry<K,V> {
+        K key;
+        V value;
+        Entry<K,V> left;//左子节点载体
+        Entry<K,V> right;//右子节点载体
+        Entry<K,V> parent;//父节点载体
+        boolean color = BLACK;//节点颜色，默认黑色     
+     }
+```
+
+- TreeMap红黑树节点新增操作(删除操作和新增操作类似)：
+
+  在进行节点新增时，从根节点开始，遍历比较：大于节点值向右；小于节点值向左；等于节点值直接替换；直到遍历到NIL节点时，创建当前节点，颜色默认黑色。整个过程无需关系节点颜色和树的平衡：
+
+  put方法源码：
+
+  ```java
+   public V put(K key, V value) {
+          Entry<K,V> t = root;
+       	//判断根节点是否为null
+          if (t == null) {//将key作为根节点，结束
+              compare(key, key); //检测key是否可以执行比较
+  
+              root = new Entry<>(key, value, null);
+              size = 1;
+              modCount++;
+              return null;
+          }
+          int cmp;//接收比较结果
+          Entry<K,V> parent;
+          
+       	//获取当前treeMap的比较器
+          Comparator<? super K> cpr = comparator;
+          if (cpr != null) {//比较器不为null时，调用比较器compare方法进行比较
+              do {
+                  parent = t;//获取当前节点（第一次为根节点）
+                  cmp = cpr.compare(key, t.key);//比较当前节点和新节点
+                  if (cmp < 0)//小于，获取当前节点的左子节点，作为下一次比较节点
+                      t = t.left;
+                  else if (cmp > 0)//大于，获取当前节点的右子节点，作为下一次比较节点
+                      t = t.right;
+                  else
+                      return t.setValue(value);//等于，则直接替换当前节点的Value值（即新节点替换当前节点）
+              } while (t != null);//循环遍历，直到遍历到NIL节点
+          }
+       
+       	//在没有指定比较器时，调用key实现的Comparable接口的compareTo方法
+          else {
+              //key不能为null
+              if (key == null)
+                  throw new NullPointerException();
+              @SuppressWarnings("unchecked")
+              //检测key类型是否实现Comparable接口
+                  Comparable<? super K> k = (Comparable<? super K>) key;
+              //开始从根节点出发，遍历比较
+              do {
+                  parent = t;
+                  cmp = k.compareTo(t.key);
+                  if (cmp < 0)
+                      t = t.left;
+                  else if (cmp > 0)
+                      t = t.right;
+                  else
+                      return t.setValue(value);
+              } while (t != null);
+          }
+       
+       	//当遍历到NIL节点后，以当前KV对创建节点载体对象Entry
+          Entry<K,V> e = new Entry<>(key, value, parent)
+       	//并根据最后一次比较结果，判断新节点为左节点或右节点
+          if (cmp < 0)
+              parent.left = e;
+        else
+              parent.right = e;
+       
+       	//最后进行自平衡（重新着色、旋转）
+          fixAfterInsertion(e);
+          size++;
+          modCount++;
+          return null;//插入新节点后，返回null
+      }
+  ```
+  
+  fixAfterInsertion方法源码(和fixAfterDeletion类似)：
+  
+  通过put方法可以知道，当新节点插入能够运行到fixAfterInsertion方法时，说明：
+  
+  1. 新节点插入前，二叉树为非空树
+  2. 新节点key与任何节点都不相同
+  
+  ```java
+      private void fixAfterInsertion(Entry<K,V> x) {
+          //将新节点颜色默认为红色
+          x.color = RED;
+  
+          //新节点不能为null和根节点、父节点为红色时，进行自平衡
+          while (x != null && x != root && x.parent.color == RED) {
+              //如果父节点为左子节点
+              if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
+                  //获取父节点的父节点（爷爷）的右子节点（右叔），判断其颜色是否为红色
+                  Entry<K,V> y = rightOf(parentOf(parentOf(x)));
+                  if (colorOf(y) == RED) {
+                      //是，则说明当前新节点到爷爷节点的子树，不满足红黑树约束
+                      setColor(parentOf(x), BLACK);//将父节点置为黑色
+                      setColor(y, BLACK);//爷爷节点的右节点置为黑色
+                      setColor(parentOf(parentOf(x)), RED);//爷爷节点置为红色
+                      x = parentOf(parentOf(x));//此时爷爷节点作为新节点，向上遍历比较
+                  } else {//如果右叔节点为黑色
+                      //判断新节点是否为右子节点
+                      if (x == rightOf(parentOf(x))) {
+                          //对父节点做一次左旋操作，并作为新节点
+                          x = parentOf(x);
+                          rotateLeft(x);
+                      }
+                 		//将此时新节点的父节点设置为黑色，爷爷节点设置为红色，对爷爷节点进行右旋
+                      setColor(parentOf(x), BLACK);
+                      setColor(parentOf(parentOf(x)), RED);
+                      rotateRight(parentOf(parentOf(x)));
+                  }
+              } else {//同理，当父节点为右叔节点时，判断左叔节点
+                  Entry<K,V> y = leftOf(parentOf(parentOf(x)));
+                  if (colorOf(y) == RED) {
+                      setColor(parentOf(x), BLACK);
+                      setColor(y, BLACK);
+                      setColor(parentOf(parentOf(x)), RED);
+                      x = parentOf(parentOf(x));
+                  } else {
+                      if (x == leftOf(parentOf(x))) {
+                          x = parentOf(x);
+                          rotateRight(x);
+                      }
+                      setColor(parentOf(x), BLACK);
+                      setColor(parentOf(parentOf(x)), RED);
+                      rotateLeft(parentOf(parentOf(x)));
+                  }
+              }
+          }
+          root.color = BLACK;//最后保证根节点为黑色
+      }
+  ```
+  
+  左旋源码rotateLeft：
+  
+  ```java
+   private void rotateLeft(Entry<K,V> p) {
+       	//p为当前需要旋转的节点
+          if (p != null) {
+              //获取右子节点（之后会作为根节点），将其左子节点作为当前节点的右子节点
+              Entry<K,V> r = p.right;
+              p.right = r.left;
+              
+              //将r的左子节点类的parent属性保存p
+              if (r.left != null)
+                  r.left.parent = p;
+              //并将p的父类保存到r的parent属性中
+              r.parent = p.parent;
+              
+              //当p的父类为null，则当前r直接作为根节点
+              if (p.parent == null)
+                  root = r;
+              //当根节点存在时，p为其left属性，则修改其left属性为r
+              else if (p.parent.left == p)
+                  p.parent.left = r;
+              else
+                  //p为right属性，则修改其right属性为r
+                  p.parent.right = r;
+              //最后修改r的left为p，p的parent为r
+              r.left = p;
+              p.parent = r;
+          }
+      }
+  ```
+
+##### TreeMap实例分析红黑树机制：
+
+**以插入55、56、57、58、83、删除57、59为例：**
+
+**前三步过程如下：**
+
+![](C:\Users\OneMTime\Desktop\Typora图片\红黑树机制过程图一.jpg)
+
+a、插入第一个元素，直接为根节点，因此颜色为黑色
+
+b、在右边插入56，在自平衡时，首先设置为红色，由于没有爷爷节点，因此直接跳过
+
+c.d.e、继续在最右变插入57，进行自平衡：
+
+- 57设置为红色，父节点为右节点，则判断左叔节点颜色，由于不存在左叔节点，跳过
+
+- 然后判断57新节点是否为左子节点，不是则跳过
+- 将父节点56设置为黑色、爷爷节点55设置为红色，然后将55节点进行左旋，得到e
+
+**插入58节点：**![](C:\Users\OneMTime\Desktop\Typora图片\红黑树机制过程图二.jpg)
+
+a、58作为57的右节点，默认为红色，由于出现两红相邻，进行自平衡
+
+b、判断左叔节点颜色，是否为红色，则设置父节点57为黑色、左叔节点55为黑色、爷爷节点56为红色
+
+c、最后由于根节点必须为黑色，因此设置56节点为黑色
+
+**插入83节点：**
+
+![](C:\Users\OneMTime\Desktop\Typora图片\红黑树机制过程图三.png)
+
+​	a、83作为58的右节点，默认为红色，由于出现两红相邻，进行自平衡
+
+​	b、判断左叔节点颜色，是否为红色，不存在左叔节点，因此跳过；判断新节点83是否子左节点，不是则跳过；将父节点58设置为黑色、爷爷节点57设置为红色；然后进行爷爷节点57的左旋
+
+​	c、57节点左旋，58节点作为子树根节点，57作为左子节点，整个子树作为右子树
+
+**删除57节点：**
+
+​	由于57节点没有任何子节点（子节点不需要重新连接），且本身为红色（不影响路径上黑节点个数相同），因此不影响红黑树性质，不需要自平衡
+
+**插入59节点：**
+
+![](C:\Users\OneMTime\Desktop\Typora图片\红黑树机制过程图四.png)
+
+​	a、59作为83的左子节点，两红进行自平衡；判断左叔节点颜色，是否为红色，左数节点不存在，跳过；
+
+​	b、判断新节点59是否为子左节点，是,则右旋父节点83，此时59代替83位置，83作为新节点继续进行平衡
+
+​	c、将新节点83的父节点59设置为黑色，爷爷节点58设置为红色，左旋爷爷节点58
+
+​	d、58作为59的左子节点，59作为右子树根节点
+
+通过如上过程，可以得出红黑树的平衡方式：
+
+##### 红黑树平衡方式：
+
+- **每次平衡只针对于当前新节点的爷爷节点作为根节点的子树，进行操作**
+
+- **新节点默认为红色，当父节点为红色时，则进行自平衡**
+
+- **进行自平衡时，平衡规则通过叔叔节点颜色和新节点的子节点方向决定：**
+
+  | 叔叔节点颜色 | 新节点方向       | 平衡规则                                                     |
+  | ------------ | ---------------- | ------------------------------------------------------------ |
+  | 红色         | 同父节点方向一致 | 父节点设置为黑色、叔节点设置为黑色、爷爷节点设置为红色       |
+  | 红色         | 右子节点         | 父节点设置为黑色、叔节点设置为黑色、爷爷节点设置为红色       |
+  | 黑色         | 同父节点方向一致 | 父节点设置为黑色，爷爷为红色，旋转爷爷节点，让父节点替换爷爷节点 |
+  | 黑色         | 同父节方向相反   | 旋转父节点，让新节点替换为父节点（**使子节点和父节点方向相同**）；然后设置当前父节点为黑色，爷爷节点为红色，旋转爷爷节点，让父节点替换爷爷节点 |
+
+  - **叔叔节点为红色时，新节点的方向不影响**
+
+  - **平衡时的旋转方向，和旋转中心节点方向相反（旋转中心为左子节点，则其父节点右旋）**
+
+##### TreeMap与其他容器相关：
+
+​       TreeMap在时间复杂度上，要比hashMap搞，但可以提供对集合元素的排序，并且有很高的稳定性（维护排序结构的效率高）；但TreeMap线程不安全，不能在多线程中对共享数据进行写操作，需要通过同步锁实现（可以通过Collections.synchroinzedMap(treeMap)封装方法，实现同步）
+
+​		在JDK8中，HashMap、ConcurrentHashMap中，也使用了红黑树：HashMap、ConcurrentHashMap当出现大量hash冲突时，会导致链表边长，影响查询效率；因此当链表超过8时，则hash冲突的数据，使用红黑树存储，优化查询效率；
+
+​		TreeSet内部也使用了红黑树，其实现就是通过TreeMap来完成，只是所有value共享使用了一个静态Object对象
+
+#### 6.8.3、HashMap
