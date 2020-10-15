@@ -1,4 +1,4 @@
-# 码出高效 java开发手册
+码出高效 java开发手册
 
 ## 1、计算机基础
 
@@ -2089,3 +2089,172 @@ c、最后由于根节点必须为黑色，因此设置56节点为黑色
 ​		TreeSet内部也使用了红黑树，其实现就是通过TreeMap来完成，只是所有value共享使用了一个静态Object对象
 
 #### 6.8.3、HashMap
+
+##### HashMap存储结构：
+
+​		在所有hash类集合中，有三个基本存储概念：
+
+| 名称   | 说明                                   |
+| ------ | -------------------------------------- |
+| table  | 存储所有节点数据，构成hash表的**数组** |
+| slot   | 哈希槽，即table[i]这个内存空间         |
+| bucket | 哈希桶，在table[i]上所有元素组成的集合 |
+
+![](C:\Users\OneMTime\Desktop\Typora图片\hash表结构.jpg)	
+
+- **每一个哈希槽都存放哈希桶中的第一节点元素**
+- **哈希桶中的每个元素通过链表结构进行连接**	
+
+##### hashMap源码解析：
+
+在JDK8之前，hashMap存在并发环境下的**死链问题和扩容数据丢失问题**（不单单只是线程不安全），因此我们以JDK7中的HashMap源码进行分析：
+
+- put方法：
+
+  ```java
+  public V put（K key，V value）{
+      //通过key的hash值，计算hash表数组的索引
+      int hash = hash(key);
+      int i = indexFor(hash,table.length);
+      
+      //获取hash表中当前索引的元素节点类，
+      for（Entry<K,V> e = table[i]; e != null; e = e.next）{
+          Object k;
+          //判断当前节点key是否和插入的K相同，相同则覆盖原值
+          if（e.hash == hash && ((k = e.key) == key || key.equals(k)）{
+              V oldValue = e.value;
+              e.value = value;
+              return oldValue;
+          }
+          //不同，则进行下一次循环，找到该节点的下一个节点                     
+      }
+                                
+      //当该索引下的所有元素节点key都和要插入的key不同时，则进行元素新增
+      modCount++;//集合操作数+1
+      addEntry（hash, key, value, i）;    
+      return null;
+  }
+                                
+  void addEnt ry (int hash, K key , V value , int bucketindex) {
+      //新增元素前，判断是否需要扩容并且当前索引已存在至少一个元素节点
+      if ((size>= threshold) && (null ! = table[bucketindex])) {
+          //扩容，创建新table，并将旧table中的数据进行转移
+          resize (2 *table .length) ; 
+  		hash = (null 1= key ) ? hash (key ) : 0 ; 
+  		bucketindex = indexFor (hash , table.length);
+      }
+      
+      //创建新节点
+      createEntry(hash , key , value , bucketi ndex) ;
+  }
+                                
+  void createEntry(int hash , K key , V value , int bucketindex) {
+      //获取原来该索引链表的第一节点
+      Entry ＜K,V> e = table [bucketindex];
+      //创建一个新节点，并作为第一节点和原来第一节点链接
+      table[bucketindex] = new Entry<> (hash , key , value , e );
+      size++;
+  }
+  ```
+
+- resize()扩容方法：
+
+  ```java
+  void resize(int newCapacity) {
+      //创建一个两倍长度的新数组
+      Entry[] newTable = new Entry[newCapacity];
+      //将旧数组数据复制转移到新数组
+      transfer(newTable , initHashSeedAsNeeded(newCapacity)) ;
+      //替换全局变量table的引用
+      table = newTable;
+      threshold= (int)Math.min(newCapacity * loadFactor, MAXIMUM CAPACITY + 1)；
+  }
+  
+  void transfer(Entry[] newTable, boolean rehash) {
+      int newCapacity = newTable . length ;
+      //遍历旧数组中所有的哈希桶
+      for (Entry<K,V> e : table) {
+          //遍历哈希桶中所有节点
+          while (null != e) {
+              //总是将旧数组中遍历的节点作为当前新数组哈希桶的第一元素，之前的第一元素作为next
+              Entry<K, V> next= e . next ;
+              if (rehash) { 
+  				e.hash = null == e . key? 0 : hash(e . key) ; 
+  				int i= indexFor(e .hash , newCapacity) ;
+                  e. next= newTable[i] ;
+                  newTable[i] = e;
+                  e = next ;
+              }
+          }
+      }
+  }
+  ```
+
+通过源码可知：
+
+**1、新元素会直接放在hash桶的第一个位置，即哈希槽**，这样可以更快的访问到新增元素。
+
+**2、扩容数据丢失原因：**
+
+- 扩容期间，旧表仍然可以插入数据，导致进行扩容转移时，已遍历的哈希槽新增数据，无法转移到新扩容数组中
+- 当多个线程同时扩容时，会导致出现多个新扩容数据，每个线程完成扩容后，就会对线程共享遍历table进行覆盖，因此会导致先完成的新表被后完成的新表覆盖，从而使先完成线程中扩容时的新增数据丢失
+
+**3、死链形成原因：**
+
+​	当A、B线程同时指向transfer方法时，虽然每个线程都有各自的新数组，但是它们都在同时操作全局共享的旧数组中的所有entry对象，在共同进行同一索引的哈希桶节点时：
+
+如旧表哈希桶节点元素为1——2——null，形成死链过程如下：
+
+- A线程遍历1插入时：
+
+  next=e.next  next=2
+
+  e. next= newTable[i] ;  1.next=null
+
+  newTable[i] = e;     newTable[i]=1
+
+  e = next ;      e=2
+
+  **此时：1.next=null  2.next=null    e=2**
+
+- B线程完成1、2的插入：
+
+  2——1——null
+
+  **此时：1.next=null  2.next=1**
+
+- A线程插入2：
+
+  next=e.next  next=1 
+
+  e. next= newTable[i] ;  2.next=1
+
+  newTable[i] = e;     newTable[i]=2
+
+  e = next ;      e=1
+
+  **此时：1.next=null，2.next=1，e=1**
+
+- A线程继续插入1
+
+  next=e.next  next=null
+
+  e.next= newTable[i] ;  1.next=2
+
+  newTable[i] = e;     newTable[i]=1
+
+  e = next ;      e=null
+
+  **此时：1.next=2，2.next=1，e=null，结束遍历，newTable为：1——2——1——2......，从而形成死链**
+
+当HashMap中存在死链后，进行put（）、get（）、transfer（）操作时，就会使线程进入死循环，使CPU占用快速上升，最后宕机
+
+##### HashMap在JDK8中的优化：
+
+- 当哈希表中的哈希桶元素超过8使，则使用红黑树来代替链表结构，提高hash冲突元素的查询效率
+- 在JDK8中，HashMap进行扩容转移时，会将遍历的当前元素放在链表尾部，next统一为null，防止多线程对节点next的影响，解决死链问题（**虽然HashMap本身不能就在多线程中使用，但是我们不能控制开发者的行为，因此必须解决影响整个系统运行的风险（死链），对于系统业务的正确性交给开发者解决**）
+
+对于HashMap并发时的数据丢失问题，还是没有无法解决；因此多线程环境下，请使用ConcurrentHashMap或同步处理
+
+#### 6.8.4、ConcurrentHashMap
+
