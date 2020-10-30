@@ -825,6 +825,8 @@ JVM屏蔽了java代码在具体计算机硬件平台运行的相关细节，而�
 
 ​	对操作栈上的两个值进行运算，并将结果写入操作栈顶:IADD、IMUL（int类型值的加减法）
 
+​	对局部变量表的值进行自增、自减：IINC、IDEC（int类型值）
+
 3、类型转换指令
 
 ​	显式转换两种不同的数值类型：I2L\D2F（int转long、double转float）
@@ -2416,6 +2418,7 @@ private transient volatile int sizeCtl;
 - RUNNABLE，**就绪状态，是调用start（）之后、运行run方法代码之前的状态**。注意的是Tread对象的start（）方法不能多次调用，否则回抛出IllegalStateException异常
 
 - RUNNING，**运行状态，是run（）正在执行时线程的状态**。此时线程可以由于多种原因，而退出RUNNING，如CPU时间片使用完（进入就绪状态，等待继续直接run（）方法代码）、wait、sleep、未竞争到锁等
+
 - BLOCKED，**阻塞状态，线程被阻塞，有如下种情况：**
   1. 同步阻塞：run（）方法中使用了锁，并且锁被其他线程占用
   2. 主动阻塞：调用了Thread的某些方法，主动让出了CPU执行权；如sleep（）、join（）等
@@ -2445,6 +2448,8 @@ private transient volatile int sizeCtl;
   **4、同步与锁机制**
 
   ​		如果想要对某个对象进行并发更新操作，该对象又不属于上述三类（对象仅单线程可见、对象为只读、对象为线程安全类）；则需要开发者在代码中使用同步机制来达到线程安全
+
+#### 7.1.4、JUC并发包
 
 **线程安全的核心理念：要么只读、要么加锁。JDK5.0提供了JUC（java.util.concurrent）并发包,来提供java并发编程的易用性,由Doug Lea主导设计**
 
@@ -2492,7 +2497,7 @@ private transient volatile int sizeCtl;
 
   - 在CountDownLatch中，初始化定义state=count，执行countDown（）方法-1，直到state为0时，唤醒所有调用await（）方法的线程。并且此时线程再调用await（），并不会等待，即CountDownLatch是一次性的
   - 在CyclicBarrier中，和CountDownLatch类似，但在state=0，唤醒所有调用await（）方法的线程后，会将state重置为parties
-  - Semaphore中，初始化定义state=permits，当state>0时就能获得锁，并且每一个线程获得锁，则将state键1，当state=0时，就会阻塞其他线程，等待锁的释放。因此当permits>0时，Semphore就为共享锁（则需要保证当前锁作用的代码块，其线程安全，只是为了减少并发量，提升并发执行效率）
+  - Semaphore中，初始化定义state=permits，当state>0时就能获得锁，并且每一个线程获得锁，则将state减1，当state=0时，就会阻塞其他线程，等待锁的释放。因此当permits>0时，Semphore就为共享锁（则需要保证当前锁作用的代码块，其线程安全，只是为了减少并发量，提升并发执行效率）
 
   - **StampedLock，JDK8中引入，是对ReentrantReadWriteLock的改进**
 
@@ -2538,3 +2543,338 @@ synchronized锁特性由JVM负责实现。在JDK不断优化迭代中，synchron
   **重量级锁是互斥锁，会导致其他线程阻塞**
 
 **在锁的升降级过程中，都是用了CAS机制，进行锁的状态转变、获取和释放**
+
+### 7.3、线程同步
+
+**1、资源共享有两种原因：**
+
+- 资源短缺，多线程共享CPU就是从资源短缺的角度考虑
+
+- 共建需求，多线程共享同一个变量，就是从共建需求考虑
+
+
+**2、原子性：**		
+
+​		在多线程中对同一个变量进行写操作是，如果操作没有原子性，就可能产生脏数据。而操作原子性就是该操作是一个不可分割的一系列指令，在执行完毕前不会被任何其他操作中断，要么全部执行，要么全部不执行。因此**如果每个线程的修改都是原子操作，则不存在线程同步问题，synchronized就是通过互斥性，来实现线程执行同步代码操作的原子性**
+
+​		以i++操作为例，它分为三步，ILOAD->IINC->ISTORE,即加载变量i的值到操作栈中，变量i进行自增，然后将操作栈的值保存到变量表中（根据i++结果赋值来进行）
+
+- **java赋值操作的原子性：**
+
+  - 除long、double外，其他基本数据类型变量的赋值通过JVM来保证其原子性（在64位机器上，long、double赋值具有原子性）
+  - 对于reference引用的赋值，根据JLS原理，JVM会自动实现其原子性（实际操作是：ALOAD ->ASTORE，先将引用压入操作栈，然后出栈放入变量表）
+
+  由于这些操作的原子性都是交给JVM实现的，因此和操作系统平台和JVM有关，因此在实际编程过程中，我们不能把它们当作原子性的操作，并认为线程安全
+
+**3、线程同步：**
+
+​		同步在我们生活中随处可见，比如排队。而计算机的线程同步，就是线程之间按某种机制协调异常执行，当一个线程对某个内存进行操作时，其他线程就不可对该内存地址进行操作。实现线程同步的方式有很多，比如同步方法、锁、阻塞队列等
+
+#### 7.3.1、Volatile
+
+​		每一个线程都有自己独占的内存区域，如操作栈、局部变量表等。它们是JVM内存布局中，相当于CPU的缓存，通过将引用类型变量在堆内存中的副本保存到本地内存中，让线程在本地内存实现中对变量进行操作（**缓存执行速度大于内存,因此执行效率更高**)，执行结束后，再同步到堆内存中。这样就会有时间差，这段时间内，线程对该副本的本地操作，对于其他线程都是不可见的。
+
+​		volatile，英译“挥发、不稳定的”，延伸意思就是敏感的。当使用volatile修饰变量时，线程对该变量的每次操作前，都会从主存中获取最新值，修改完成后，则会将最新值立即同步到主存中，从而保证该变量的可见性，并且阻止**指令重排**的发生；
+
+- **多线程变量不可见：**
+
+  ​		由于CPU缓存机制，导致缓存和内存数据的不一致性；在一定时间内，缓存数据不会被更新；CPU会根据某些策略来对缓存进行清理
+
+  ​		当线程加锁时，CPU会主动更新缓存数据；当线程释放锁时，CPU会主动将缓存数据立即更新到更新到主存
+
+- **指令重排：**
+
+​		在单例模式中，如果没有使用同步锁，则在某个线程new 进行创建对象时，编译器执行过程如下：
+
+​		1、分配内存空间
+
+​		2、初始化对象
+
+​		3、将内存空间地址赋值给对象引用
+
+但由于编译器的指令优化重排，会在分配内存空间后，直接将地址赋值给对象引用，导致此时对象并没有完成初始化；而另外一个线程再调用get方法时，就会获得一个初始化不完整的对象；而通过volatile，就可以防止指令重排，只有对象实例化完成后，才会返回内存空间地址，进行引用赋值
+
+- **volatile的使用：**		
+
+  ​		volatile解决了共享变量在多线程中的可见性，但不具备synchronized的互斥性。因此volatile变量的操作并不具有原子性。
+
+  ​		volatile用于一写多读的并发场景，比如并发容器CopyOnWriteArrayList，它对于写操作会使用进行加锁，然后使用一个volatile修改的数组变量，保存最终修改后的数据，从而在写操作成功后，立即将数据同步給其他线程；**但由于volatile变量的所有操作，都需要同步到内存变量中，因此线程的执行速度会下降**
+
+
+#### 7.3.2、信号量同步
+
+​		**信号量同步是指在不同线程之间，通过传递同步信号量，来协调线程执行的先后次序**
+
+- **CountDownLatch（倒数锁）**，以时间维度作为信号量同步，当线程使用CountDownLatch进行等待阻塞后，当CountDownLatch的倒数值达到0时，唤醒所有被CountDownLatch等待阻塞的线程，此时CountDownLatch失效（还是能执行countDown(）、await()方法，但没有作用）
+
+  ```java
+  //子线程任务类
+  public class RunnableTask implements Runnable {
+  	private String content;
+  	private final CountDownLatch count;
+  
+  	public RunnableTask(String content, CountDownLatch count) {
+  		this.content = content;
+  		this.count = count;
+  	}
+  
+  	@Override
+  	public void run() {
+  		System.out.println(content+"执行");
+  		count.countDown();
+  	}
+  }
+  
+  //主线程开启子线程、倒数锁
+  public static void main(String[] args) {
+  	CountDownLatch count = new CountDownLatch(3);
+  		
+  	Thread thread1 = new Thread(new RunnableTask("Thread1", count));
+  	Thread thread2= new Thread(new RunnableTask("Thread2", count));
+  	Thread thread3 = new Thread(new RunnableTask("Thread3", count));
+  		
+  	thread1.start();
+  	thread2.start();
+  	thread3.start();
+  		
+  	//通过倒数锁，使主线程睡眠（保证所有子线程执行完后，再执行主线程）
+  	try {
+  		count.await();
+  	} catch (InterruptedException e) {
+  		e.printStackTrace();
+  	}
+  	System.out.println("所有子线程执行完成");
+  ```
+
+- **CyclicBarrier（循环栅栏）**，以时间维度作为同步信号量，线程使用CyclicBarrier进行等待阻塞，其阻塞线程数达到指定值时，同时唤醒所有等待阻塞线程。并且重新重置CyclicBarrier，继续监控后序使用CyclicBarrier等待的线程
+
+  ```java
+  //子线程任务类，每个阶段都会等待
+  public class RunnableTaskCyclic implements Runnable {
+  	private String content;
+  	private final CyclicBarrier cyclicBarrier;
+  
+  	public RunnableTaskCyclic(String content, CyclicBarrier cyclicBarrier) {
+  		this.content = content;
+  		this.cyclicBarrier = cyclicBarrier;
+  	}
+  
+  	@Override
+  	public void run() {
+  		try {
+  			System.out.println(content + "完成第一次计算");
+  			cyclicBarrier.await();
+  			System.out.println(content + "完成第二次计算");
+  			cyclicBarrier.await();
+  			System.out.println(content + "完成第三次计算");
+  			cyclicBarrier.await();
+  			System.out.println(content + "完成最后计算");
+  		} catch (InterruptedException | BrokenBarrierException e) {
+  			e.printStackTrace();
+  		}
+  	}
+  }
+  
+  //主线程使用循环栅栏
+  public static void main(String[] args) {
+  	//当栅栏数（循环栅栏拦截的线程数）达到指定值后，执行相应方法,最后唤醒所有线程
+  	CyclicBarrier cyclicBarrier = new CyclicBarrier(3, new Runnable() {
+  		@Override
+  		public void run() {
+  			System.out.println("合并结果计算");
+  		}
+  	});
+  	// 循环创建、执行子线程
+  	for (int i = 0; i <3; i++) {
+  		new Thread(new RunnableTaskCyclic("线程"+i, cyclicBarrier)).start();
+  	}
+  }
+  ```
+
+- **Semaphore（信号量）**，以信号维度作为同步信号量，它定义以所有使用它的子线程，最大并发执行数，在线程任务执行前，先调用**acquire（）方法**，Semaphore保存了当前执行的线程数，如果未达到最大并发数，则线程继续执行任务；如果到达最大并发数，则阻塞线程，并使用一个链表存放阻塞线程。当出现其他线程完成任务执行**release（）方法**退出Semaphore监控时，则立即唤醒链表中的第一个线程
+
+  ```java
+  	//指定信号量的限制线程数，开启公正性（等待最久的线程，下一个执行）
+  	Semaphore semaphore = new Semaphore(2, true);
+  	//定义子线程任务
+  	Runnable runnable = new Runnable() {
+  		@Override
+  		public void run() {
+  			try {
+  				//该段代码只能同时被2个线程使用，其他线程等待
+  				//通过acquire（）、release()方法标记需控制访问的代码块的起止点
+  				semaphore.acquire();
+  				System.out.println(Thread.currentThread().getName());
+  				Thread.sleep(3000);
+  				semaphore.release();
+  			} catch (InterruptedException e) {
+  				e.printStackTrace();
+  			}
+  		}
+  	};
+  	//创建多个子线程，并执行
+  	for (int i = 0; i < 10; i++) {
+  		new Thread(runnable).start();
+  	}
+  ```
+
+- **CountDownLatch（倒数锁）和CyclicBarrier（循环栅栏）的比较**：
+
+  - 相同点：它们都是以时间维度，作为同步信号量；当自身属性达到指定值时，此刻释放所有线程资源，让子线程继续执行
+
+  - 不同点：CountDownLatch是一次性的，而CyclicBarrier可以循环利用
+
+    ​				有CountDownLatch参与的线程，既可以是用于倒数的线程，又可以是等待倒计时的线程；CyclicBarrier都参与等待计数的线程，但CyclicBarrier的构造方法提供一个runnable参数，用于定义栅栏开启前（唤醒所有等待线程前）需要执行的代码
+
+**JUC并发包提供的信号量同步工具类，无论从性能、安全性、方便性上，都远优于开发者手动使用对象的wait（）和notify（）方式协调线程间的同步。因此开发者应该尽量使用信号同步类**
+
+### 7.4、线程池
+
+​		多线程可以更加充分合理地协调使用CPU、内存、网络、I/O等系统资源，而线程创建需要开辟虚拟机栈、本地方法栈、程序计数器等线程私有地本地内存空间。在线程被销毁时，就需要对这些内存空间进行资源回收，而频繁地创建和销毁线程，就大大浪费了使用在本地内存创建和回收上的系统资源，增加并发编程风险。另外，当服务器负载过大时，我们需要新线程能够等待或之间拒绝服务。这些都无法通过线程自身来解决，所以通过线程池就可以来协调多个线程，其作用如下：
+
+- 利用线程池管理和复用线程，控制最大并发数
+- 实现任务线程队列缓存策略和拒绝机制
+
+- 实现线程执行与时间相关功能，如定时执行、周期执行
+- 隔离线程环境，通过两个不同的线程池，来将两种类型线程隔离，配置不同的线程池策略，避免各类型线程池互相影响；
+
+#### 7.4.1、ThreadPoolExecutor
+
+​		JUC并发包，提供了一整套线程池框架，常用核心类就是ThreadPoolExecutor（线程池执行器），通过该类源码来了解线程池基本属性：
+
+- **ThreadPoolExecutor构造方法**
+
+```java
+public ThreadPoolExecutor(
+	int corePoolSize,//核心线程数
+    int maximumPoolSize,//最大线程数
+    long keepAliveTime,//线程空间时间
+    TimeUnit unit,//空闲时间单位
+    BlockingQueue<Runnable> workQueue,//待执行任务的缓存队列
+    ThreadFactory threadFactory,//线程工厂
+    RejectedExecutionHandler handler//拒绝策略  ){
+         if (corePoolSize < 0 ||
+            maximumPoolSize <= 0 ||
+            maximumPoolSize < corePoolSize ||
+            keepAliveTime < 0)
+            throw new IllegalArgumentException();
+        if (workQueue == null || threadFactory == null || handler == null)
+            throw new NullPointerException();
+    }
+```
+
+1、corePoolSize，常驻核心线程数。如果等于0，则任务执行完后，没有任何请求进入时，则销毁线程池中的线程；如果大于0，则即使任务完成，核心线程也不会被销毁。**该值设置非常关键，过大会浪费资源，过小会导致线程频繁创建和销毁**
+
+2、maximumPoolSize，最大线程数。必须大于等于1，如果待执行的线程数大于该值，则待执行的任务（runnable）进入缓存队列，等待有空闲线程后，再出队执行。如果maximumPoolSize=corePoolSize，则该线程池为固定大小线程池，内部不会发生线程的创建和销毁
+
+3、keepAliveTime，线程空闲时间。当线程空闲时间达到keepAliveTime值时，线程会被销毁，直到只剩下corePoolSize个线程为止，避免过多空闲线程，浪费内存和句柄资源。默认情况下，线程池的线程数大于corePoolSize时，keepAlive才起作用；但当ThreadPoolExecutor的allowCoreThreadTimeOut变量为true时，核心线程也会超时回收
+
+4、TimeUnit，时间单位，keepAliveTime通常使用TimeUnit.SECONDS(秒)
+
+5、workQueue，缓存队列。当请求线程数大于maxmumPoolSize时，线程进入BlockingQueue阻塞队列。使用两个锁来控制队列的出栈、入栈，保证线程安全
+
+6、threadFactory，线程工厂。用于生成一组相同任务的线程。线程池的命名可以通过thradFacotry来添加线程名前缀进行区分。从而就能得知线程是由哪个工厂生成，来自于哪个线程池
+
+7、handler，拒绝策略。当任务缓存队列达到上限时，可以通过该策略来处理请求，用于线程池的限流保护
+
+​		在构造方法中，对这七个参数进行了校验：corePoolSize不能小于0、maximumPoolSize必须大于等于1，并且不能小于corePoolSize、keepAliveTime必须大于等于0、workQueue、threadFactory和handler不能为null
+
+- **自定义handler（拒绝策略）**
+
+  ThreadPoolExecutor提供四个公开的静态内部类，用于定义其拒绝策略：
+
+  - AbortPolicy（默认值）：丢弃任务并抛出RejectedExecutionException（拒绝执行）异常
+  - DiscardPolicy：直接丢弃任务，非常不推荐
+  - DiscardOldestPolicy：抛弃队列中等待最久的任务，然后把当前任务加入队列
+  - CallerRunsPolicy：跳过线程池，调用任务run（）方法直接执行（使用主线程执行）
+
+  ​        当线程池达到最大值、并且缓存队列已满，就触发拒绝策略；但这四种默认策略都太过简单，或者没有解决实质性问题（**即当前线程池的属性没有设计好**），因此在实际工作中，应该自定义拒绝策略
+
+  ```java
+  
+  ```
+
+  
+
+- **自定义threadFactory（线程工厂）**
+
+  ​		线程工厂可以对线程做出明确的标识，并在不同的线程中，区别它们来自于哪个线程池。让我们更好的分析问题原因，**在实际工作中，必须使用线程工厂来对线程池生产的线程进行标识**
+
+#### 7.4.2、自定义线程工厂
+
+
+
+​		
+
+#### 7.4.3、Executors（线程池工厂）
+
+​		在实际编程中，开发者一般使用Executors的静态工厂方法来创建线程池对象，提供了对部分参数值设置，Executor有五个方法，来创建三种线程池实现类对象。
+
+​		首先，先通过线程池类框架图，来了解三种线程池实现类：
+
+![](C:\Users\OneMTime\Desktop\Typora图片\线程池类框架图.jpg)
+
+- Executor接口，仅定义execute（）方法，用于线程池执行Runnable接口任务
+
+- ExecutorService接口，提供了submit（）、shutdown（）、invokeAll（）等方法，用于线程池执行任务、关闭所有线程池任务、执行多个任务等
+
+- AbstractExecutorService，实现了ExecutorService接口定义的所有方法，但未实现execute（）方法
+
+- 线程的三个实现类：
+
+  - ForkJoinPool
+
+  - ThreadPoolExecutor
+
+  - ScheduledThreadPoolExecutor
+
+    和Timer、TimeTask区别
+
+    
+
+**Executors提供五个静态方法，来获取不同功能类型的线程池对象：**
+
+- Executors .newWorkStealingPool：
+
+  ​		在JDK8中引入，使用**ForkJoinPool**实现类，默认
+
+  ```java
+      public static ExecutorService newWorkStealingPool() {
+          return new ForkJoinPool
+              (Runtime.getRuntime().availableProcessors(),
+               ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+               null, true);
+      }
+  ```
+
+- Executors.new CacheThreadPool：
+
+  ​		使用**ThreadPoolExecutor**实现类，maximumPoolSize为Interg.MAX_VALUE,是高度可伸缩线程池，因此有OOM风险。corePoolSize为0，keepAliveTime默认为60s，因此所有工作线程都可以被回收
+
+- Executors.newSingleThreadExecutor:
+
+  ​		使用**ThreadPoolExecutor**实现类，corePoolSize、maximumPoolSize为1，keepAliveTime为0s，是一个单线程的线程池，相当于单线程串行执行所有任务，保证任务按提交顺序依次执行
+
+- Executors.newFixedThreadPool:
+
+  ​		使用**ThreadPoolExecutor**实现类，corePoolSize=maximumPoolSize，并且需要指定，keepAliveTime为0s，是一个固定线程数的线程池
+
+- Executors.newScheduledThreadPool:
+
+  ​		使用**ScheduledThreadPoolExecutor**实现类，maximumPoolSize为Interg.MAX_VALUE，因此存在OOM风险。需要指定corePoolSize，并且线程不会被回收。
+
+  ​		Executors还提供newSingleThreadScheduledExecutor方法，用于创建一个核心线程数为1、支持定时及周期性任务执行的线程池	
+
+  
+
+**五种线程池对象的缓存队列：**
+
+​		Executors .newWorkStealingPool（），由于使用**ThreadPoolExecutor**实现类，因此没有缓存队列
+
+​		Executors.newCacheThreadPool（），使用SynchronousQueue<Runnable>，通过同步阻塞队列，该队列不存储元素，并每次put都会阻塞主线程，内部保证立即有空闲线程（或新线程）可以执行该任务，然后让该线程take任务，主线程唤醒；**保证了主线程提交任务，立刻调用子线程获取执行任务的同步过程**（SynchronousQueue具有非公正性和公正性，公正性即出现两个线程先后put（），导致线程阻塞，SynchronousQueue可以根据put（）的先后，take（）指定元素；**在newCacheThreadPool（）中使用非公正的SynchronousQueue**）
+
+​		Executors.newSingleThreadExecutor（）、Executors.newFixedThreadPool（）使用LinkedBlockingQueue<Runnable>，通过阻塞队列缓存任务，保证缓存任务执行的公正性
+
+​		Executors.newScheduledThreadPool（），使用DelayedWorkQueue，延迟阻塞队列，实现定时及周期性任务执行
+
+#### 7.4.4、线程池的使用
