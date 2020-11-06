@@ -2412,12 +2412,12 @@ private transient volatile int sizeCtl;
 
 - New，**新键状态，是线程被创建且未启动的状态**。线程创建方式有三种：
   1. 继承Tread类，重写run方法
-  2. 实现Runnable接口，相对于第一种，继承Thread类往往**不符合里氏替换原则（每个子类都能替换父类进行工作），每个线程任务都需要重新创建一个类，进行编写**；而实现Runnable接口可以是线程编写更加灵活，对外暴露细节较少，让使用者专注于实现线程任务的run（）方法上
+  2. 实现Runnable接口，相对于第一种，继承Thread类往往**不符合里氏替换原则（每个子类都能替换父类进行工作，且行为不发生变化），每个线程任务都需要重新创建一个类，进行编写**；而实现Runnable接口可以是线程编写更加灵活，对外暴露细节较少，让使用者专注于实现线程任务的run（）方法上
   3. 实现Callable，相对于第二种，call（）方法有返回值，可以获取到任务完成后的执行结果，并且call（）方法可以抛出异常；而Runnable只能通过setDfaultUncaughtExceptionHandler（）额外的异常处理器，才能将子线程中的异常交给主线程处理
 
 - RUNNABLE，**就绪状态，是调用start（）之后、运行run方法代码之前的状态**。注意的是Tread对象的start（）方法不能多次调用，否则回抛出IllegalStateException异常
 
-- RUNNING，**运行状态，是run（）正在执行时线程的状态**。此时线程可以由于多种原因，而退出RUNNING，如CPU时间片使用完（进入就绪状态，等待继续直接run（）方法代码）、wait、sleep、未竞争到锁等
+- RUNNING，**运行状态，是run（）正在执行时线程的状态**。此时线程可以由于多种原因，而退出RUNNING，如CPU时间片使用完（进入就绪状态，等待继续执行run（）方法代码）、wait、sleep、未竞争到锁等
 
 - BLOCKED，**阻塞状态，线程被阻塞，有如下种情况：**
   1. 同步阻塞：run（）方法中使用了锁，并且锁被其他线程占用
@@ -2466,7 +2466,7 @@ private transient volatile int sizeCtl;
 
 3、线程管理类。引入了线程池的概念，来管理线程对象的创建，并提供ScheduledExecutorService实现定时任务，代替Timer、TimerTask（java的定时器机制）
 
-4、锁相关类。一Lock接口为核心，在实现场景中映入了不同类型的锁相关类：
+4、锁相关类。以Lock接口为核心，在实现场景中引入了不同类型的锁相关类：
 
 - ReentrantLock 可重入锁，和synchronized类似，可以重复使用，但加锁和解锁需要手动，并且加锁和解锁次数要一致
 - ReentrantReadWriteLock 可重入读写锁，实现读写操作的锁分离
@@ -2555,7 +2555,7 @@ synchronized锁特性由JVM负责实现。在JDK不断优化迭代中，synchron
 
 **2、原子性：**		
 
-​		在多线程中对同一个变量进行写操作是，如果操作没有原子性，就可能产生脏数据。而操作原子性就是该操作是一个不可分割的一系列指令，在执行完毕前不会被任何其他操作中断，要么全部执行，要么全部不执行。因此**如果每个线程的修改都是原子操作，则不存在线程同步问题，synchronized就是通过互斥性，来实现线程执行同步代码操作的原子性**
+​		在多线程中对同一个变量进行写操作是，如果操作没有原子性，就可能产生脏数据。而操作原子性就是该操作是一个不可分割的一系列指令，在执行完毕前不会被任何其他操作中断，要么全部执行，要么全部不执行。因此**如果每个线程的对共享资源的修改都是原子操作，则就不存在线程同步问题，synchronized就是通过互斥性，来实现线程执行同步代码操作的原子性**
 
 ​		以i++操作为例，它分为三步，ILOAD->IINC->ISTORE,即加载变量i的值到操作栈中，变量i进行自增，然后将操作栈的值保存到变量表中（根据i++结果赋值来进行）
 
@@ -2578,7 +2578,7 @@ synchronized锁特性由JVM负责实现。在JDK不断优化迭代中，synchron
 
 - **多线程变量不可见：**
 
-  ​		由于CPU缓存机制，导致缓存和内存数据的不一致性；在一定时间内，缓存数据不会被更新；CPU会根据某些策略来对缓存进行清理
+  ​		由于CPU缓存机制，导致缓存和内存数据的不一致性；在一定时间内，缓存数据不会被更新（CPU会根据某些策略来对缓存进行清理）
 
   ​		当线程加锁时，CPU会主动更新缓存数据；当线程释放锁时，CPU会主动将缓存数据立即更新到更新到主存
 
@@ -2742,7 +2742,7 @@ synchronized锁特性由JVM负责实现。在JDK不断优化迭代中，synchron
 
 ​		JUC并发包，提供了一整套线程池框架，常用核心类就是ThreadPoolExecutor（线程池执行器），通过该类源码来了解线程池基本属性：
 
-- **ThreadPoolExecutor构造方法**
+##### ThreadPoolExecutor构造方法
 
 ```java
 public ThreadPoolExecutor(
@@ -2779,64 +2779,267 @@ public ThreadPoolExecutor(
 
 ​		在构造方法中，对这七个参数进行了校验：corePoolSize不能小于0、maximumPoolSize必须大于等于1，并且不能小于corePoolSize、keepAliveTime必须大于等于0、workQueue、threadFactory和handler不能为null
 
-- **自定义handler（拒绝策略）**
+##### 自定义handler（拒绝策略）
 
-  ThreadPoolExecutor提供四个公开的静态内部类，用于定义其拒绝策略：
+ThreadPoolExecutor提供四个公开的静态内部类，用于定义其拒绝策略：
 
-  - AbortPolicy（默认值）：丢弃任务并抛出RejectedExecutionException（拒绝执行）异常
-  - DiscardPolicy：直接丢弃任务，非常不推荐
-  - DiscardOldestPolicy：抛弃队列中等待最久的任务，然后把当前任务加入队列
-  - CallerRunsPolicy：跳过线程池，调用任务run（）方法直接执行（使用主线程执行）
+- AbortPolicy（默认值）：丢弃任务并抛出RejectedExecutionException（拒绝执行）异常
+- DiscardPolicy：直接丢弃任务，非常不推荐
+- DiscardOldestPolicy：抛弃队列中等待最久的任务，然后把当前任务加入队列
+- CallerRunsPolicy：跳过线程池，调用任务run（）方法直接执行（使用主线程执行）
 
-  ​        当线程池达到最大值、并且缓存队列已满，就触发拒绝策略；但这四种默认策略都太过简单，或者没有解决实质性问题（**即当前线程池的属性没有设计好**），因此在实际工作中，应该自定义拒绝策略
+​        当线程池达到最大值、并且缓存队列已满，就触发拒绝策略；但这四种默认策略都太过简单，或者没有解决实质性问题（**即当前线程池的属性没有设计好**），因此在实际工作中，应该自定义拒绝策略
+
+```java
+public class MyThreadPoolPolicy implements RejectedExecutionHandler{
+	@Override
+	public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        //当线程池缓存队列满时，打印线程池状态信息
+		System.out.println(executor.toString());
+	}
+}
+```
+
+##### 自定义threadFactory（线程工厂）
+
+​		线程工厂可以对线程做出明确的标识，并在不同的线程中，区别它们来自于哪个线程池。让我们更好的分析问题原因，**在实际工作中，必须使用线程工厂来对线程池生产的线程进行标识**
+
+```java
+public class MyThreadFactory implements ThreadFactory {
+	private final String namePrefix;// 线程名前缀
+	private final AtomicInteger nextId = new AtomicInteger(1);// 线程计数，初始值为1
+
+	public MyThreadFactory(String namePrefix) {
+		this.namePrefix = namePrefix;
+	}
+
+	@Override
+	public Thread newThread(Runnable r) {
+		String name = namePrefix + nextId.getAndIncrement();// 类似于i++;
+		Thread thread = new Thread(r, name);
+		System.out.println(thread.getName() + "线程已创建");
+		return thread;
+	}
+}
+```
+
+##### ThreadPoolExecutor线程池状态
+
+```java
+//ctl为AtomicInteger类型，右边29位表示当前工作线程数，左边3位标识线程池状态
+private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
+```
+
+```java
+//Integer.size=32,因此count_bits=29，用于进行int参数的位运算，表示线程池状态
+private static final int COUNT_BITS = Integer.SIZE - 3;
+```
+
+ThreadPoolExecutor线程池具有五种线程池状态：
+
+- RUNNING：运行状态，接受新任务，并处理排队任务
+- SHUTDOWN：关闭状态，不接受新任务，但继续处理已排队任务
+- STOP：停止状态，不接受新任务，并立即关闭正在处理任务
+- TIDYING：整理状态，所有任务已终止，workerCount=0，并会自动调用terminated（）方法
+- TERMINATED：终止状态，terminated（）方法调用完成
+
+当调用shutdown（）方法时，线程池会从RUNNING转变为SHUTDOWN;
+
+当调用shutdownNow（）方法时，线程池会从RUNNING转变为STOP;
+
+当在SHUTDOWN、STOP状态下，线程池完成所有任务关闭后，转化为TIDYING,并调用terminated（）方法;
+
+当terminated（）方法完成时，转化为TERMINATED状态
+
+![](C:\Users\OneMTime\Desktop\Typora图片\线程池状态图.jpg)
+
+
+
+​		它们通过和COUNT_BITS属性相关的位运算，得到一个int类型数字来表示相应线程池状态，然后将**ctl**变量和各个线程池状态变量值进行比较，得到当前线程池状态
+
+##### ThreadPoolExecutor任务执行流程
+
+- **execute方法**，判断线程池是否可以执行任务，并选择
 
   ```java
-  
+  public void execute(Runnable command) {
+      //任务对象不能为null
+  	if (command == null)
+  		throw new NullPointerException();
+      
+      //获取表示当前线程池状态和工作线程数的int值
+  	int c = ctl.get();
+      //判断工作线程池数是否小于核心线程数，则将任务交给已有线程处理，并保证工作线程数小于核心线程数
+  	if (workerCountOf(c) < corePoolSize) {
+  		if (addWorker(command, true))
+  			return;
+  		c = ctl.get();
+  	}
+      
+      //不是，判断线程池处于运行状态，然后将任务放入工作队列（可以成功，未满）
+  	if (isRunning(c) && workQueue.offer(command)) {
+  		int recheck = ctl.get();
+          //又一次判断线程是否处理运行状态
+          //不在运行状态，则删除该任务，并执行拒绝策略
+  		if (! isRunning(recheck) && remove(command))
+  			reject(command);
+        	//处于工作状态，则判断当前工作线程是否为0，为0则创建一个新线程执行,并且保证工作线程数小于最大线程数（避免核心线程数为0，从而触发创建新线程）
+     		else if (workerCountOf(recheck) == 0)
+  			addWorker(null, false);
+          
+          //工作线程不为零，则让任务在工作队列中等待被执行
+      }
+      //放入工作队列不成功（已满），且没有空闲线程执行，则执行拒绝策略
+  	else if (!addWorker(command, false))
+  		reject(command);
+  }
   ```
 
+- **addWorker方法**，使用CAS机制将任务真正的交给线程执行
+
+  ```java
+    private boolean addWorker(Runnable firstTask, boolean core) {
+          retry://定义语法标签，使用 break/countinue retry快速跳出多重循环
+          for (;;) {
+              int c = ctl.get();
+              int rs = runStateOf(c);
   
+              //检测工作队列不为空，、线程池至少为shutdown状态、当前任务不为null
+              if (rs >= SHUTDOWN &&
+                  ! (rs == SHUTDOWN &&
+                     firstTask == null &&
+                     ! workQueue.isEmpty()))
+                  return false;
+  
+              //当前工作线程数不能超过最大线程数/核心线程数（根据参数core决定）、和2^29(保证不影响左边3位所表示的线程状态值)
+              for (;;) {
+                  int wc = workerCountOf(c);
+                  if (wc >= CAPACITY ||
+                      wc >= (core ? corePoolSize : maximumPoolSize))
+                      return false;
+                  
+                  //此时，将当前工作线程数+1，跳出循环
+                  if (compareAndIncrementWorkerCount(c))
+                      break retry;
+                  
+                 //如果工作线程数+1操作不成功，则判断线程池是否属于runnning状态，不属于则跳出循环，从retry入口开始重新判断;属于则重新最近循环进行+1（CAS操作） 
+                  c = ctl.get();  // Re-read ctl
+                  if (runStateOf(c) != rs)
+                      continue retry;
+                  // else CAS failed due to workerCount change; retry inner loop
+              }
+          }
+  
+        	//创新新线程，执行任务
+          boolean workerStarted = false;
+          boolean workerAdded = false;
+          Worker w = null;
+          try {
+              w = new Worker(firstTask);
+              final Thread t = w.thread;
+              if (t != null) {
+                  //使用同步锁
+                  final ReentrantLock mainLock = this.mainLock;
+                  mainLock.lock();
+                  try {
+                  	//获得锁后，再次检测线程池状态、新线程状态
+                      int rs = runStateOf(ctl.get());
+                      if (rs < SHUTDOWN ||
+                          (rs == SHUTDOWN && firstTask == null)) {
+                          if (t.isAlive()) // precheck that t is startable
+                              throw new IllegalThreadStateException();
+                          
+                          //正常，则将新线程加入到工作线程中
+                          workers.add(w);
+                          int s = workers.size();                        
+                          if (s > largestPoolSize)
+                              largestPoolSize = s;
+                          workerAdded = true;
+                      }
+                  } finally {
+                      //释放锁
+                      mainLock.unlock();
+                  }
+                  //执行线程任务
+                  if (workerAdded) {
+                      t.start();
+                      workerStarted = true;
+                  }
+              }
+          } finally {
+              if (! workerStarted)
+                  addWorkerFailed(w);
+          }
+          return workerStarted;
+      }
+  ```
 
-- **自定义threadFactory（线程工厂）**
+因此线程池工作流程如下：
 
-  ​		线程工厂可以对线程做出明确的标识，并在不同的线程中，区别它们来自于哪个线程池。让我们更好的分析问题原因，**在实际工作中，必须使用线程工厂来对线程池生产的线程进行标识**
+- 提交任务：判断工作线程数是否达到核心线程数，没有则创建新线程、执行任务；否则，则进入下一步
+- 判断线程池缓存队列是否已满，没有则将任务存储在队列中；否则，进入下一步
+- 判断工作线程数达到最大线程数，没有则创建线程、执行任务；否则，执行拒绝策略
 
-#### 7.4.2、自定义线程工厂
+7.4.2、线程池实现类
 
-
-
-​		
-
-#### 7.4.3、Executors（线程池工厂）
-
-​		在实际编程中，开发者一般使用Executors的静态工厂方法来创建线程池对象，提供了对部分参数值设置，Executor有五个方法，来创建三种线程池实现类对象。
+#### 7.4.3、线程池三种实现类
 
 ​		首先，先通过线程池类框架图，来了解三种线程池实现类：
 
 ![](C:\Users\OneMTime\Desktop\Typora图片\线程池类框架图.jpg)
 
 - Executor接口，仅定义execute（）方法，用于线程池执行Runnable接口任务
-
 - ExecutorService接口，提供了submit（）、shutdown（）、invokeAll（）等方法，用于线程池执行任务、关闭所有线程池任务、执行多个任务等
-
+- ScheduleExecutorService接口，提供了4种执行定时及周期性任务方法
 - AbstractExecutorService，实现了ExecutorService接口定义的所有方法，但未实现execute（）方法
 
-- 线程的三个实现类：
+**线程池的三个实现类：**
 
-  - ForkJoinPool
+- **ThreadPoolExecutor**
 
-  - ThreadPoolExecutor
+  ​		最常用的线程池对象，前一节进行了解析
 
-  - ScheduledThreadPoolExecutor
+- **ScheduledThreadPoolExecutor**
 
-    和Timer、TimeTask区别
+  ​		在ThreadPoolExecutor基础上，添加了定时及周期性任务执行功能。在此之前，定时任务是通过Timer、TimerTask来实现，但它们存在很大的缺点：
 
-    
+  ​		**Timer是单线程执行任务，因此在进行周期任务时，会出现前一次任务未执行完，导致后一次任务延期执行；但另外Timer中的线程TimerThread内部没有做异常处理，某次任务出现异常，会导致整个线程结束，无法继续周期执行**
+
+  ​		而ScheduledThreadPoolExecuto这种线程池机制，就很好的解决了单线程带来的问题，它提供了对周期性任务执行，它提供了两种执行方案：
+
+  ​		scheduleAtFixedRate，固定间隔时间执行，无论前一次任务是否完成，都会执行下一次任务
+
+  ​		scheduleWithFixedDelay，固定延迟时间执行，当前一次任务执行完成后，才开始计算延迟
+
+  ​		但是ScheduledThreadPoolExecuto相对于Timer，有一个致命缺点，无法使用指定自然时间，规定第一次执行时间（spring task、Quartz解决了整个问题，使用cron表达式）
+
+- **ForkJoinPool**
+
+  ​		JDK7引入的线程池，它是对ThreadPoolExecutor的补充，在某些应用场景下性能比ThreadPoolExecutor更好：
+
+  ​		ThreadPoolExecutor每个任务都是由单个线程独立处理的，当出现一个非常耗时的大任务是，就可能出现只有一个线程在处理这个大任务，而CPU的其他线程处于空闲状态，导致CPU负载不均衡。而ForkJoinPool就解决了这种问题，它会将任务拆分为多个小任务，使用**fork**将小任务给多个线程同时处理，最后再使用**join**将多线程结果汇总，实现一个工作的**分治并行处理**，**合理利用现代CPU的多核心、多线程技术**
+
+  ​		ForkJoinPool的实现就是基于JDK7新增的并发框架：**Fork/Join框架**
+
+##### Fork/Join框架
+
+​		Work Stealing算法（**工作窃取算法**）是Fork/Join框架的核心：
+
+- 每个线程都有自己的一个WorkQueue，该工作队列为双端队列
+- 队列支持三个功能：push（入栈）、pop（出栈）、poll（获取队列中的第一元素，即队尾出栈）
+- push/pop只能被队列所有者线程调用；poll只能被其他线程调用（实现工作窃取）
+- 子任务调用fork时，就会push到相应线程队列中；线程通过队列来获取执行任务
+- 当工作队列为空时，线程随机从另一个线程的工作队列末尾poll窃取任务
+
+#### 7.4.4、Executors（线程池工厂）
+
+​	在实际编程中，开发者一般喜欢使用Executors的静态工厂方法来创建线程池对象，提供了对部分参数值设置，Executor有五个方法，来创建三种线程池实现类对象。 
 
 **Executors提供五个静态方法，来获取不同功能类型的线程池对象：**
 
 - Executors .newWorkStealingPool：
 
-  ​		在JDK8中引入，使用**ForkJoinPool**实现类，默认
+  ​		在JDK8中引入，使用**ForkJoinPool**实现类，并行级别默认为JVM可用的处理器个数（CPU线程数）、ThreadFacory使用ForkJoinPool内部提供的默认值、异常处理器为null、asyncMode=true
 
   ```java
       public static ExecutorService newWorkStealingPool() {
@@ -2869,12 +3072,255 @@ public ThreadPoolExecutor(
 
 **五种线程池对象的缓存队列：**
 
-​		Executors .newWorkStealingPool（），由于使用**ThreadPoolExecutor**实现类，因此没有缓存队列
+​		Executors .newWorkStealingPool（），
 
-​		Executors.newCacheThreadPool（），使用SynchronousQueue<Runnable>，通过同步阻塞队列，该队列不存储元素，并每次put都会阻塞主线程，内部保证立即有空闲线程（或新线程）可以执行该任务，然后让该线程take任务，主线程唤醒；**保证了主线程提交任务，立刻调用子线程获取执行任务的同步过程**（SynchronousQueue具有非公正性和公正性，公正性即出现两个线程先后put（），导致线程阻塞，SynchronousQueue可以根据put（）的先后，take（）指定元素；**在newCacheThreadPool（）中使用非公正的SynchronousQueue**）
+​		Executors.newCacheThreadPool（），使用SynchronousQueue<Runnable>，通过同步阻塞队列，该队列不存储元素，并每次put都会阻塞主线程，内部保证立即有空闲线程（或新线程）可以执行该任务，然后让该线程take任务，主线程唤醒；**保证了主线程提交任务，立刻调用子线程获取执行任务的同步过程**（SynchronousQueue具有非公正性和公正性两种，公正性即出现两个线程先后put（），导致线程阻塞，SynchronousQueue可以根据put（）的先后，take（）指定元素；**在newCacheThreadPool（）中使用非公正的SynchronousQueue**）
 
 ​		Executors.newSingleThreadExecutor（）、Executors.newFixedThreadPool（）使用LinkedBlockingQueue<Runnable>，通过阻塞队列缓存任务，保证缓存任务执行的公正性
 
 ​		Executors.newScheduledThreadPool（），使用DelayedWorkQueue，延迟阻塞队列，实现定时及周期性任务执行
 
-#### 7.4.4、线程池的使用
+#### 7.4.5、线程池的使用
+
+​		通过线程池的源码分析，在线程池使用中，我们需要注意如下几点：
+
+1 、合理设置线程池参数，根据实际业务场景来确定合理工作线程数
+
+2、线程资源必须通过线程池提供，不允许项目中自行显式创建线程
+
+3、线程池声明时，必须指定有意义的线程名称，方便出错回溯（即要自定义ThreadFactory）
+
+4、虽然JUC包提供了Executors，用于快速创建相应功能类型的线程池对象；但是这样会让我们违背第一、三条，增加线程池使用的风险，因此**不允许使用Executors**
+
+### 7.5、ThreadLocal
+
+​		ThreadLocal用于在线程并发中作为共享变量，为每个线程创建一个变量副本（使用同一个变量对象，但在多线程中，该对象对应的值是独立的），因此也叫做**线程局部变量**
+
+#### 7.5.1、引用类型
+
+​		在JVM内存分配和回收中，我们知道java对象的垃圾回收，是通过它于其他对象是否存在引用关系来决定的。实际上，引用关系可以分为四类：
+
+- 强引用，Strong Reference，最为常见。 User  user1 = new User（），这样的变量声明和定义就会产生对该对象的强引用。而只该对象存在强引用，即GC Roots存在，那么java垃圾回收时，即使内存耗尽，也不会回收该对象
+
+- 软引用，Soft Reference，引用力度弱于“强引用”，SoftReference<User> user2 = new SoftReference<User>（new User（）），即将该对象的强引用转换为软引用，当系统将要触发OOM时，就会回收new user（）对象，从而使得user2.get（）方法返回null；
+
+- 弱引用，Weak Reference，引用力度弱于前两个，WeakReference<User> user3 = new WeakReference<User>（new User（）），即将该对象强引用转化为弱引用，当JVM进行YGC时会被回收，从而使的user3.get（）方法返回null
+
+- 虚引用，Phantom Reference，极弱的一种引用，PhantomReference<User> user4 = new PhantomReference<User>（new User（）），即将该对象强引用转化为虚引用，定义完成后，并不能获取该引用指定对象。在实际开发中，基本不会使用
+
+  
+
+  ​		强引用的最常用的，只有将user1=null时，强引用消除，才能使该对象被回收；而对于其他三种都可以减少对象在生命周期所占用的内存大小。但其使用成本较大，需要**避免当前对象存在强引用，而导致其他三种应用的特性无法实现**，因此使用风险更大
+
+- **弱引用的使用：**
+
+​		在hashMap中，如果将user1作为key放入map，则此时map就会保存该强引用；当我们将user1=null时，该User对象也不会被回收，hashMap也就依然保存该KV对；但当HashMap使用弱引用存放数据时，只要user1=null，则该User对象就可以被YGC回收，此时HashMap也就不在保存该KV对
+
+​		**ThreadLocal就利用了WeakReference（弱引用）特性，让ThreadLocal对象在多线程中，能够更好地方便回收，避免使用强引用劫持，导致对象无法回收，内存泄漏**
+
+#### 		7.5.2、ThreadLocal源码分析
+
+​		ThreadLocal是一个泛型类，该泛型对应ThreadLocal作为共享变量值的数据类型
+
+ThreadLocal类中提供一个包私有的静态内部类：ThreadLocalMap
+
+- ThreadLocalMap
+
+  ​		ThreadLocalMap内部是一个定制的哈希表数据结构，用于维护ThreadLocal对象及其值
+
+  - ThreadLocalMap的KV对节点对象Entry，使用了ThreadLocal的WeakReference弱引用，并且将ThreadLocal对象作为Key，其值作为Value
+  
+    ```java
+     static class Entry extends WeakReference<ThreadLocal<?>> {
+                /** The value associated with this ThreadLocal. */
+                Object value;
+    
+                Entry(ThreadLocal<?> k, Object v) {
+                    super(k);
+                    value = v;
+                }
+            }
+    ```
+  
+    
+  
+  - Thread类中，有一个成员变量： ThreadLocal.ThreadLocalMap threadLocals = null;因此**每个线程都有一个ThreadLocalMap对象，来维护同一个ThreadLocal所对应的值**
+
+ThreadLocal类通过set（）、get（）、remove（）方法来操作线程中的ThreadLocal，并且这些方法内部都是通过当前线程对象中的ThreadLocalMap属性，来进行最终的操作和存储
+
+- set（）方法：
+
+  ```java
+   public void set(T value) {
+       	//获取当前线程中的ThreadLocalMap对象
+          Thread t = Thread.currentThread();
+          ThreadLocalMap map = getMap(t);
+       
+       	//判断ThreadLocalMap对象是否为null
+       	//不为null，则将ThreadLocal及其值放入ThreadLocalMap对象存储
+          if (map != null)
+              map.set(this, value);
+          else
+              //为null，则创建ThreadLocalMap对象，并存储该KV对
+              createMap(t, value);
+      }
+  ```
+
+- get（）方法：
+
+   ```java
+      public T get() {
+          //获取当前线程中的ThreadLocalMap对象
+          Thread t = Thread.currentThread();
+          ThreadLocalMap map = getMap(t);
+          
+          //判断ThreadLocalMap对象是否为null
+          //不为null，则获取当前ThreadLocal对象的保存值
+          if (map != null) {
+              ThreadLocalMap.Entry e = map.getEntry(this);
+              if (e != null) {
+                  @SuppressWarnings("unchecked")
+                  T result = (T)e.value;
+                  return result;
+              }
+          }
+          
+          //为null，创建一个ThreadLocalMap对象，交给当前线程
+          //并执行initialValue()，初始化ThreadLocal保存值，并将其和保存值存入ThreadLocalMap对象中
+          return setInitialValue();
+      }
+   ```
+
+- remove（）方法
+
+  ```java
+       public void remove() {
+           //获取当前线程中的ThreadLocalMap对象
+           ThreadLocalMap m = getMap(Thread.currentThread());
+           //不为空，则删除当前ThreadLocal所对应的KV对
+           if (m != null)
+               m.remove(this);
+       }
+  ```
+
+我们可以得知：
+
+1、所有ThreadLocal值的初始化，是在其get（）方法中实现的，并且ThreadLocal值并不会被ThreadLocal对象保存，而是由线程中的ThreadLocalMap对象持有；
+
+2、ThreadLocal通过弱引用存储在ThreadLocalMap中，当ThreadLocal不存在强引用时，就会在下一次YGC时，被回收
+
+##### ThreadLocal线程安全
+
+​		多线程访问ThreadLocal对象时，会将ThreadLocal值的副本保存到线程的ThreadLocalMap中，之后的set、get方法执行，都是对该副本的操作。因此也就不会存在线程安全问题，所有线程中的ThreadLocal值也不会相互干扰。从而相对于全局变量，就省略了加锁同步、减少线程竞争，当然变量操作也就没有了可见性
+
+##### ThreadLocal的脏数据
+
+​		线程复用就会产生脏数据。由于线程池会重用Thread对象，那个和Thread绑定的静态属性ThreadLocal变量也会被重用。如果在上一次任务没有清理线程相关ThreadLocal信息时，下一次任务直接调用ThreadLocal的get（）方法，则就可能重用之前数据，而不是使用ThreadLocal定义的初始值
+
+​		解决方式：
+
+​		每次任务完成前，remove清理Thread中所有绑定的ThreadLocal；或者在每次执行任务前，执行set方法来初始化ThreadLocal值
+
+##### ThreadLocal的内存泄露问题
+
+​		ThreadLocal在设计上，就在想办法避免内存泄漏问题：
+
+1、ThreadLocalMap使用弱引用保存ThreadLocal，从而保证即使线程存活，ThreadLocal也能被回收：
+
+​		如果ThreadLocalMap使用强引用保存ThreadLocal：当前线程任务结束，但线程一直存活，其ThreadLocalMap属性实例和ThreadLocal就会一直存在，从而导致ThreadLocal及其值无法被回收；
+
+​		如果使用弱引用来保存：当JVM进行YGC时，就会自动将不存在强引用的ThreadLocal进行回收，因此只要ThreadLocal没有被任何一个线程任务使用时，就会被回收，**从而实现无用ThreadLocal的自动回收（如将ThreadLocal定义为Task类的成员变量，任务完成后，ThreadLocal就会便随task对象一起被回收）**
+
+2、当ThreadLocal被手动回收后（使用ThreadLocal=null，来释放该对象），则ThreadLocalMap中就会存储一个key=null的键值对，当执行ThreadLocal的set（）、get（）方法时，ThreadLocalMap就会自动将key==null的value置也为null，使已回收ThreadLcoal对应的Value也能够被垃圾回收**（但这样必须要保证，在ThreadLocal=null后，需要调用一次get、set方法）**
+
+​		在实际使用中，ThreadLocal通常作为私有静态变量使用，因此会一直存在该类class对象的强引用，从而即使线程任务结束后，也无法被回收；因此如果线程不会销毁，则该键值对会一直存储在ThreadLocalMap中，导致内存泄漏；
+
+​		解决方式：
+
+​		在线程池中，就会常常出现核心线程不被销毁的情况，因此我们需要在使用完ThreadLocal值后，需要调用remove方法，释放value值，或者直接将线程属性threadLocals = null（线程在下次使用ThreadLocal时，会重新初始化创建）
+
+##### ThreadLocal的本质作用
+
+​		在一个线程任务中，可能需要调用很多方法来实现功能，而方法间的信息传递，就需要使用返回值和参数来，这样就会大大增加每个方法对参数和返回值的处理，并增加类之间的耦合。因此当使用ThreadLocal作为线程独有的局部变量时，就可以**存储单个线程上下文信息，减少参数传递，同时作为全局变量，提供给所有线程使用，但又不存在线程安全问题（每个线程中，该变量对象对应的值是独立存在的）**
+
+#### 7.5.3、ThreadLoacl在父子线程间的传递
+
+​		在Thread类中，所有构造方法都会调用执行同一个方法：
+
+ ```java
+    private void init(ThreadGroup g, Runnable target, String name,
+                      long stackSize, AccessControlContext acc,
+                      boolean inheritThreadLocals) {
+  
+        xxx      
+        //判断是否存在父线程、inheritThreadLocals==true
+        if (inheritThreadLocals && parent.inheritableThreadLocals != null)
+            //成立，则将父线程中的inheritableThreadLocals数据，存放到子线程中的inheritableThreadLocals
+            this.inheritableThreadLocals =
+                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+		xxx
+    }
+ ```
+
+- Thread提供**inheritableThreadLocals属性**，来进行父子线程间的信息传递；其实现类也就是ThreadLocalMap，用于存放需要在线程间传递的InheritableThreadLocal变量
+- **InheritableThreadLocal**继承了ThreadLocal类，并重写了getMap()、createMap()和childValue()方法，用于初始化和获取当前线程的Thread.inheritableThreadLocals属性值
+
+##### InheritableThreadLocal的使用：
+
+```java
+private static InheritableThreadLocal<User> kILL_NUMBER = new InheritableThreadLocal<User>();
+	public static void main(String[] args) {
+		//此时主线程的inheritableThreadLocals属性已初始化
+		kILL_NUMBER.set(new User("yh"));
+		
+        //该构造方法默认开启当前父线程的inheritableThreadLocals属性传递
+		Thread thread = new Thread(null, new Runnable() {
+			@Override
+			public void run() {
+                //此时子线程可以获取已保存父线程的值
+                System.out.println(kILL_NUMBER.get().getName());
+				
+                //睡眠一段时间，等待父线程的inheritableThreadLocals属性数据发生改变
+                try {
+					Thread.sleep(1200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+                //此时数据同步到子线程中
+				System.out.println(kILL_NUMBER.get().getName());
+				
+			}
+		},"子线程1");	
+		thread.start();
+        
+        //睡眠一段时间，等待子线程第一次打印
+        try {
+            Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		user.setName("HHH");
+		kILL_NUMBER.set(user);
+	}
+}
+```
+
+注意：
+
+1、在子线程被创建时，父线程中的inheritableThreadLocals属性数据，就会复制Value引用，同步到子线程中；对于非final引用类型数据，它们使用同一个Value的引用（同一个对象），因此在不改变Value引用（不进行重新赋值）的情况下，子线程和父线程对value值的修改，会互相影响；
+
+2、对于基本数据类型不能作为泛型使用在InheritableThreadLocal中；而其基本数据类型包装类（final引用类型），它们实际上相同值的Value，使用的是不同对象，因此父子线程对value值的修改，并不会互相影响
+
+#### 7.5.4、ThreadLocal的使用场景
+
+​		以SimpleDateFormat为例，作为全局变量时，存在线程安全风险。一般情况下，有如下方式解决：
+
+1、避免作为全局变量，所有方法在内部定义其局部变量，进行使用（最低效的方式，浪费内存）
+
+2、所有格式化的方法进行加锁同步处理，保证线程安全（通过降低效率，减少对象的创建）
+
+**3、使用ThreadLocal来包装SimpleDateFormat，使每个线程都有自己独立的副本，实现线程安全**
+
+**重点：**
+
+​		**在JDK8中，重新优化了日期和时间的API，从而也可以使用新的线程安全的时间格式化类，来保证全局变量的线程安全**

@@ -270,6 +270,8 @@ format(Date date)，将时间按照格式化模板转化为字符串
 
 parse(String time),将满足格式化模板的字符串，转化为date对象
 
+**无论是DateFormat或是SimpleDateFormat，它们都是线程不安全的，因此在多线程中使用是需要避免：**
+
 ### 4、数字格式化类NumberFormat、DecimalFormat
 
 **两个格式化类都是线程不安全的**
@@ -324,6 +326,8 @@ format.setRoundingMode(RoundingMode.XXX);//设置舍入模式，一般常用四�
 | 11      | ,        | 前缀或后缀 | 用于在前缀或或后缀中为特殊字符加引号，例如 "'#'#" 将 123 格式化为 "#123"。要创建单引号本身，请连续使用两个单引号："# o''clock"。 |
 
 DecimalFormat decimalFormat = new DecimalFormat("##.000%");//获得百分数格式化
+
+**NumberFormat、DecimalFormat同时间格式化类一样，线程不安全**
 
 ### 5、数学类Math
 
