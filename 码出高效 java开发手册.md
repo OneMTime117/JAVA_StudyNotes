@@ -3324,3 +3324,6 @@ private static InheritableThreadLocal<User> kILL_NUMBER = new InheritableThreadL
 **重点：**
 
 ​		**在JDK8中，重新优化了日期和时间的API，从而也可以使用新的线程安全的时间格式化类，来保证全局变量的线程安全**
+
+## 8、单元测试
+
