@@ -4211,6 +4211,10 @@ public class SpringTest {
 }    
 ```
 
+- spring2.2版本后，将JUnit5作为单元测试默认包，因此整合方式也有变化：
+
+  **@RunWith(SpringRunner.class)**直接替换为**@ExtendWith(SpringExtension.class)**
+
 ### springTest事务管理：
 
 springTest支持使用@Transactional注解，来进行事务管理。但默认情况下，事务在测试完成后会自动回滚，即不会影响数据库中的数据，我们可以通过@Commit或@Rollback（false），但它们都会导致**事务无法进行异常回滚**
