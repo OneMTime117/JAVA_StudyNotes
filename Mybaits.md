@@ -1811,8 +1811,8 @@ mybatis-spring包，帮助mybatis代码无缝整合到spring中，它将允许 M
 
 SqlSessionTemplate内部实际上每个线程都会创建了多个sqlSession，也就对应了多个数据库连接；
 
-- 当spring容器中没有声明事务管理器时，则默认所有sqlSession操作，都会自动提交；在线程完成工作后（比如一个web请求处理完），就会自动关闭当前sqlSession；
-- 当spring容器中声明事务管理器时，则所有的sqlSession的创建、操作和关闭，都交给事务管理器来完成，默认进行手动提交
+- 当spring容器中没有声明事务管理器时，则默认所有sqlSession操作，执行后都会自动提交；在线程完成工作后（比如一个web请求处理完），就会自动关闭当前sqlSession；
+- 当spring容器中声明事务管理器时，则所有的sqlSession的创建、操作和关闭，都交给事务管理器来完成，在一个事务中，默认进行手动提交
 
 ## 13、mybatis的底层架构：
 

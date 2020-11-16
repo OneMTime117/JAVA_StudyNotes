@@ -1085,7 +1085,7 @@ blob 二进制数据，可以存放图片/声音4g；一般来讲，在真实项
 
 
 
-# 基本Oracle数据库对表操作语句：
+# Oracle数据库基本语句：
 
 1、创建表
 --学生表
@@ -1310,7 +1310,7 @@ SELECT  *  from table WHERE ROWNUM<=10
 
 
 
-#### Oracle数据库分页方法：
+## Oracle数据库分页方法：
 
 oracle的分页一共有三种方式
 
@@ -1404,7 +1404,7 @@ SELECT * FROM (SELECT e.*, ROWNUM rn FROM (SELECT * FROM emp) e WHERE ROWNUM<=10
 
 
 
-#### Oracle数据库的常用函数：
+## Oracle数据库的常用函数：
 
 1、字符函数：
 
@@ -1503,16 +1503,23 @@ to_number(VALUE, '999999.999') 将字符串转为数值类型
  to_date('2012-02-18 09:25:30','yyyy-mm-dd hh24:mi:ss')//将字符串转化为date
 ```
 
-### pl/sql Developer  设置新表段属性：
+# Oracle日常问题集合
+
+## 1、pl/sql工具对表的属性设置：
+
+**一般情况下，都是用默认值**
 
   %free 10 --块保留10%的空间留给更新该块数据使用 
   initrans 1 --初始化事务槽的个数
   maxtrans 255 --最大事务槽的个数
 
-    initial 64k --区段(extent)一次扩展64k
-    minextents 1 --最小区段数
-    maxextents unlimited --最大区段无限制 
-## 1、Oracle客户端连接注意事项：
+```
+initial 64k --区段(extent)一次扩展64k
+minextents 1 --最小区段数
+maxextents unlimited --最大区段无限制 
+```
+
+## 2、Oracle客户端连接注意事项：
 
 查询当前oracle服务端的字符集编码：
 
@@ -1542,7 +1549,7 @@ NLS_LANG： oracle服务器对应的字符集编码
 
 2. Navicat Premium 12，自带一个精简版instantclient_10_2，但该版本不支持GBK编码，只支持Unicode（AL32UTF8属于unicode编码）、ASCII以及西欧字符集；因此需要下载一个完整版的instantclient客户端
 
-## 2、Oracle创建自增字段：
+## 3、Oracle创建自增字段：
 
 1、创建oracle序列
 
@@ -1569,13 +1576,13 @@ CREATE TRIGGER ContestDB_trigger
 
 2、通过执行自增来调整当前序列值（操作比较麻烦）
 
-## 3、Oracle分析函数，以及常用场景：
+## 4、Oracle分析函数，以及常用场景：
 
 在Oracle8.16后，提供一种分析函数语法，用于计算基于一组数据为结果的聚合函数（计算参数为字段）：
 
-##### 1、和聚合函数的区别，返回的是一组数据；而聚合函数返回的是一行数据
+1、非聚合函数返回的是一组数据；而聚合函数返回的是一行数据
 
-##### 2、分析函数需要搭配over（）开窗函数一起使用，over（）开窗函数：
+2、分析函数需要搭配over（）开窗函数一起使用，over（）开窗函数：
 
 其中包括三个分析子句：**分组(partition by), 排序(order by), 窗口(rows)**
 
@@ -1603,7 +1610,7 @@ CREATE TRIGGER ContestDB_trigger
 
 **窗口子句不能单独出现，必须有order by子句时才能出现；当没有窗口子句，但有order by 时，默认为当组中的第一行到当前行，因此需要使用全组数据时，要么省略order by，要么在order by基础上指定窗口**
 
-##### 3、常用分析函数有：
+3、常用分析函数有：
 
 1、计算：sum（column）、avg（column）、max（column）、min（column）##它们本身也是聚合函数
 
@@ -1633,7 +1640,7 @@ lead（column，n，‘null’）：获取column字段，省略全部数据中�
 
 **该分析函数的处理前体是数据有一定的排序，因此必须使用order by子句，由于需要全部数据，因此不能指定rows窗口子句**
 
-##### 4、常用使用场景：
+4、常用使用场景：
 
 1、first_value(column)、last_value(column)，可以用于当前场景：
 
@@ -1709,6 +1716,10 @@ group by to_char(DATAUPDATETIME-4, 'yyyymmddhh24') order by to_char(DATAUPDATETI
 ````
 
 ## 6、Oracle DBlink
+
+**用于在本地数据库，远程访问另外一个数据库中的数据，并进行增删改操作**
+
+在实际开发过程中，会直接创建两个数据库的连接，然后进行操作访问；但有了DBlink后，就可以把两个不同数据库的表数据，交给oracl进行sql处理（数据库处理效率和便利性，远大于JAVA）
 
 ## 7、通过过程函数，来筛选varchar字段中，无法转换为number的数据
 
