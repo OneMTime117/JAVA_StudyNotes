@@ -11,7 +11,7 @@
 ````java
 //当使用外部Selvet容器（tomcat）时，则不需要进行配置
 //springboot会自动将所有webSocket服务（@ServerEndpoint修饰的类）交给外部容器处理（Tomcat）
-@Configuration 
+@Configuration
 public class WebSocketConfig {
 	@Bean
 	public ServerEndpointExporter getServerEndpointExporter() {
@@ -29,7 +29,7 @@ public class WebSocketConfig {
 public class WebSocketServer {
 
 	//统计连接推送的客户端数
-	private static int onlineCount=0;
+	private static AtomicInteger onlineCount = new AtomicInteger(0);
 	//线程安全的set，来保存所有客户端对于的webSocket服务对象
 	private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<WebSocketServer>();
 	//客户端与对于webSocketServer的Session对象，webSocketServer通过它来向客户端发送数据
@@ -42,7 +42,7 @@ public class WebSocketServer {
 		//将该webSocket放入set集合
 		webSocketSet.add(this);
 		//webSocket统计+1
-		onlineCount++;
+		onlineCount.incrementAndGet();
 		
 		try {
 			//服务器主动推送消息
@@ -56,7 +56,7 @@ public class WebSocketServer {
 	@OnClose//当websocket连接关闭时，执行的方法
 	public void onClose() {
 		webSocketSet.remove(this);
-		onlineCount--;
+		onlineCount.decrementAndGet();
 		log.info("webSocket连接关闭，当前服务连接数为"+onlineCount);
 	}
 	
