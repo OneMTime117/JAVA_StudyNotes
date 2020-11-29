@@ -48,9 +48,9 @@
 
    **综上所述：RPC传输效率高、性能损耗小、服务治理更加方便**
 
-## 2、Doubbo：
+## 2、Dubbo：
 
-Doubbo是Alibaba开源（现在被apache管理）的分布式系统的RPC框架，实现分布式模块之间服务调用。
+Dubbo是Alibaba开源（现在被apache管理）的分布式系统的RPC框架，实现分布式模块之间服务调用。
 
 - **Doubbo特性：**
 

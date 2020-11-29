@@ -212,6 +212,8 @@ WebEnvironment.MOCK：只是模拟tomcat环境，并不会启动Tomcat（默认�
 
 WebEnvironment.NONE: 不提供web环境
 
+**5、当使用springboot内置Tomcat时，所有Websocket类都需要添加@Component注解，这样才能交给内置Tomcat处理**
+
 ## 2、java原生使用websocket
 
 相比于springboot，java原生使用websocket时，直接使用Tomcat服务器中提供的websocket-api.jar依赖包

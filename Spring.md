@@ -658,7 +658,7 @@ public class UserFactory {
 }
  ```
 
-- @Bean注解的方法，其参数会默认使用IOC容器进行依赖注入（类似于方法上添加了@Autowired注解，在当前类进行Bean注册后，执行该方法创建工厂Bean），因此可以使用@Qualifier来指定唯一的Bean
+- @Bean注解的方法，**其参数会默认使用IOC容器进行依赖注入**（类似于方法上添加了@Autowired注解，在当前类进行Bean注册后，执行该方法创建工厂Bean），因此可以使用@Qualifier来指定唯一的Bean
 - @Bean默认使用方法名作为Bean注册的name；可以通过其name属性修改（value属性为name属性的别名，用于作为name属性的默认值，因此不能和name属性同时使用）；**并且会选择name中的第一个元素，作为Bean的id**
 - @Bean注解提供initMethod、destroyMethod属性，指定该Bean生命周期的回调方法
 - 同一个类中的所有@Bean方法，会按照其声明顺序执行；当@Bean方法之间出现依赖注入时，则按照依赖关系执行（但Bean的定义顺序还是其声明顺序，只是初始化顺序会改变）
@@ -3100,7 +3100,7 @@ public class MvcConfig implements WebMvcConfigurer {
 			.allowedOrigins("*")	//允许的跨域请求，* 为允许所有(浏览器对于跨域请求，会自动添加origin请求头，value为当前项目的ip+端口)
 			.allowedHeaders("*") //允许的请求头
 			.allowedMethods("*")  //允许的HTTP请求方法
-			.allowCredentials(true) //允许请求发送cookie等安全证书
+			.allowCredentials(false) //允许请求发送cookie等安全证书（当allowedOrigins为*时，就不能设置allCrendentials为true）
 			.maxAge(3600);//预检请求有效期 单位s
 	}
 ```
@@ -3531,7 +3531,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler{
 }
 ```
 
-- 
+- @EnableWebSocket
 
 xxxx测试失败
 
@@ -4277,3 +4277,32 @@ spring-context包，除了对外提供操作spring容器功能外，还定义了
 
 ## 7、spring5的新特性
 
+## 8、面试问题：
+
+1、spring三级缓存：
+
+- 一级缓存：存储完整Bean
+- 二级缓存：存储未注入属性的Bean
+- 三级缓存：使用该Bean的工厂对象，提供beanName、BD、未注入属性的Bean；（当进行获取后，则进行二级缓存；为了是在该缓存中判断是否存在循环依赖的AOP代理）
+
+1、spring为什么要使用三级缓存解决循环依赖
+
+- 本身只需要使用二级缓存就可以解决循环依赖，将为完成属性注入的Bean防止二级缓存中，从而保证循环依赖注入
+
+- 但如果只使用二级缓存，来保存实例化对象和初始化完成对象:
+
+  1. 创建A的实例化对象，放入二级缓存
+  2. A进行AOP代理，此时由于依赖注入，则进行B的初始化
+  3. 此时B进行依赖注入时，使用二级缓存中的A对象
+  4. 此时A再进行B的依赖注入，此时又需要进行AOP代理，而导致A出现两个相同类型实例（B中依赖的A实例、A的代理）
+
+  即会导致，进行aop代理后，B所依赖的A并不是代理实例，而是原生实例
+
+- 当使用三级缓存时
+  1. 创建A的实例对象，放入三级缓存，
+  2. 进行代理时，依赖B，完成B的注入（当出现循环依赖时）使用三级缓存；
+  3. 如果调用三级缓存，则此时就会判断A是否存在动态代理，存在则提前进行A的动态代理，让后转移到二级缓存中
+  4. 保证B中存储A的动态代理对象引用
+  5. B初始化完成后，开始进行A的动态代理
+
+**即三级缓存机制是为了保证，存在AOP代理的循环引用正常进行**
